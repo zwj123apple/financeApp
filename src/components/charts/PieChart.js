@@ -73,7 +73,6 @@ const PieChart = ({
           paddingLeft="0"
           absolute
           hasLegend={showLegend}
-          center={[screenWidth / 2, 0]} // 调整中心点位置，使饼图在不同屏幕尺寸下都能正确居中显示
           avoidFalseZero
           style={{
             marginVertical: 8,

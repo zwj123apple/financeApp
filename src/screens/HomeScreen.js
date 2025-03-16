@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Text, Button, Icon, SearchBar, Chip, Card, Badge, Divider } from '@rneui/themed';
 import { useProductStore } from '../store/productStore';
 import { useAuthStore } from '../store/authStore';
+import { getRecommendedProducts } from '../services/recommendService';
 
 // 导入统一主题
 import theme from '../utils/theme';
@@ -13,6 +14,7 @@ const HomeScreen = ({ navigation }) => {
   const { width, height } = useWindowDimensions();
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
   const { user } = useAuthStore();
   const { products, fetchProducts, filters, isLoading } = useProductStore();
   
@@ -81,6 +83,12 @@ const HomeScreen = ({ navigation }) => {
     
     // 请求产品数据
     await fetchProducts();
+    
+    // 获取热门推荐产品
+    const recommendResult = await getRecommendedProducts();
+    if (recommendResult.success) {
+      setRecommendedProducts(recommendResult.products);
+    }
     
     setRefreshing(false);
   };
@@ -269,77 +277,58 @@ const HomeScreen = ({ navigation }) => {
           </View>
           
           {/* 热门推荐 */}
-          {products.length > 0 && (
-            <View style={styles.recommendSection}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>热门推荐</Text>
-              </View>
-              
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.recommendScrollContent}
-                onLayout={(event) => {
-                  // 获取可用宽度
-                  const availableWidth = event.nativeEvent.layout.width;
-                  // 计算每个卡片所需的宽度（卡片宽度 + 右边距）
-                  const cardWidth = Math.min(160, width * 0.45) + theme.SPACING.md;
-                  // 计算可以完整显示的卡片数量
-                  const visibleCards = Math.floor(availableWidth / cardWidth);
-                  // 如果可显示的卡片数量小于产品数量，则不显示
-                  if (visibleCards < Math.min(products.length, 3)) {
-                    if (event.target && event.target.setNativeProps) {
-                      event.target.setNativeProps({ opacity: 0 });
-                    }
-                  } else {
-                    if (event.target && event.target.setNativeProps) {
-                      event.target.setNativeProps({ opacity: 1 });
-                    }
-                  }
-                }}
-              >
-                {products.slice(0, 2).map((item, index) => (
-                  <TouchableOpacity 
-                    key={item.id}
-                    style={[styles.recommendCard, {width: Math.min(160, width * 0.45)}]}
-                    onPress={() => navigateToProductDetail(item.id)}
-                    activeOpacity={0.7}
-                  >
-                    <LinearGradient
-                      colors={[theme.COLORS.backgroundLight, theme.COLORS.white]}
-                      style={styles.recommendCardGradient}
-                    >
-                      <Text style={styles.recommendProductName} numberOfLines={1} ellipsizeMode="tail">{item.name}</Text>
-                      <Text style={styles.recommendReturn}>{item.expectedReturn}</Text>
-                      <Text style={styles.recommendLabel}>预期收益</Text>
-                      <View style={styles.recommendFooter}>
-                        <Text style={styles.recommendTerm}>{item.investmentTerm}</Text>
-                        <Badge 
-                          value={item.riskLevel} 
-                          badgeStyle={[styles.recommendRiskBadge, {
-                            backgroundColor: 
-                              item.riskLevel === '低风险' ? theme.COLORS.success :
-                              item.riskLevel === '中风险' ? theme.COLORS.warning :
-                              item.riskLevel === '中高风险' ? theme.COLORS.accent :
-                              theme.COLORS.error
-                          }]}
-                          textStyle={styles.recommendRiskText}
-                        />
-                      </View>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>   
-              {/* 查看更多按钮 - 新行显示 */}
-              <TouchableOpacity 
-                onPress={() => navigation.navigate('ProductsScreen')}
-                style={styles.viewMoreButtonRow}
-              >
-                <Text style={styles.viewMoreText}>查看更多</Text>
-                <Icon name="chevron-right" type="material" size={16} color={theme.COLORS.primary} />
-              </TouchableOpacity>
+          <View style={styles.recommendSection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>热门推荐</Text>
             </View>
-          )}
+            
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.recommendScrollContent}
+            >
+              {recommendedProducts.map((item, index) => (
+                <TouchableOpacity 
+                  key={item.id}
+                  style={[styles.recommendCard, {width: Math.min(160, width * 0.45)}]}
+                  onPress={() => navigateToProductDetail(item.id)}
+                  activeOpacity={0.7}
+                >
+                  <LinearGradient
+                    colors={[theme.COLORS.backgroundLight, theme.COLORS.white]}
+                    style={styles.recommendCardGradient}
+                  >
+                    <Text style={styles.recommendProductName} numberOfLines={1} ellipsizeMode="tail">{item.name}</Text>
+                    <Text style={styles.recommendReturn}>{item.expectedReturn}</Text>
+                    <Text style={styles.recommendLabel}>预期收益</Text>
+                    <View style={styles.recommendFooter}>
+                      <Text style={styles.recommendTerm}>{item.investmentTerm}</Text>
+                      <Badge 
+                        value={item.riskLevel} 
+                        badgeStyle={[styles.recommendRiskBadge, {
+                          backgroundColor: 
+                            item.riskLevel === '低风险' ? theme.COLORS.success :
+                            item.riskLevel === '中风险' ? theme.COLORS.warning :
+                            item.riskLevel === '中高风险' ? theme.COLORS.accent :
+                            theme.COLORS.error
+                        }]}
+                        textStyle={styles.recommendRiskText}
+                      />
+                    </View>
+                  </LinearGradient>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            
+            {/* 查看更多按钮 - 新行显示 */}
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('ProductsScreen')}
+              style={styles.viewMoreButtonRow}
+            >
+              <Text style={styles.viewMoreText}>查看更多</Text>
+              <Icon name="chevron-right" type="material" size={16} color={theme.COLORS.primary} />
+            </TouchableOpacity>
+          </View>
           {/* 风险等级筛选 */}
           <View style={styles.filterContainer}>
             <Text style={styles.sectionTitle}>理财产品</Text>
@@ -644,6 +633,7 @@ const styles = StyleSheet.create({
   recommendScrollContent: {
     paddingVertical: theme.SPACING.sm,
     paddingRight: theme.SPACING.md,
+    paddingLeft: theme.SPACING.xs,
   },
   recommendCard: {
     width: 160,

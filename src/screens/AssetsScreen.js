@@ -217,25 +217,11 @@ const AssetsScreen = ({ navigation }) => {
             </LinearGradient>
           </View>
           
-          {/* 资产分布饼图 */}
-          <View style={styles.chartSection}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>资产分布</Text>
-            </View>
-            <View style={styles.chartContainer}>
-              <PieChart
-                data={pieChartData}
-                width={Math.min(width - theme.SPACING.md * 2, 500)} // 限制最大宽度为500
-                height={Math.min(width * 0.6, 220)} // 调整高度比例
-                title="资产分布"
-                showLegend={width > 320}
-              />
-            </View>
-          </View>
-          
           {/* 持仓列表 */}
           <View style={styles.holdingsSection}>
+           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>我的持仓</Text>
+           </View>
             {holdings && holdings.length > 0 ? (
               <FlatList
                 data={holdings}
@@ -370,23 +356,6 @@ const styles = StyleSheet.create({
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.textDark,
     textAlign: 'center',
-  },
-  chartSection: {
-    width: '100%',
-    marginBottom: theme.SPACING.md,
-    borderRadius: theme.BORDER_RADIUS.lg,
-    overflow: 'hidden',
-    backgroundColor: theme.COLORS.white,
-    ...theme.SHADOWS.md,
-  },
-  chartContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: theme.SPACING.md,
-    backgroundColor: theme.COLORS.white,
-    width: '100%',
-    flexWrap: 'wrap',
-    overflow: 'hidden',
   },
   holdingsSection: {
     width: '100%',

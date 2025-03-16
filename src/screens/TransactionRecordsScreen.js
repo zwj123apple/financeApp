@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
     bottom: theme.SPACING.md,
   },
   bottomPadding: {
-    height: 120 // 增加底部填充高度，确保内容可以滚动到底部导航栏上方
+    height: 60// 增加底部填充高度，确保内容可以滚动到底部导航栏上方
   },
   statItem: {
     alignItems: 'center'

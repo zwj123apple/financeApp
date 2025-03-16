@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, Alert, StatusBar, SafeAreaView, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Text, Button, Icon, Divider, ListItem } from '@rneui/themed';
+import { Text, Button, Icon, Divider, ListItem, Input } from '@rneui/themed';
 import { useAssetStore } from '../store/assetStore';
 import { useProductStore } from '../store/productStore';
 import { useAuthStore } from '../store/authStore';
@@ -50,11 +50,33 @@ const HoldingDetailScreen = ({ route, navigation }) => {
     loadData();
   };
   
+  // 状态管理 - 卖出相关
+  const [sellAmount, setSellAmount] = useState('');
+  const [showSellForm, setShowSellForm] = useState(false);
+
   // 处理卖出
   const handleSell = async () => {
+    // 如果未显示卖出表单，则显示表单
+    if (!showSellForm) {
+      setShowSellForm(true);
+      return;
+    }
+    
+    // 验证输入金额
+    const amount = parseFloat(sellAmount);
+    if (isNaN(amount) || amount <= 0) {
+      Alert.alert('输入错误', '请输入有效的金额');
+      return;
+    }
+    
+    if (currentHolding && amount > currentHolding.currentValue) {
+      Alert.alert('金额错误', `您的持仓价值为 ¥${currentHolding.currentValue.toFixed(2)}，不能卖出更多`);
+      return;
+    }
+    
     Alert.alert(
       '确认卖出',
-      `确定要卖出 ${currentHolding.productName} 吗？`,
+      `确定要卖出 ${currentHolding.productName} ¥${amount.toFixed(2)} 吗？`,
       [
         { text: '取消', style: 'cancel' },
         { 
@@ -62,18 +84,30 @@ const HoldingDetailScreen = ({ route, navigation }) => {
           onPress: async () => {
             const result = await sellHolding({
               userId: user?.id || 1,
-              holdingId: currentHolding.id
+              holdingId: currentHolding.id,
+              amount: amount
             });
             
             if (result.success) {
               Alert.alert('卖出成功', '您已成功卖出该产品', [
-                { text: '确定', onPress: () => navigation.goBack() }
+                { text: '查看交易记录', onPress: () => navigation.navigate('TransactionRecords') },
+                { text: '确定', onPress: () => {
+                  setSellAmount('');
+                  setShowSellForm(false);
+                  navigation.goBack();
+                }}
               ]);
             }
           } 
         }
       ]
     );
+  };
+  
+  // 取消卖出
+  const cancelSell = () => {
+    setSellAmount('');
+    setShowSellForm(false);
   };
   
   // 准备收益走势数据
@@ -202,13 +236,46 @@ const HoldingDetailScreen = ({ route, navigation }) => {
           
           {/* 操作按钮 */}
           <View style={styles.sectionContainer}>
-            <Button
-              title="卖出产品"
-              onPress={handleSell}
-              loading={isLoading}
-              buttonStyle={styles.sellButton}
-              icon={<Icon name="monetization-on" color="white" style={{ marginRight: 10 }} />}
-            />
+            {showSellForm ? (
+              <View style={styles.sellFormContainer}>
+                <Input
+                  placeholder="请输入卖出金额"
+                  keyboardType="numeric"
+                  value={sellAmount}
+                  onChangeText={setSellAmount}
+                  containerStyle={styles.inputContainer}
+                  inputStyle={styles.inputText}
+                  leftIcon={<Icon name="attach-money" type="material" size={20} color={theme.COLORS.error} />}
+                />
+                <Text style={styles.holdingText}>
+                  当前持有: ¥{currentHolding.currentValue.toFixed(2)}
+                </Text>
+                <View style={styles.buttonRow}>
+                  <Button
+                    title="取消"
+                    onPress={cancelSell}
+                    buttonStyle={[styles.sellButton, styles.cancelButton]}
+                    containerStyle={styles.buttonContainer}
+                  />
+                  <Button
+                    title="确认卖出"
+                    onPress={handleSell}
+                    loading={isLoading}
+                    buttonStyle={styles.sellButton}
+                    containerStyle={styles.buttonContainer}
+                    icon={<Icon name="monetization-on" color="white" style={{ marginRight: 10 }} />}
+                  />
+                </View>
+              </View>
+            ) : (
+              <Button
+                title="卖出产品"
+                onPress={handleSell}
+                loading={isLoading}
+                buttonStyle={styles.sellButton}
+                icon={<Icon name="monetization-on" color="white" style={{ marginRight: 10 }} />}
+              />
+            )}
           </View>
           
           {/* 底部填充，确保内容可以滚动到底部导航栏上方 */}
@@ -314,6 +381,34 @@ const styles = StyleSheet.create({
     paddingVertical: theme.SPACING.sm,
     marginHorizontal: theme.SPACING.md,
     ...theme.SHADOWS.sm
+  },
+  sellFormContainer: {
+    width: '100%',
+    paddingHorizontal: 16
+  },
+  inputContainer: {
+    marginBottom: 8
+  },
+  inputText: {
+    fontSize: 16
+  },
+  holdingText: {
+    fontSize: 14,
+    color: theme.COLORS.grey1,
+    marginBottom: 16,
+    textAlign: 'right'
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8
+  },
+  buttonContainer: {
+    flex: 1,
+    marginHorizontal: 4
+  },
+  cancelButton: {
+    backgroundColor: theme.COLORS.grey3
   },
   bottomPadding: {
     height: 80, // 确保底部有足够的空间，使内容可以滚动到底部导航栏上方

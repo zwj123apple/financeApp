@@ -87,9 +87,7 @@ const ProfileScreen = ({ navigation }) => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>账户管理</Text>
-            
+          <View style={styles.sectionContainer}>        
             <ListItem onPress={navigateToAccountSettings} containerStyle={styles.listItem}>
               <Icon name="settings" type="material" color={theme.COLORS.primary} />
               <ListItem.Content>
@@ -214,13 +212,6 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.SPACING.md,
     ...theme.SHADOWS.sm,
     overflow: 'hidden',
-  },
-  sectionTitle: {
-    fontSize: theme.FONT_SIZES.md,
-    fontWeight: theme.FONT_WEIGHTS.bold,
-    color: theme.COLORS.textDark,
-    padding: theme.SPACING.md,
-    backgroundColor: theme.COLORS.backgroundLight,
   },
   listItem: {
     paddingVertical: theme.SPACING.sm,

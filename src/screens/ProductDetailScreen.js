@@ -13,10 +13,9 @@ const ProductDetailScreen = ({ route, navigation }) => {
   const { productId } = route.params;
   const [refreshing, setRefreshing] = useState(false);
   const [purchaseAmount, setPurchaseAmount] = useState('');
-  const [sellAmount, setSellAmount] = useState('');
-  const [activeTab, setActiveTab] = useState('buy'); // 'buy' 或 'sell'
+  const [activeTab, setActiveTab] = useState('buy');
   const { user } = useAuthStore();
-  const { currentProduct, fetchProductDetail, purchaseProduct, sellProduct, isLoading } = useProductStore();
+  const { currentProduct, fetchProductDetail, purchaseProduct, isLoading } = useProductStore();
   
   // 使用useWindowDimensions钩子获取屏幕尺寸，这样在屏幕旋转或尺寸变化时会自动更新
   const { width, height } = useWindowDimensions();
@@ -67,33 +66,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
     }
   };
   
-  // 处理卖出
-  const handleSell = async () => {
-    // 验证输入金额
-    const amount = parseFloat(sellAmount);
-    if (isNaN(amount) || amount <= 0) {
-      Alert.alert('输入错误', '请输入有效的金额');
-      return;
-    }
-    
-    // 这里应该获取用户的持仓信息，验证是否有足够的持仓可卖出
-    // 简化处理，假设用户有该产品的持仓，且持仓ID为1
-    const holdingId = 1;
-    
-    // 执行卖出
-    const result = await sellProduct({
-      userId: user?.id || 1,
-      holdingId: holdingId,
-      amount: amount
-    });
-    
-    if (result.success) {
-      Alert.alert('卖出成功', '您已成功卖出该产品', [
-        { text: '查看交易记录', onPress: () => navigation.navigate('TransactionRecords') },
-        { text: '确定', onPress: () => setSellAmount('') }
-      ]);
-    }
-  };
+
   
   // 准备历史收益数据
   const prepareHistoricalReturnsData = () => {
@@ -240,14 +213,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
                 <Text style={[styles.tradeTabButtonText, 
                   { color: activeTab === 'buy' ? theme.COLORS.white : theme.COLORS.textLight }]}>买入</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.tradeTabButton, styles.tradeTabButtonRight, 
-                  { backgroundColor: activeTab === 'sell' ? theme.COLORS.primary : theme.COLORS.backgroundLight }]}
-                onPress={() => setActiveTab('sell')}
-              >
-                <Text style={[styles.tradeTabButtonText, 
-                  { color: activeTab === 'sell' ? theme.COLORS.white : theme.COLORS.textLight }]}>卖出</Text>
-              </TouchableOpacity>
+
             </View>
             
             <View style={styles.tradeContent}>
@@ -282,36 +248,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
                 </>
               )}
               
-              {activeTab === 'sell' && (
-                <>
-                  <Input
-                    placeholder="请输入卖出金额"
-                    keyboardType="numeric"
-                    value={sellAmount}
-                    onChangeText={setSellAmount}
-                    containerStyle={styles.inputContainer}
-                    inputStyle={styles.inputText}
-                    leftIcon={<Icon name="attach-money" type="material" size={20} color={theme.COLORS.error} />}
-                  />
-                  <Text style={styles.holdingText}>
-                    当前持有: ¥10,000.00
-                  </Text>
-                  <Button
-                    title="确认卖出"
-                    onPress={handleSell}
-                    loading={isLoading}
-                    buttonStyle={[styles.actionButton, { backgroundColor: theme.COLORS.error }]}
-                    titleStyle={styles.actionButtonText}
-                    icon={{
-                      name: 'monetization-on',
-                      type: 'material',
-                      size: 20,
-                      color: 'white',
-                    }}
-                    iconRight
-                  />
-                </>
-              )}
+
             </View>
           </Card>
           

@@ -8,6 +8,7 @@ import { Text, Button, Icon, Divider } from '@rneui/themed';
 import { useAuthStore } from '../store/authStore';
 import { useAssetStore } from '../store/assetStore';
 import { LineChart, PieChart, BarChart } from '../components/charts';
+import { getMonthlyProfitData } from '../services/assetAnalysisService';
 
 // 使用useWindowDimensions钩子替代静态Dimensions
 
@@ -64,6 +65,18 @@ const AssetAnalysisScreen = ({ navigation }) => {
         fetchHoldings(user.id),
         fetchAssetAnalysis(user.id)
       ]);
+      
+      // 获取月度收益数据
+      const monthlyProfitResult = await getMonthlyProfitData(user.id);
+      if (monthlyProfitResult.success) {
+        // 更新资产分析数据中的月度收益
+        useAssetStore.setState(state => ({
+          assetAnalysis: {
+            ...state.assetAnalysis,
+            monthlyProfit: monthlyProfitResult.monthlyProfit
+          }
+        }));
+      }
     }
   };
   
@@ -150,7 +163,7 @@ const AssetAnalysisScreen = ({ navigation }) => {
       labels,
       datasets: [{
         data,
-        colors: data.map(value => value >= 0 ? '#4CAF50' : '#F44336')
+        color: (opacity = 1, index) => data[index] >= 0 ? `rgba(76, 175, 80, ${opacity})` : `rgba(244, 67, 54, ${opacity})`
       }]
     };
   };
@@ -277,8 +290,8 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: theme.SPACING.sm,
-    overflow: 'hidden' // 防止图表溢出
+    marginVertical: theme.SPACING.md,
+    overflow: 'visible' // 允许图表内容溢出，解决饼图被覆盖问题
   },
   loginContainer: {
     margin: theme.SPACING.lg,
@@ -324,7 +337,7 @@ const styles = StyleSheet.create({
     marginVertical: theme.SPACING.sm
   },
   bottomPadding: {
-    height: 120, // 增加底部填充高度，确保内容可以滚动到底部导航栏上方
+    height: 60 // 增加底部填充高度，确保内容可以滚动到底部导航栏上方
   }
 });
 
