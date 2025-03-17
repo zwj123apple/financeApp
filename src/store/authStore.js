@@ -21,8 +21,8 @@ export const useAuthStore = create(
           const { token, user } = response;
           
           // 保存token和用户信息到本地存储
-          saveToken(token);
-          saveUserInfo(user);
+          await saveToken(token);
+          await saveUserInfo(user);
           
           set({ 
             user, 
@@ -48,8 +48,8 @@ export const useAuthStore = create(
           const { token, user } = response;
           
           // 保存token和用户信息到本地存储
-          saveToken(token);
-          saveUserInfo(user);
+          await saveToken(token);
+          await saveUserInfo(user);
           
           set({ 
             user, 
@@ -74,8 +74,8 @@ export const useAuthStore = create(
           await logout();
           
           // 清除本地存储的token和用户信息
-          removeToken();
-          removeUserInfo();
+          await removeToken();
+          await removeUserInfo();
           
           set({ 
             user: null, 

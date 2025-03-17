@@ -1,7 +1,8 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import { ThemeProvider } from '@rneui/themed';
+import { Platform } from 'react-native';
 import AppNavigator from './src/navigation/AppNavigator';
 
 // 导入主题配置
@@ -22,10 +23,13 @@ const appTheme = {
 
 export default function App() {
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <ThemeProvider theme={appTheme}>
         <AppNavigator />
-        <StatusBar style="auto" />
+        <StatusBar 
+          style="auto" 
+          translucent={Platform.OS === 'ios'}
+        />
       </ThemeProvider>
     </SafeAreaProvider>
   );

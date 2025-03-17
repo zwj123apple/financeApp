@@ -302,9 +302,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     marginVertical: 2,
     ...theme.SHADOWS.sm,
-    // 添加输入框焦点状态样式，移除黑色边框
-    outlineStyle: 'none',
-    outlineWidth: 0
+    // 添加输入框焦点状态样式
+    ...(Platform.OS === 'web' ? { outline: 'none' } : {})
   },
   buttonContainer: {
     marginTop: theme.SPACING.md,
@@ -349,6 +348,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: theme.SPACING.md,
+    alignItems:'center',
     width: '100%'
   }
 });

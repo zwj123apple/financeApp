@@ -1,4 +1,6 @@
 import { registerRootComponent } from 'expo';
+// 导入screens配置
+import './src/navigation';
 
 import App from './App';
 

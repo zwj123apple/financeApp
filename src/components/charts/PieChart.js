@@ -29,7 +29,7 @@ const PieChart = ({
     name: item.name,
     population: item.value,
     color: item.color || theme.colors.primary,
-    legendFontColor: theme.colors.grey1,
+    legendFontColor: theme.colors.grey0,
     legendFontSize: 12
   }));
   
@@ -74,6 +74,7 @@ const PieChart = ({
           absolute
           hasLegend={showLegend}
           avoidFalseZero
+          legendOffset={screenWidth * 0.04} // 减小图例与饼图的距离
           style={{
             marginVertical: 8,
             borderRadius: 16,
@@ -91,24 +92,26 @@ const PieChart = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 8,
-    paddingHorizontal: 8,
-    borderRadius: 8,
+    marginVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'center'
+    alignSelf: 'center',
+    width: '100%'
   },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 8,
-    textAlign: 'center'
+    marginBottom: 12,
+    textAlign: 'center',
+    color: '#1F2937'
   },
   chartWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    overflow: 'hidden' // 防止图表溢出
+    overflow: 'visible' // 修改为visible以确保饼图完整显示
   },
   emptyContainer: {
     flex: 1,

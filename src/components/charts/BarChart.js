@@ -52,7 +52,26 @@ const BarChart = ({
           backgroundGradientFrom: theme.colors.background,
           backgroundGradientTo: theme.colors.background,
           decimalPlaces: 1,
-          color: (opacity = 1) => `rgba(139, 92, 246, ${opacity})`,
+          // 更新为更鲜艳的配色方案
+          color: (opacity = 1, index) => {
+            // 使用主题中定义的鲜艳图表颜色
+            const colors = [
+              'rgba(37, 99, 235, 1)', // 蓝色
+              'rgba(16, 185, 129, 1)', // 绿色
+              'rgba(245, 158, 11, 1)', // 橙色
+              'rgba(139, 92, 246, 1)', // 紫色
+              'rgba(236, 72, 153, 1)', // 粉色
+              'rgba(20, 184, 166, 1)', // 青色
+              'rgba(244, 63, 94, 1)', // 红色
+              'rgba(99, 102, 241, 1)'  // 靛蓝色
+            ];
+            // 根据数据值的正负选择颜色
+            if (data.datasets[0].data[index] >= 0) {
+              return `rgba(16, 185, 129, ${opacity})`; // 正值使用绿色
+            } else {
+              return `rgba(244, 63, 94, ${opacity})`; // 负值使用红色
+            }
+          },
           labelColor: (opacity = 1) => theme.colors.grey1,
           style: {
             borderRadius: 16
@@ -62,8 +81,15 @@ const BarChart = ({
             fontSize: 10,
             fontWeight: '500'
           },
-          fillShadowGradient: theme.colors.secondary,
-          fillShadowGradientOpacity: 0.8
+          // 移除填充渐变，使用纯色
+          fillShadowGradient: null,
+          fillShadowGradientOpacity: 1,
+          // 修改网格线样式
+          propsForBackgroundLines: {
+            strokeDasharray: '', // 移除虚线
+            stroke: 'rgba(0, 0, 0, 0.05)', // 更淡的网格线颜色
+            strokeWidth: 1
+          }
         }}
         showValuesOnTopOfBars={showValuesOnTopOfBars}
         fromZero

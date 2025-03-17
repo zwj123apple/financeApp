@@ -146,6 +146,26 @@ const AssetAnalysisScreen = ({ navigation }) => {
       color: colors[index % colors.length]
     }));
   };
+    // 准备风险等级分布饼图数据
+  const prepareRiskDistributionData = () => {
+    if (!assetAnalysis || !assetAnalysis.assetSummary || !assetAnalysis.assetSummary.riskLevelDistribution) {
+      return [];
+    }
+    
+    // 风险等级颜色映射
+    const riskColors = {
+      '低风险': '#4CAF50', // 绿色
+      '中风险': '#FFC107', // 黄色
+      '高风险': '#F44336'  // 红色
+    };
+    
+    // 转换为饼图数据格式
+    return assetAnalysis.assetSummary.riskLevelDistribution.map(item => ({
+      name: item.riskLevel,
+      value: parseFloat(item.percentage.replace('%', '')),
+      color: riskColors[item.riskLevel] || '#9C27B0' // 默认紫色
+    }));
+  };
   
   // 准备月度收益柱状图数据
   const prepareMonthlyProfitData = () => {
@@ -162,11 +182,12 @@ const AssetAnalysisScreen = ({ navigation }) => {
     return {
       labels,
       datasets: [{
-        data,
-        color: (opacity = 1, index) => data[index] >= 0 ? `rgba(76, 175, 80, ${opacity})` : `rgba(244, 67, 54, ${opacity})`
+        data
+        // 注意：不需要在这里提供color函数，BarChart组件内部已经实现了根据数据正负值显示不同颜色的逻辑
       }]
     };
   };
+
   
   return (
     <LinearGradient
@@ -193,7 +214,7 @@ const AssetAnalysisScreen = ({ navigation }) => {
               <LineChart 
                 data={prepareProfitTrendData()} 
                 title="资产收益走势" 
-                height={Math.min(220, height * 0.3)} // 根据屏幕高度调整图表高度
+                height={Math.min(180, height * 0.25)} // 减小图表高度
                 width={width * 0.85} // 设置图表宽度为屏幕宽度的85%
                 yAxisSuffix="元"
                 bezier
@@ -204,25 +225,25 @@ const AssetAnalysisScreen = ({ navigation }) => {
             </Text>
           </Animated.View>
           
-          {/* 资产分布饼图 */}
+          {/* 风险分布饼图 */}
           <Animated.View style={[styles.sectionContainer, {
               opacity: fadeAnim,
               transform: [{ translateY: fadeAnim.interpolate({inputRange: [0, 1], outputRange: [100, 0]}) }, { scale: scaleAnim }],
               width: width * 0.9, // 使用屏幕宽度的90%
               maxWidth: 500 // 设置最大宽度
             }]}>
-            <Text style={styles.sectionTitle}>资产分布分析</Text>
+            <Text style={styles.sectionTitle}>风险分布分析</Text>
             <Divider style={styles.divider} />
             <View style={styles.chartWrapper}>
               <PieChart 
-                data={prepareAssetDistributionData()} 
-                title="资产类别分布" 
-                height={Math.min(220, height * 0.3)} // 根据屏幕高度调整图表高度
-                width={Math.min(width * 0.85, 450)} // 设置图表宽度为屏幕宽度的85%，但最大不超过450
+                data={prepareRiskDistributionData()} 
+                title="风险等级分布" 
+                height={Math.min(200, height * 0.28)} // 调整饼图高度
+                width={Math.min(width * 0.9, 400)} // 调整饼图宽度，确保完整显示
               />
             </View>
             <Text style={styles.chartDescription}>
-              展示您的资产在不同产品类别间的分布情况，帮助您了解资产多样化程度。
+              展示您的资产在不同风险等级间的分布情况，帮助您了解投资组合的风险水平。
             </Text>
           </Animated.View>
           
@@ -239,7 +260,7 @@ const AssetAnalysisScreen = ({ navigation }) => {
               <BarChart 
                 data={prepareMonthlyProfitData()} 
                 title="月度收益情况" 
-                height={Math.min(220, height * 0.3)} // 根据屏幕高度调整图表高度
+                height={Math.min(180, height * 0.25)} // 减小图表高度
                 width={width * 0.85} // 设置图表宽度为屏幕宽度的85%
                 yAxisSuffix="元"
                 showValuesOnTopOfBars
@@ -272,13 +293,13 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   contentContainer: {
-    paddingTop: theme.SPACING.md,
+    paddingTop: theme.SPACING.sm, // 减小顶部间距
     width: '100%',
     alignItems: 'center'
   },
   sectionContainer: {
-    marginBottom: theme.SPACING.lg,
-    padding: theme.SPACING.md,
+    marginBottom: theme.SPACING.md, // 减小底部间距
+    padding: theme.SPACING.sm, // 减小内边距
     backgroundColor: theme.COLORS.white,
     borderRadius: theme.BORDER_RADIUS.md,
     ...theme.SHADOWS.sm,
@@ -290,7 +311,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: theme.SPACING.md,
+    marginVertical: theme.SPACING.sm, // 减小垂直间距
     overflow: 'visible' // 允许图表内容溢出，解决饼图被覆盖问题
   },
   loginContainer: {
@@ -305,39 +326,39 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: theme.COLORS.primary,
-    fontSize: theme.FONT_SIZES.lg,
+    fontSize: theme.FONT_SIZES.md, // 减小标题字体大小
     fontWeight: theme.FONT_WEIGHTS.bold,
     letterSpacing: 0.5,
-    marginBottom: theme.SPACING.xs,
+    marginBottom: theme.SPACING.xxs, // 减小底部间距
     textAlign: 'center',
   },
   notLoginText: {
     textAlign: 'center',
-    marginVertical: theme.SPACING.md,
+    marginVertical: theme.SPACING.sm, // 减小垂直间距
     color: theme.COLORS.textLight,
     fontSize: theme.FONT_SIZES.md,
   },
   loginButton: {
-    marginTop: theme.SPACING.md,
+    marginTop: theme.SPACING.sm, // 减小顶部间距
     borderRadius: theme.BORDER_RADIUS.sm,
     backgroundColor: theme.COLORS.primary,
   },
   chartDescription: {
-    fontSize: theme.FONT_SIZES.sm,
+    fontSize: theme.FONT_SIZES.xs, // 减小描述文字大小
     color: theme.COLORS.textLight,
     textAlign: 'center',
-    marginTop: theme.SPACING.sm,
-    paddingHorizontal: theme.SPACING.md,
+    marginTop: theme.SPACING.xs, // 减小顶部间距
+    paddingHorizontal: theme.SPACING.sm, // 减小水平内边距
     fontStyle: 'italic'
   },
   divider: {
     backgroundColor: theme.COLORS.primaryLight,
     height: 1,
     opacity: 0.5,
-    marginVertical: theme.SPACING.sm
+    marginVertical: theme.SPACING.xs // 减小垂直间距
   },
   bottomPadding: {
-    height: 60 // 增加底部填充高度，确保内容可以滚动到底部导航栏上方
+    height: 40 // 减小底部填充高度
   }
 });
 

@@ -64,11 +64,18 @@ const LineChart = ({
           },
           propsForLabels: {
             fontSize: 10,
-            fontWeight: '500'
+            fontWeight: '500',
+            padding: 8  // 增加标签内边距
           },
           fillShadowGradientFrom: theme.colors.primary,
           fillShadowGradientTo: 'rgba(37, 99, 235, 0.1)',
-          strokeWidth: 2
+          strokeWidth: 2,
+          // 修改网格线样式
+          propsForBackgroundLines: {
+            strokeDasharray: '', // 移除虚线
+            stroke: 'rgba(0, 0, 0, 0.05)', // 更淡的网格线颜色
+            strokeWidth: 1
+          }
         }}
         bezier={bezier}
         style={{
@@ -78,7 +85,8 @@ const LineChart = ({
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.1,
           shadowRadius: 3,
-          elevation: 3
+          elevation: 3,
+          paddingLeft: 10 // 增加左侧间距
         }}
         withInnerLines={false}
         withOuterLines={true}

@@ -13,16 +13,34 @@ const ProductDetailScreen = ({ route, navigation }) => {
   const { productId } = route.params;
   const [refreshing, setRefreshing] = useState(false);
   const [purchaseAmount, setPurchaseAmount] = useState('');
-  const [activeTab, setActiveTab] = useState('buy');
+  const [activeTab, setActiveTab] = useState('description');
   const { user } = useAuthStore();
   const { currentProduct, fetchProductDetail, purchaseProduct, isLoading } = useProductStore();
   
   // 使用useWindowDimensions钩子获取屏幕尺寸，这样在屏幕旋转或尺寸变化时会自动更新
   const { width, height } = useWindowDimensions();
   
+  // 动画值
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const [slideAnim] = useState(new Animated.Value(50));
+  
   // 初始加载数据
   useEffect(() => {
     loadData();
+    
+    // 启动进入动画
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: theme.ANIMATION.normal,
+        useNativeDriver: true
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: theme.ANIMATION.normal,
+        useNativeDriver: true
+      })
+    ]).start();
   }, [productId]);
   
   // 加载数据函数
@@ -66,8 +84,6 @@ const ProductDetailScreen = ({ route, navigation }) => {
     }
   };
   
-
-  
   // 准备历史收益数据
   const prepareHistoricalReturnsData = () => {
     if (!currentProduct || !currentProduct.historicalReturns) {
@@ -89,10 +105,25 @@ const ProductDetailScreen = ({ route, navigation }) => {
   // 如果产品数据未加载，显示加载状态
   if (!currentProduct) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text>加载中...</Text>
-      </View>
+      <LinearGradient
+        colors={theme.GRADIENTS.background}
+        style={styles.gradientContainer}
+      >
+        <View style={styles.loadingContainer}>
+          <Text>加载中...</Text>
+        </View>
+      </LinearGradient>
     );
+  }
+  
+  // 根据风险等级设置标签颜色
+  let riskColor = theme.COLORS.success;
+  if (currentProduct.riskLevel === '中风险') {
+    riskColor = theme.COLORS.warning;
+  } else if (currentProduct.riskLevel === '中高风险') {
+    riskColor = theme.COLORS.accent;
+  } else if (currentProduct.riskLevel === '高风险') {
+    riskColor = theme.COLORS.error;
   }
   
   return (
@@ -101,21 +132,24 @@ const ProductDetailScreen = ({ route, navigation }) => {
       style={styles.gradientContainer}
     >
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor={theme.COLORS.backgroundLight} />
+        <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
         <ScrollView 
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={true}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.COLORS.primary]} />}
         >
           {/* 产品基本信息区域 - 使用卡片设计 */}
-          <Card containerStyle={styles.headerCard}>
+          <Animated.View style={[styles.card, styles.headerCard, {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }]
+          }]}>
             <View style={styles.headerContent}>
               <View style={styles.headerLeft}>
-                <Text h4 style={styles.productName}>{currentProduct.name}</Text>
+                <Text style={styles.productName}>{currentProduct.name}</Text>
                 <Badge
                   value={currentProduct.riskLevel}
-                  badgeStyle={styles.riskBadge}
+                  badgeStyle={[styles.riskBadge, {backgroundColor: riskColor}]}
                   textStyle={styles.riskBadgeText}
                 />
               </View>
@@ -139,25 +173,33 @@ const ProductDetailScreen = ({ route, navigation }) => {
                 <Text style={styles.infoValue}>¥{currentProduct.minInvestment}</Text>
               </View>
             </View>
-          </Card>
+          </Animated.View>
           
           {/* 历史收益走势图 - 增强视觉效果 */}
-          <Card containerStyle={styles.chartCard}>
-            <Card.Title style={styles.cardTitle}>历史收益走势</Card.Title>
-            <Card.Divider />
-            <LineChart 
-              data={prepareHistoricalReturnsData()} 
-              height={220}
-              width={width * 0.85}
-              yAxisSuffix="%"
-              bezier={true}
-            />
-          </Card>
+          <Animated.View style={[styles.card, styles.chartCard, {
+            opacity: fadeAnim,
+            transform: [{ translateY: fadeAnim.interpolate({inputRange: [0, 1], outputRange: [100, 0]}) }]
+          }]}>
+            <Text style={styles.cardTitle}>历史收益走势</Text>
+            <Divider style={styles.divider} />
+            <View style={styles.chartWrapper}>
+              <LineChart 
+                data={prepareHistoricalReturnsData()} 
+                height={220}
+                width={width * 0.85}
+                yAxisSuffix="%"
+                bezier={true}
+              />
+            </View>
+          </Animated.View>
           
           {/* 产品详情区域 - 使用选项卡设计 */}
-          <Card containerStyle={styles.detailCard}>
-            <Card.Title style={styles.cardTitle}>产品详情</Card.Title>
-            <Card.Divider />
+          <Animated.View style={[styles.card, styles.detailCard, {
+            opacity: fadeAnim,
+            transform: [{ translateY: fadeAnim.interpolate({inputRange: [0, 1], outputRange: [150, 0]}) }]
+          }]}>
+            <Text style={styles.cardTitle}>产品详情</Text>
+            <Divider style={styles.divider} />
             
             <View style={styles.tabContainer}>
               <TouchableOpacity 
@@ -197,60 +239,45 @@ const ProductDetailScreen = ({ route, navigation }) => {
                 <Text style={styles.descriptionText}>{currentProduct.fees}</Text>
               )}
             </View>
-          </Card>
+          </Animated.View>
           
-          {/* 交易区域 - 买入/卖出选项卡 */}
-          <Card containerStyle={styles.tradeCard}>
-            <Card.Title style={styles.cardTitle}>交易</Card.Title>
-            <Card.Divider />
-            
-            <View style={styles.tradeTabContainer}>
-              <TouchableOpacity 
-                style={[styles.tradeTabButton, styles.tradeTabButtonLeft, 
-                  { backgroundColor: activeTab === 'buy' ? theme.COLORS.primary : theme.COLORS.backgroundLight }]}
-                onPress={() => setActiveTab('buy')}
-              >
-                <Text style={[styles.tradeTabButtonText, 
-                  { color: activeTab === 'buy' ? theme.COLORS.white : theme.COLORS.textLight }]}>买入</Text>
-              </TouchableOpacity>
-
-            </View>
+          {/* 交易区域 - 买入选项卡 */}
+          <Animated.View style={[styles.card, styles.tradeCard, {
+            opacity: fadeAnim,
+            transform: [{ translateY: fadeAnim.interpolate({inputRange: [0, 1], outputRange: [200, 0]}) }]
+          }]}>
+            <Text style={styles.cardTitle}>交易</Text>
+            <Divider style={styles.divider} />
             
             <View style={styles.tradeContent}>
-              {activeTab === 'buy' && (
-                <>
-                  <Input
-                    placeholder="请输入买入金额"
-                    keyboardType="numeric"
-                    value={purchaseAmount}
-                    onChangeText={setPurchaseAmount}
-                    containerStyle={styles.inputContainer}
-                    inputStyle={styles.inputText}
-                    leftIcon={<Icon name="attach-money" type="material" size={20} color={theme.COLORS.primary} />}
-                  />
-                  <Text style={styles.minInvestmentText}>
-                    最低投资金额: ¥{currentProduct.minInvestment}
-                  </Text>
-                  <Button
-                    title="确认买入"
-                    onPress={handlePurchase}
-                    loading={isLoading}
-                    buttonStyle={styles.actionButton}
-                    titleStyle={styles.actionButtonText}
-                    icon={{
-                      name: 'shopping-cart',
-                      type: 'material',
-                      size: 20,
-                      color: 'white',
-                    }}
-                    iconRight
-                  />
-                </>
-              )}
-              
-
+              <Input
+                placeholder="请输入买入金额"
+                keyboardType="numeric"
+                value={purchaseAmount}
+                onChangeText={setPurchaseAmount}
+                containerStyle={styles.inputContainer}
+                inputStyle={styles.inputText}
+                leftIcon={<Icon name="attach-money" type="material" size={20} color={theme.COLORS.primary} />}
+              />
+              <Text style={styles.minInvestmentText}>
+                最低投资金额: ¥{currentProduct.minInvestment}
+              </Text>
+              <Button
+                title="确认买入"
+                onPress={handlePurchase}
+                loading={isLoading}
+                buttonStyle={styles.actionButton}
+                titleStyle={styles.actionButtonText}
+                icon={{
+                  name: 'shopping-cart',
+                  type: 'material',
+                  size: 20,
+                  color: 'white',
+                }}
+                iconRight
+              />
             </View>
-          </Card>
+          </Animated.View>
           
           <View style={styles.bottomPadding} />
         </ScrollView>
@@ -279,61 +306,42 @@ const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    height: 300
   },
-  // 卡片样式
-  headerCard: {
+  // 卡片通用样式
+  card: {
     borderRadius: theme.BORDER_RADIUS.lg,
     padding: theme.SPACING.md,
     marginBottom: theme.SPACING.md,
     marginHorizontal: theme.SPACING.md,
+    backgroundColor: theme.COLORS.white,
     ...theme.SHADOWS.md,
-    borderWidth: 0,
     width: '92%',
     alignSelf: 'center'
+  },
+  // 头部卡片样式
+  headerCard: {
+    marginTop: theme.SPACING.sm,
   },
   chartCard: {
-    borderRadius: theme.BORDER_RADIUS.lg,
-    padding: theme.SPACING.md,
-    marginBottom: theme.SPACING.md,
-    marginHorizontal: theme.SPACING.md,
-    ...theme.SHADOWS.md,
-    borderWidth: 0,
-    width: '92%',
-    alignSelf: 'center'
+    paddingBottom: theme.SPACING.lg,
   },
-  detailCard: {
-    borderRadius: theme.BORDER_RADIUS.lg,
-    padding: theme.SPACING.md,
-    marginBottom: theme.SPACING.md,
-    marginHorizontal: theme.SPACING.md,
-    ...theme.SHADOWS.md,
-    borderWidth: 0,
-    width: '92%',
-    alignSelf: 'center'
-  },
+  detailCard: {},
   tradeCard: {
-    borderRadius: theme.BORDER_RADIUS.lg,
-    padding: theme.SPACING.md,
-    marginBottom: theme.SPACING.md,
-    marginHorizontal: theme.SPACING.md,
-    ...theme.SHADOWS.md,
-    borderWidth: 0,
-    width: '92%',
-    alignSelf: 'center'
+    marginBottom: theme.SPACING.xl,
   },
   cardTitle: {
     fontSize: theme.FONT_SIZES.lg,
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.textDark,
-    textAlign: 'left',
-    marginBottom: 0
+    marginBottom: theme.SPACING.xs
   },
   // 头部信息样式
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: theme.SPACING.md,
     width: '100%'
   },
@@ -352,7 +360,6 @@ const styles = StyleSheet.create({
     marginBottom: theme.SPACING.xs
   },
   riskBadge: {
-    backgroundColor: theme.COLORS.warning,
     borderRadius: theme.BORDER_RADIUS.sm,
     paddingHorizontal: theme.SPACING.sm
   },
@@ -372,12 +379,15 @@ const styles = StyleSheet.create({
   },
   // 基本信息行
   divider: {
-    marginBottom: theme.SPACING.md
+    marginBottom: theme.SPACING.md,
+    backgroundColor: theme.COLORS.primaryLight,
+    opacity: 0.5,
+    height: 1
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: theme.SPACING.md
+    marginBottom: theme.SPACING.sm
   },
   infoItem: {
     alignItems: 'center',
@@ -393,6 +403,13 @@ const styles = StyleSheet.create({
     fontWeight: theme.FONT_WEIGHTS.bold,
     marginTop: theme.SPACING.xs,
     color: theme.COLORS.textDark
+  },
+  // 图表样式
+  chartWrapper: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: theme.SPACING.sm
   },
   // 产品详情选项卡
   tabContainer: {
@@ -426,40 +443,18 @@ const styles = StyleSheet.create({
     fontWeight: theme.FONT_WEIGHTS.medium
   },
   tabContent: {
-    padding: theme.SPACING.sm
+    padding: theme.SPACING.md,
+    backgroundColor: theme.COLORS.backgroundLight,
+    borderRadius: theme.BORDER_RADIUS.md
   },
   descriptionText: {
     lineHeight: 22,
-    color: theme.COLORS.text
+    color: theme.COLORS.text,
+    fontSize: theme.FONT_SIZES.sm
   },
-  // 交易选项卡
-  tradeTabContainer: {
-    flexDirection: 'row',
-    marginBottom: theme.SPACING.md,
-    borderRadius: theme.BORDER_RADIUS.md,
-    overflow: 'hidden',
-    backgroundColor: theme.COLORS.backgroundLight
-  },
-  tradeTabButton: {
-    flex: 1,
-    paddingVertical: theme.SPACING.sm,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  tradeTabButtonLeft: {
-    borderTopLeftRadius: theme.BORDER_RADIUS.md,
-    borderBottomLeftRadius: theme.BORDER_RADIUS.md
-  },
-  tradeTabButtonRight: {
-    borderTopRightRadius: theme.BORDER_RADIUS.md,
-    borderBottomRightRadius: theme.BORDER_RADIUS.md
-  },
-  tradeTabButtonText: {
-    fontSize: theme.FONT_SIZES.md,
-    fontWeight: theme.FONT_WEIGHTS.bold
-  },
+  // 交易区域
   tradeContent: {
-    padding: theme.SPACING.md
+    padding: theme.SPACING.sm
   },
   // 输入框和按钮
   inputContainer: {
@@ -467,19 +462,14 @@ const styles = StyleSheet.create({
     borderColor: theme.COLORS.border,
     borderRadius: theme.BORDER_RADIUS.md,
     paddingHorizontal: theme.SPACING.sm,
-    marginBottom: theme.SPACING.sm
+    marginBottom: theme.SPACING.sm,
+    backgroundColor: theme.COLORS.white
   },
   inputText: {
     fontSize: theme.FONT_SIZES.md,
     color: theme.COLORS.textDark
   },
   minInvestmentText: {
-    fontSize: theme.FONT_SIZES.sm,
-    color: theme.COLORS.textLight,
-    marginBottom: theme.SPACING.md,
-    marginLeft: theme.SPACING.sm
-  },
-  holdingText: {
     fontSize: theme.FONT_SIZES.sm,
     color: theme.COLORS.textLight,
     marginBottom: theme.SPACING.md,

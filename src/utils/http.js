@@ -16,9 +16,9 @@ const http = axios.create({
 
 // 请求拦截器
 http.interceptors.request.use(
-  config => {
+  async config => {
     // 从本地存储获取token并添加到请求头
-    const token = getToken();
+    const token = await getToken();
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
@@ -35,7 +35,7 @@ http.interceptors.response.use(
     // 如果响应成功，直接返回数据
     return response.data;
   },
-  error => {
+  async error => {
     // 获取错误信息
     const { response } = error;
     let message = '网络错误，请稍后重试';
@@ -49,7 +49,7 @@ http.interceptors.response.use(
         case 401:
           message = '登录已过期，请重新登录';
           // 清除token并跳转到登录页
-          removeToken();
+          await removeToken();
           // 在实际应用中，这里可能需要使用导航来跳转
           break;
         case 403:

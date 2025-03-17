@@ -122,8 +122,8 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate('ProductDetail', { productId });
   };
   
-  // 渲染产品项
-  renderProductItem = ({ item }) => {
+  // 渲染产品项 - 响应式设计
+  const renderProductItem = ({ item }) => {
     // 根据风险等级设置标签颜色
     let riskColor = theme.COLORS.success;
     if (item.riskLevel === '中风险') {
@@ -134,6 +134,10 @@ const HomeScreen = ({ navigation }) => {
       riskColor = theme.COLORS.error;
     }
     
+    // 根据屏幕宽度调整字体大小 (使用组件顶层已定义的width)
+    const nameFontSize = width < 350 ? theme.FONT_SIZES.sm : theme.FONT_SIZES.md;
+    const valueFontSize = width < 350 ? theme.FONT_SIZES.md : theme.FONT_SIZES.lg;
+    
     return (
       <TouchableOpacity 
         style={styles.productCard}
@@ -141,11 +145,11 @@ const HomeScreen = ({ navigation }) => {
         activeOpacity={0.7}
       >
         <LinearGradient
-          colors={['#FFFFFF', '#F9FAFB']}
+          colors={theme.GRADIENTS.card}
           style={styles.productCardGradient}
         >
           <View style={styles.productCardHeader}>
-            <Text style={styles.productName}>{item.name}</Text>
+            <Text style={[styles.productName, {fontSize: nameFontSize}]} numberOfLines={1} ellipsizeMode="tail">{item.name}</Text>
             <Badge 
               value={item.riskLevel} 
               badgeStyle={[styles.riskBadge, {backgroundColor: riskColor}]}
@@ -154,31 +158,24 @@ const HomeScreen = ({ navigation }) => {
           </View>
           
           <View style={styles.productCardBody}>
-            <View style={styles.productInfoItem}>
-              <Text style={styles.infoLabel}>预期收益</Text>
-              <Text style={[styles.infoValue, styles.returnValue]}>{item.expectedReturn}</Text>
-            </View>
-            
             <View style={styles.productInfoRow}>
+              <View style={styles.productInfoItem}>
+                <Text style={styles.infoLabel}>预期收益</Text>
+                <Text style={[styles.infoValue, styles.returnValue, {fontSize: valueFontSize}]}>{item.expectedReturn}</Text>
+              </View>
+              
               <View style={styles.productInfoItem}>
                 <Text style={styles.infoLabel}>投资期限</Text>
                 <Text style={styles.infoValue}>{item.investmentTerm}</Text>
               </View>
-              
+            </View>
+            
+            <View style={styles.productInfoRow}>
               <View style={styles.productInfoItem}>
-                <Text style={styles.infoLabel}>起投金额</Text>
+                <Text style={styles.infoLabel}>最低投资</Text>
                 <Text style={styles.infoValue}>¥{item.minInvestment}</Text>
               </View>
             </View>
-          </View>
-          
-          <View style={styles.productCardFooter}>
-            <Button
-              title="立即投资"
-              buttonStyle={styles.investButton}
-              titleStyle={styles.investButtonText}
-              onPress={() => navigateToProductDetail(item.id)}
-            />
           </View>
         </LinearGradient>
       </TouchableOpacity>
@@ -203,34 +200,41 @@ const HomeScreen = ({ navigation }) => {
   };
   
   // 渲染轮播项
-  const renderBannerItem = (item, index) => (
-    <TouchableOpacity 
-      style={[styles.bannerItem, {width}]}
-      onPress={() => navigateToProductDetail(item.id)}
-      activeOpacity={0.9}
-    >
-      <LinearGradient
-        colors={[item.backgroundColor, `${item.backgroundColor}99`]}
-        style={styles.bannerGradient}
+  const renderBannerItem = (item, index) => {
+    // 根据屏幕宽度计算响应式样式
+    const titleSize = width < 380 ? theme.FONT_SIZES.lg : width < 768 ? theme.FONT_SIZES.xl : theme.FONT_SIZES.xxl;
+    const subtitleSize = width < 380 ? theme.FONT_SIZES.sm : width < 768 ? theme.FONT_SIZES.md : theme.FONT_SIZES.lg;
+    const buttonPadding = width < 380 ? theme.SPACING.xxs : theme.SPACING.xs;
+    
+    return (
+      <TouchableOpacity 
+        style={[styles.bannerItem, {width}]}
+        onPress={() => navigateToProductDetail(item.id)}
+        activeOpacity={0.9}
       >
-        <View style={styles.bannerContent}>
-          <View style={styles.bannerTextContainer}>
-            <Text style={styles.bannerTitle}>{item.title}</Text>
-            <Text style={styles.bannerSubtitle}>{item.subtitle}</Text>
-            <Button
-              title="了解详情"
-              buttonStyle={styles.bannerButton}
-              titleStyle={styles.bannerButtonText}
-              onPress={() => navigateToProductDetail(1)}
-            />
+        <LinearGradient
+          colors={[item.backgroundColor, `${item.backgroundColor}99`]}
+          style={styles.bannerGradient}
+        >
+          <View style={styles.bannerContent}>
+            <View style={styles.bannerTextContainer}>
+              <Text style={[styles.bannerTitle, {fontSize: titleSize}]}>{item.title}</Text>
+              <Text style={[styles.bannerSubtitle, {fontSize: subtitleSize}]}>{item.subtitle}</Text>
+              <Button
+                title="了解详情"
+                buttonStyle={[styles.bannerButton, {paddingVertical: buttonPadding}]}
+                titleStyle={styles.bannerButtonText}
+                onPress={() => navigateToProductDetail(1)}
+              />
+            </View>
+            <View style={styles.bannerImageContainer}>
+              {/* 这里可以放置轮播图片 */}
+            </View>
           </View>
-          <View style={styles.bannerImageContainer}>
-            {/* 这里可以放置轮播图片 */}
-          </View>
-        </View>
-      </LinearGradient>
-    </TouchableOpacity>
-  );
+        </LinearGradient>
+      </TouchableOpacity>
+    );
+  };
   
   return (
     <View style={styles.container}>
@@ -238,7 +242,7 @@ const HomeScreen = ({ navigation }) => {
         colors={theme.GRADIENTS.background}
         style={styles.gradientBackground}
       >
-        {/* 搜索栏 */}
+        {/* 搜索栏 - 优化样式 */}
         <View style={styles.searchContainer}>
           <SearchBar
             placeholder="搜索产品..."
@@ -260,8 +264,9 @@ const HomeScreen = ({ navigation }) => {
               colors={[theme.COLORS.primary]}
             />
           }
+          contentContainerStyle={styles.scrollContent}
         >
-          {/* 轮播广告 */}
+          {/* 轮播广告 - 优化样式 */}
           <View style={styles.bannerContainer}>
             <ScrollView
               ref={scrollViewRef}
@@ -276,10 +281,17 @@ const HomeScreen = ({ navigation }) => {
             {renderBannerIndicator()}
           </View>
           
-          {/* 热门推荐 */}
+          {/* 热门推荐 - 优化样式 */}
           <View style={styles.recommendSection}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>热门推荐</Text>
+              <TouchableOpacity 
+                onPress={() => navigation.navigate('ProductsScreen')}
+                style={styles.viewMoreButton}
+              >
+                <Text style={styles.viewMoreText}>查看更多</Text>
+                <Icon name="chevron-right" type="material" size={16} color={theme.COLORS.primary} />
+              </TouchableOpacity>
             </View>
             
             <ScrollView
@@ -319,19 +331,13 @@ const HomeScreen = ({ navigation }) => {
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            
-            {/* 查看更多按钮 - 新行显示 */}
-            <TouchableOpacity 
-              onPress={() => navigation.navigate('ProductsScreen')}
-              style={styles.viewMoreButtonRow}
-            >
-              <Text style={styles.viewMoreText}>查看更多</Text>
-              <Icon name="chevron-right" type="material" size={16} color={theme.COLORS.primary} />
-            </TouchableOpacity>
           </View>
-          {/* 风险等级筛选 */}
+          
+          {/* 风险等级筛选 - 优化样式 */}
           <View style={styles.filterContainer}>
-            <Text style={styles.sectionTitle}>理财产品</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>理财产品</Text>
+            </View>
             <ScrollView 
               horizontal 
               showsHorizontalScrollIndicator={false}
@@ -364,28 +370,29 @@ const HomeScreen = ({ navigation }) => {
             </ScrollView>
           </View>
           
-          {/* 产品列表 */}
+          {/* 产品列表 - 响应式布局 */}
           <View style={styles.productListContainer}>
             {isLoading ? (
               <View style={styles.loadingContainer}>
                 <Text>加载中...</Text>
               </View>
-            ) : searchProducts().length > 0 ? (
-              searchProducts().map(item => (
-                <TouchableOpacity 
-                  key={item.id} 
-                  style={styles.productItemContainer}
-                  onPress={() => navigateToProductDetail(item.id)}
-                  activeOpacity={0.7}
-                >
-                  {renderProductItem({item})}
-                </TouchableOpacity>
-              ))
-            ) : (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>暂无产品</Text>
-              </View>
-            )}
+            ) : (() => {
+              const filteredProducts = searchProducts();
+              return filteredProducts.length > 0 ? (
+                filteredProducts.map(item => (
+                  <View 
+                    key={item.id} 
+                    style={styles.productItemContainer}
+                  >
+                    {renderProductItem({item})}
+                  </View>
+                ))
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>暂无产品</Text>
+                </View>
+              );
+            })()}
           </View>
         </ScrollView>
       </LinearGradient>
@@ -403,151 +410,44 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   searchContainer: {
-    paddingHorizontal: theme.SPACING.sm,
-    paddingTop: theme.SPACING.sm,
+    paddingHorizontal: theme.SPACING.md,
+    paddingTop: theme.SPACING.md,
     paddingBottom: theme.SPACING.xs,
+    backgroundColor: 'transparent',
+    zIndex: 10,
   },
   searchBarContainer: {
     backgroundColor: 'transparent',
     borderTopWidth: 0,
     borderBottomWidth: 0,
     paddingHorizontal: 0,
-    marginBottom: theme.SPACING.xs
+    marginBottom: theme.SPACING.sm
   },
   searchBarInputContainer: {
     backgroundColor: theme.COLORS.white,
-    height: 40,
+    height: 46,
     borderRadius: theme.BORDER_RADIUS.md,
     borderWidth: 0.5,
-    borderColor: theme.COLORS.primaryLight
+    borderColor: theme.COLORS.primaryLight,
+    ...theme.SHADOWS.sm
   },
-  filterContainer: {
-    marginVertical: theme.SPACING.sm,
-    paddingHorizontal: theme.SPACING.md,
-  },
-  filterScrollContent: {
-    paddingVertical: theme.SPACING.sm,
-  },
-  filterButton: {
-    paddingHorizontal: theme.SPACING.md,
-    paddingVertical: theme.SPACING.xs,
-    marginRight: theme.SPACING.sm,
-    borderRadius: theme.BORDER_RADIUS.xl,
-    borderWidth: 1,
-    minWidth: 70,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  filterButtonActive: {
-    backgroundColor: theme.COLORS.primary,
-    borderColor: theme.COLORS.primary,
-  },
-  filterButtonInactive: {
-    backgroundColor: 'transparent',
-    borderColor: theme.COLORS.border,
-  },
-  filterButtonText: {
-    fontSize: theme.FONT_SIZES.sm,
-    fontWeight: theme.FONT_WEIGHTS.medium,
-  },
-  filterButtonTextActive: {
-    color: theme.COLORS.white,
-  },
-  filterButtonTextInactive: {
-    color: theme.COLORS.textLight,
-  },
-  filterChip: {
-    marginRight: theme.SPACING.sm,
-    borderRadius: theme.BORDER_RADIUS.lg,
-    borderWidth: 1,
-    borderColor: theme.COLORS.primary,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingVertical: theme.SPACING.md,
-    paddingBottom: theme.SPACING.xxxl, // 确保底部有足够空间
-    width: '100%'
-  },
-  section: {
-    marginBottom: theme.SPACING.lg,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: theme.SPACING.md,
-    marginBottom: theme.SPACING.sm,
-  },
-  sectionTitle: {
-    fontSize: theme.FONT_SIZES.lg,
-    fontWeight: theme.FONT_WEIGHTS.bold,
-    color: theme.COLORS.textDark,
-    letterSpacing: 0.5,
-  },
-  viewAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  viewAllText: {
-    fontSize: theme.FONT_SIZES.sm,
-    color: theme.COLORS.primary,
-    marginRight: 2,
-  },
-  productsList: {
-    paddingHorizontal: theme.SPACING.md,
-  },
-  productItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: theme.COLORS.white,
-    borderRadius: theme.BORDER_RADIUS.md,
-    marginBottom: theme.SPACING.sm,
-    padding: theme.SPACING.md,
-    ...theme.SHADOWS.sm,
-  },
-  productContent: {
-    flex: 1,
-  },
-  productName: {
-    fontSize: theme.FONT_SIZES.md,
-    fontWeight: theme.FONT_WEIGHTS.semibold,
-    color: theme.COLORS.textDark,
-    marginBottom: theme.SPACING.xs,
-  },
-  productInfoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: theme.SPACING.xs,
-  },
-  productInfoItem: {
-    flex: 1,
-  },
-  infoLabel: {
-    fontSize: theme.FONT_SIZES.xs,
-    color: theme.COLORS.textLight,
-    marginBottom: 2,
-  },
-  infoValue: {
-    fontSize: theme.FONT_SIZES.sm,
-    fontWeight: theme.FONT_WEIGHTS.medium,
-    color: theme.COLORS.text,
-  },
-  bottomPadding: {
-    height: 60, // 底部导航栏的高度
-  },
+  // 轮播图样式优化
   bannerContainer: {
     height: 180,
     marginBottom: theme.SPACING.md,
+    marginHorizontal: theme.SPACING.md,
+    borderRadius: theme.BORDER_RADIUS.lg,
+    overflow: 'hidden',
+    ...theme.SHADOWS.sm,
   },
   bannerItem: {
     height: 180,
+    borderRadius: theme.BORDER_RADIUS.lg,
+    overflow: 'hidden',
   },
   bannerGradient: {
     flex: 1,
-    borderRadius: theme.BORDER_RADIUS.md,
+    borderRadius: theme.BORDER_RADIUS.lg,
     padding: theme.SPACING.md,
   },
   bannerContent: {
@@ -562,12 +462,14 @@ const styles = StyleSheet.create({
     fontSize: theme.FONT_SIZES.xl,
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.white,
-    marginBottom: theme.SPACING.xs,
+    marginBottom: theme.SPACING.sm,
+    letterSpacing: 0.5,
   },
   bannerSubtitle: {
     fontSize: theme.FONT_SIZES.md,
     color: theme.COLORS.white,
-    marginBottom: theme.SPACING.md,
+    marginBottom: theme.SPACING.lg,
+    letterSpacing: 0.3,
   },
   bannerButton: {
     backgroundColor: theme.COLORS.white,
@@ -575,6 +477,7 @@ const styles = StyleSheet.create({
     paddingVertical: theme.SPACING.xs,
     paddingHorizontal: theme.SPACING.md,
     alignSelf: 'flex-start',
+    ...theme.SHADOWS.xs,
   },
   bannerButtonText: {
     color: theme.COLORS.primary,
@@ -601,29 +504,31 @@ const styles = StyleSheet.create({
   },
   bannerDotActive: {
     backgroundColor: theme.COLORS.white,
+    width: 16, // 活动指示器宽度增加
+    borderRadius: 4,
   },
+  // 热门推荐样式优化
   recommendSection: {
-    marginVertical: theme.SPACING.md,
+    marginVertical: theme.SPACING.sm,
     paddingHorizontal: theme.SPACING.md,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.SPACING.sm,
+    marginBottom: theme.SPACING.xs,
+  },
+  sectionTitle: {
+    fontSize: theme.FONT_SIZES.lg,
+    fontWeight: theme.FONT_WEIGHTS.bold,
+    color: theme.COLORS.textDark,
+    letterSpacing: 0.5,
   },
   viewMoreButton: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  viewMoreButtonRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: theme.SPACING.sm,
-    marginTop: theme.SPACING.xs,
-    backgroundColor: theme.COLORS.backgroundLight,
-    borderRadius: theme.BORDER_RADIUS.md,
+    paddingVertical: theme.SPACING.xxs,
+    paddingHorizontal: theme.SPACING.xs,
   },
   viewMoreText: {
     fontSize: theme.FONT_SIZES.sm,
@@ -631,130 +536,203 @@ const styles = StyleSheet.create({
     marginRight: theme.SPACING.xxs,
   },
   recommendScrollContent: {
-    paddingVertical: theme.SPACING.sm,
-    paddingRight: theme.SPACING.md,
-    paddingLeft: theme.SPACING.xs,
+    paddingVertical: theme.SPACING.xs,
   },
   recommendCard: {
-    width: 160,
-    height: 180,
-    marginRight: theme.SPACING.md,
+    width: 140,
+    height: 140, // 减小高度，使卡片更紧凑
+    marginRight: theme.SPACING.sm, // 减小右边距
     borderRadius: theme.BORDER_RADIUS.md,
     overflow: 'hidden',
     ...theme.SHADOWS.sm,
+    elevation: 2,
   },
   recommendCardGradient: {
     flex: 1,
-    padding: theme.SPACING.md,
+    padding: theme.SPACING.xs, // 减小内边距，使内容更紧凑
     justifyContent: 'space-between',
   },
   recommendProductName: {
-    fontSize: theme.FONT_SIZES.md,
+    fontSize: theme.FONT_SIZES.sm,
     fontWeight: theme.FONT_WEIGHTS.semibold,
     color: theme.COLORS.textDark,
-    marginBottom: theme.SPACING.md,
+    marginBottom: theme.SPACING.xxs, // 减小底部间距
   },
   recommendReturn: {
-    fontSize: theme.FONT_SIZES.xl,
+    fontSize: theme.FONT_SIZES.md, // 减小字体大小
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.success,
-    marginBottom: theme.SPACING.xxs,
+    marginBottom: 0, // 移除底部间距
   },
   recommendLabel: {
     fontSize: theme.FONT_SIZES.xs,
     color: theme.COLORS.textLight,
-    marginBottom: theme.SPACING.md,
+    marginBottom: theme.SPACING.xs, // 减小底部间距
   },
   recommendFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: theme.SPACING.xxs, // 添加顶部间距
   },
   recommendTerm: {
     fontSize: theme.FONT_SIZES.xs,
     color: theme.COLORS.textLight,
   },
   recommendRiskBadge: {
-    borderRadius: theme.BORDER_RADIUS.sm,
-    paddingHorizontal: theme.SPACING.xs,
+    borderRadius: theme.BORDER_RADIUS.xs,
+    paddingHorizontal: theme.SPACING.xxs,
+    height: 16,
   },
   recommendRiskText: {
-    fontSize: theme.FONT_SIZES.xxs,
+    fontSize: 8, // 更小的字体
     fontWeight: theme.FONT_WEIGHTS.medium,
   },
+  // 筛选区域样式优化
+  filterContainer: {
+    marginVertical: 0,
+    paddingHorizontal: theme.SPACING.md,
+    backgroundColor: theme.COLORS.backgroundLight,
+    paddingTop: theme.SPACING.sm,
+    paddingBottom: theme.SPACING.md,
+    marginHorizontal: theme.SPACING.md,
+    borderRadius: theme.BORDER_RADIUS.md,
+    ...theme.SHADOWS.xs,
+  },
+  filterScrollContent: {
+    paddingVertical: theme.SPACING.sm,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  filterButton: {
+    paddingHorizontal: theme.SPACING.md,
+    paddingVertical: theme.SPACING.sm,
+    marginRight: 0,
+    marginBottom: theme.SPACING.sm,
+    borderRadius: 0,
+    borderWidth: 1,
+    minWidth: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...theme.SHADOWS.xs,
+  },
+  filterButtonActive: {
+    backgroundColor: theme.COLORS.primary,
+    borderColor: theme.COLORS.primary,
+  },
+  filterButtonInactive: {
+    backgroundColor: theme.COLORS.white,
+    borderColor: theme.COLORS.border,
+  },
+  filterButtonText: {
+    fontSize: theme.FONT_SIZES.sm,
+    fontWeight: theme.FONT_WEIGHTS.medium,
+  },
+  filterButtonTextActive: {
+    color: theme.COLORS.white,
+  },
+  filterButtonTextInactive: {
+    color: theme.COLORS.textLight,
+  },
+  // 产品列表样式优化 - 响应式布局
   productListContainer: {
     paddingHorizontal: theme.SPACING.md,
     paddingBottom: theme.SPACING.xxxl,
+    marginTop: 0, // 移除顶部间距
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   productItemContainer: {
-    marginBottom: theme.SPACING.md,
+    marginBottom: theme.SPACING.md, // 底部间距
+    width: '48%', // 响应式宽度，两列布局
   },
   productCard: {
     borderRadius: theme.BORDER_RADIUS.md,
     overflow: 'hidden',
     ...theme.SHADOWS.sm,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: theme.COLORS.borderLight,
+    height: '100%', // 确保卡片高度一致
   },
   productCardGradient: {
-    padding: theme.SPACING.sm, // 减小内边距从md到sm
+    padding: theme.SPACING.xs, // 减小内边距
   },
   productCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.SPACING.xs, // 减小底部间距从sm到xs
+    marginBottom: theme.SPACING.xxs, // 减小底部间距
+    paddingBottom: theme.SPACING.xxs,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.COLORS.borderLight,
   },
   productCardBody: {
-    marginBottom: theme.SPACING.sm, // 减小底部间距从md到sm
+    marginVertical: theme.SPACING.xxs, // 减小上下间距
   },
-  productCardFooter: {
-    alignItems: 'center',
+  productInfoItem: {
+    width: '100%',
+    marginBottom: theme.SPACING.xxs, // 减小底部间距
   },
-  riskBadge: {
-    borderRadius: theme.BORDER_RADIUS.sm,
-    paddingHorizontal: theme.SPACING.xs, // 减小水平内边距从sm到xs
+  productInfoRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: theme.SPACING.xxs, // 减小顶部间距
   },
-  riskBadgeText: {
-    fontSize: theme.FONT_SIZES.xxs, // 减小字体大小从xs到xxs
+  infoLabel: {
+    fontSize: theme.FONT_SIZES.xs,
+    color: theme.COLORS.textLight,
+    marginBottom: 2, // 极小的底部间距
+  },
+  infoValue: {
+    fontSize: theme.FONT_SIZES.sm,
+    color: theme.COLORS.textDark,
     fontWeight: theme.FONT_WEIGHTS.medium,
   },
   productName: {
     fontSize: theme.FONT_SIZES.md,
     fontWeight: theme.FONT_WEIGHTS.semibold,
     color: theme.COLORS.textDark,
-    marginBottom: 0, // 移除底部间距
-  },
-  productInfoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: theme.SPACING.xxs, // 减小顶部间距从xs到xxs
-  },
-  productInfoItem: {
     flex: 1,
+    marginRight: theme.SPACING.xs,
   },
-  infoLabel: {
-    fontSize: theme.FONT_SIZES.xxs, // 减小字体大小从xs到xxs
-    color: theme.COLORS.textLight,
-    marginBottom: 1, // 减小底部间距从2到1
+  productCardFooter: {
+    alignItems: 'flex-end',
+    marginTop: theme.SPACING.xxs, // 添加顶部间距
+    paddingTop: theme.SPACING.xxs,
+    borderTopWidth: 1,
+    borderTopColor: theme.COLORS.borderLight,
   },
-  infoValue: {
-    fontSize: theme.FONT_SIZES.sm,
+  riskBadge: {
+    borderRadius: theme.BORDER_RADIUS.xs,
+    paddingHorizontal: theme.SPACING.xs,
+    height: 20,
+  },
+  riskBadgeText: {
+    fontSize: 10,
     fontWeight: theme.FONT_WEIGHTS.medium,
-    color: theme.COLORS.text,
   },
   returnValue: {
     color: theme.COLORS.success,
-    fontSize: theme.FONT_SIZES.md, // 减小字体大小从lg到md
+    fontSize: theme.FONT_SIZES.lg,
     fontWeight: theme.FONT_WEIGHTS.bold,
   },
   investButton: {
     backgroundColor: theme.COLORS.primary,
-    borderRadius: theme.BORDER_RADIUS.md,
-    paddingVertical: theme.SPACING.xs, // 减小垂直内边距从sm到xs
-    paddingHorizontal: theme.SPACING.md, // 减小水平内边距从lg到md
+    borderRadius: theme.BORDER_RADIUS.sm,
+    paddingVertical: theme.SPACING.xs,
+    paddingHorizontal: theme.SPACING.md,
+    ...theme.SHADOWS.xs,
+    elevation: 1,
   },
   investButtonText: {
-    fontSize: theme.FONT_SIZES.sm, // 减小字体大小从md到sm
-    fontWeight: theme.FONT_WEIGHTS.medium,
+    fontSize: theme.FONT_SIZES.sm,
+    fontWeight: theme.FONT_WEIGHTS.semibold,
+    letterSpacing: 0.3,
   },
   loadingContainer: {
     padding: theme.SPACING.xl,
@@ -763,6 +741,9 @@ const styles = StyleSheet.create({
   emptyContainer: {
     padding: theme.SPACING.xl,
     alignItems: 'center',
+    backgroundColor: theme.COLORS.backgroundLight,
+    borderRadius: theme.BORDER_RADIUS.md,
+    marginTop: theme.SPACING.md,
   },
   emptyText: {
     fontSize: theme.FONT_SIZES.md,
