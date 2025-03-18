@@ -6,8 +6,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import theme from '../utils/theme';
 import { Text, Button, Avatar, ListItem, Icon, Divider } from '@rneui/themed';
 import { useAuthStore } from '../store/authStore';
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const ProfileScreen = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
   const { user, logout } = useAuthStore();
   const scrollY = React.useRef(new Animated.Value(0)).current;
   
@@ -79,6 +80,7 @@ const ProfileScreen = ({ navigation }) => {
   };
   
   return (
+  <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       
@@ -192,6 +194,7 @@ const ProfileScreen = ({ navigation }) => {
         </ScrollView>
       </LinearGradient>
     </View>
+    </SafeAreaView>
   );
 };
 

@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, KeyboardAvoidingView, Platform, ScrollView, Animated, Dimensions, ImageBackground, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, KeyboardAvoidingView, Platform, ScrollView, Animated, SafeAreaView, ImageBackground, useWindowDimensions } from 'react-native';
 import { Text, Input, Button, Icon, Card } from '@rneui/themed';
 import { useAuthStore } from '../store/authStore';
 import { ErrorModal } from '../components';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // 导入统一主题和验证工具
 import theme from '../utils/theme';
 import { isNotEmpty } from '../utils/validation';
 
 const LoginScreen = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
   // 使用useWindowDimensions钩子获取当前窗口尺寸，实现响应式布局
   const { width, height } = useWindowDimensions();
   const [username, setUsername] = useState('');
@@ -91,6 +93,7 @@ const LoginScreen = ({ navigation }) => {
   };
   
   return (
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
     <ImageBackground 
       source={require('../../assets/splash-icon.png')} 
       style={styles.backgroundImage}
@@ -198,6 +201,7 @@ const LoginScreen = ({ navigation }) => {
         </KeyboardAvoidingView>
       </LinearGradient>
       </ImageBackground>
+      </SafeAreaView>
     );
 };
 

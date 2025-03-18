@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ScrollView, RefreshControl, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, View, SafeAreaView, RefreshControl, TouchableOpacity, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 // 导入统一主题
@@ -7,8 +7,9 @@ import theme from '../utils/theme';
 import { Text, Icon, ListItem, Divider } from '@rneui/themed';
 import { useForumStore } from '../store/forumStore';
 import { useAuthStore } from '../store/authStore';
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const ForumScreen = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
   const { categories, fetchCategories, isLoading } = useForumStore();
   const { user } = useAuthStore();
@@ -67,6 +68,7 @@ const ForumScreen = ({ navigation }) => {
   );
   
   return (
+  <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
     <View style={styles.container}>
       <LinearGradient
         colors={theme.GRADIENTS.background}
@@ -102,6 +104,7 @@ const ForumScreen = ({ navigation }) => {
         <Icon name="add" type="material" color="#fff" size={30} />
       </TouchableOpacity>
     </View>
+    </SafeAreaView>
   );
 };
 

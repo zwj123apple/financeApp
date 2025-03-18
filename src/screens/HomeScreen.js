@@ -1,15 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, View, ScrollView, RefreshControl, FlatList, useWindowDimensions, TouchableOpacity, Animated, Image } from 'react-native';
+import { StyleSheet, View, ScrollView, RefreshControl, SafeAreaView, useWindowDimensions, TouchableOpacity, Animated, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text, Button, Icon, SearchBar, Chip, Card, Badge, Divider } from '@rneui/themed';
 import { useProductStore } from '../store/productStore';
 import { useAuthStore } from '../store/authStore';
 import { getRecommendedProducts } from '../services/recommendService';
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // 导入统一主题
 import theme from '../utils/theme';
 
 const HomeScreen = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
   // 使用useWindowDimensions钩子获取当前窗口尺寸，实现响应式布局
   const { width, height } = useWindowDimensions();
   const [refreshing, setRefreshing] = useState(false);
@@ -237,6 +238,7 @@ const HomeScreen = ({ navigation }) => {
   };
   
   return (
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
     <View style={styles.container}>
       <LinearGradient
         colors={theme.GRADIENTS.background}
@@ -397,6 +399,7 @@ const HomeScreen = ({ navigation }) => {
         </ScrollView>
       </LinearGradient>
     </View>
+    </SafeAreaView>
   );
 };
 
