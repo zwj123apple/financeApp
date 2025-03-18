@@ -49,7 +49,7 @@ const mobileStorage = {
   // 保存数据
   async setItem(key, value) {
     try {
-      await Keychain.setGenericPassword(key, value, { service: key });
+      await Keychain.setGenericPassword(key, value);
       return true;
     } catch (error) {
       console.error(`保存${key}失败:`, error);
@@ -60,7 +60,7 @@ const mobileStorage = {
   // 获取数据
   async getItem(key) {
     try {
-      const credentials = await Keychain.getGenericPassword({ service: key });
+      const credentials = await Keychain.getGenericPassword();
       return credentials ? credentials.password : null;
     } catch (error) {
       console.error(`获取${key}失败:`, error);
@@ -71,7 +71,7 @@ const mobileStorage = {
   // 删除数据
   async removeItem(key) {
     try {
-      await Keychain.resetGenericPassword({ service: key });
+      await Keychain.resetGenericPassword();
       return true;
     } catch (error) {
       console.error(`删除${key}失败:`, error);

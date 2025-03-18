@@ -20,7 +20,7 @@ const mockRecommendedProducts = [
   {
     id: 3,
     name: '进取增利365天',
-    riskLevel: '中高风险',
+    riskLevel: '高风险',
     expectedReturn: '7.5%',
     investmentTerm: '365天',
     minInvestment: 10000,

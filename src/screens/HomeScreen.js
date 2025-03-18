@@ -7,7 +7,7 @@ import { useAuthStore } from '../store/authStore';
 import { getRecommendedProducts } from '../services/recommendService';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // 导入统一主题
-import theme from '../utils/theme';
+import theme, { getResponsiveSize } from '../utils/theme';
 
 const HomeScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -71,7 +71,7 @@ const HomeScreen = ({ navigation }) => {
   };
   
   // 风险等级选项
-  const riskLevels = ['全部', '低风险', '中风险', '中高风险', '高风险'];
+  const riskLevels = ['全部', '低风险', '中风险', '高风险'];
   
   // 初始加载数据
   useEffect(() => {
@@ -129,8 +129,6 @@ const HomeScreen = ({ navigation }) => {
     let riskColor = theme.COLORS.success;
     if (item.riskLevel === '中风险') {
       riskColor = theme.COLORS.warning;
-    } else if (item.riskLevel === '中高风险') {
-      riskColor = theme.COLORS.accent;
     } else if (item.riskLevel === '高风险') {
       riskColor = theme.COLORS.error;
     }
@@ -203,8 +201,8 @@ const HomeScreen = ({ navigation }) => {
   // 渲染轮播项
   const renderBannerItem = (item, index) => {
     // 根据屏幕宽度计算响应式样式
-    const titleSize = width < 380 ? theme.FONT_SIZES.lg : width < 768 ? theme.FONT_SIZES.xl : theme.FONT_SIZES.xxl;
-    const subtitleSize = width < 380 ? theme.FONT_SIZES.sm : width < 768 ? theme.FONT_SIZES.md : theme.FONT_SIZES.lg;
+    const titleSize = getResponsiveSize(theme.FONT_SIZES.lg, theme.FONT_SIZES.xl, theme.FONT_SIZES.xxl);
+    const subtitleSize =  getResponsiveSize(theme.FONT_SIZES.sm, theme.FONT_SIZES.md,  theme.FONT_SIZES.lg);
     const buttonPadding = width < 380 ? theme.SPACING.xxs : theme.SPACING.xs;
     
     return (
@@ -212,6 +210,7 @@ const HomeScreen = ({ navigation }) => {
         style={[styles.bannerItem, {width}]}
         onPress={() => navigateToProductDetail(item.id)}
         activeOpacity={0.9}
+        key={item.id}
       >
         <LinearGradient
           colors={[item.backgroundColor, `${item.backgroundColor}99`]}
@@ -323,7 +322,6 @@ const HomeScreen = ({ navigation }) => {
                           backgroundColor: 
                             item.riskLevel === '低风险' ? theme.COLORS.success :
                             item.riskLevel === '中风险' ? theme.COLORS.warning :
-                            item.riskLevel === '中高风险' ? theme.COLORS.accent :
                             theme.COLORS.error
                         }]}
                         textStyle={styles.recommendRiskText}
@@ -414,7 +412,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     paddingHorizontal: theme.SPACING.md,
-    paddingTop: theme.SPACING.md,
+    paddingTop: theme.SPACING.xs,
     paddingBottom: theme.SPACING.xs,
     backgroundColor: 'transparent',
     zIndex: 10,
@@ -424,15 +422,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderBottomWidth: 0,
     paddingHorizontal: 0,
-    marginBottom: theme.SPACING.sm
+    marginBottom: theme.SPACING.sm,
   },
   searchBarInputContainer: {
     backgroundColor: theme.COLORS.white,
-    height: 46,
+    height: 44,
     borderRadius: theme.BORDER_RADIUS.md,
     borderWidth: 0.5,
     borderColor: theme.COLORS.primaryLight,
-    ...theme.SHADOWS.sm
+    ...theme.SHADOWS.sm,
   },
   // 轮播图样式优化
   bannerContainer: {
@@ -540,11 +538,12 @@ const styles = StyleSheet.create({
   },
   recommendScrollContent: {
     paddingVertical: theme.SPACING.xs,
+    flex:1,
+    justifyContent: 'space-between',
   },
   recommendCard: {
-    width: 140,
-    height: 140, // 减小高度，使卡片更紧凑
-    marginRight: theme.SPACING.sm, // 减小右边距
+    width: 160,
+    height: 120, // 减小高度，使卡片更紧凑
     borderRadius: theme.BORDER_RADIUS.md,
     overflow: 'hidden',
     ...theme.SHADOWS.sm,
@@ -552,7 +551,7 @@ const styles = StyleSheet.create({
   },
   recommendCardGradient: {
     flex: 1,
-    padding: theme.SPACING.xs, // 减小内边距，使内容更紧凑
+    padding: theme.SPACING.md, // 减小内边距，使内容更紧凑
     justifyContent: 'space-between',
   },
   recommendProductName: {
@@ -585,21 +584,17 @@ const styles = StyleSheet.create({
   recommendRiskBadge: {
     borderRadius: theme.BORDER_RADIUS.xs,
     paddingHorizontal: theme.SPACING.xxs,
-    height: 16,
+    height: 20,
   },
   recommendRiskText: {
-    fontSize: 8, // 更小的字体
+    fontSize: 12, // 更小的字体
     fontWeight: theme.FONT_WEIGHTS.medium,
   },
   // 筛选区域样式优化
   filterContainer: {
-    marginVertical: 0,
-    paddingHorizontal: theme.SPACING.md,
-    backgroundColor: theme.COLORS.backgroundLight,
+    marginBottom: theme.SPACING.md,
     paddingTop: theme.SPACING.sm,
-    paddingBottom: theme.SPACING.md,
     marginHorizontal: theme.SPACING.md,
-    borderRadius: theme.BORDER_RADIUS.md,
     ...theme.SHADOWS.xs,
   },
   filterScrollContent: {
@@ -613,7 +608,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.SPACING.md,
     paddingVertical: theme.SPACING.sm,
     marginRight: 0,
-    marginBottom: theme.SPACING.sm,
     borderRadius: 0,
     borderWidth: 1,
     minWidth: 80,
