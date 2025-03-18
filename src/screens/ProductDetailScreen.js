@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ScrollView, RefreshControl, TouchableOpacity, Alert, SafeAreaView, StatusBar, Animated, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, ScrollView, RefreshControl, TouchableOpacity, Alert, SafeAreaView, StatusBar, Animated, useWindowDimensions, KeyboardAvoidingView, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 // 导入统一主题
@@ -133,10 +133,16 @@ const ProductDetailScreen = ({ route, navigation }) => {
     >
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{flex: 1}}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+        >
         <ScrollView 
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.COLORS.primary]} />}
         >
           {/* 产品基本信息区域 - 使用卡片设计 */}
@@ -281,6 +287,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
           
           <View style={styles.bottomPadding} />
         </ScrollView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </LinearGradient>
   );

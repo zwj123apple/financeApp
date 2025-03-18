@@ -96,7 +96,7 @@ const ForumPostScreen = ({ route, navigation }) => {
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidContainer}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
       >
         <ScrollView 
           style={styles.scrollView}
@@ -374,16 +374,16 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     height: 40,
-    paddingHorizontal: 15,
+    paddingHorizontal: 20,
     borderRadius: 20,
     backgroundColor: theme.COLORS.primary
   },
   sendButtonContainer: {
-    minWidth: 70,
+    minWidth: 100,
     height: 40
   },
   bottomPadding: {
-    height: 100 // 增加底部填充高度，为底部评论框和导航栏预留更多空间
+    height: 60 // 增加底部填充高度，为底部评论框和导航栏预留更多空间
   }
 });
 

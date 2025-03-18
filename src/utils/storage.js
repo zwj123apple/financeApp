@@ -44,50 +44,152 @@ const webStorage = {
   }
 };
 
+// 检查Keychain模块是否正确加载
+const isKeychainAvailable = () => {
+  try {
+    // 检查Keychain对象是否存在
+    if (!Keychain) {
+      console.error('Keychain对象不存在');
+      return false;
+    }
+    
+    // 检查NativeModules.RNKeychainManager是否存在
+    const { NativeModules } = require('react-native');
+    if (!NativeModules.RNKeychainManager) {
+      console.error('NativeModules.RNKeychainManager不存在');
+      return false;
+    }
+    
+    // 检查关键方法是否可用
+    if (typeof Keychain.setGenericPassword !== 'function' ||
+        typeof Keychain.getGenericPassword !== 'function' ||
+        typeof Keychain.resetGenericPassword !== 'function') {
+      console.error('Keychain关键方法不可用');
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('检查Keychain可用性时出错:', error);
+    return false;
+  }
+};
+
+// 内存存储作为备用方案
+const memoryStorage = {
+  _data: new Map(),
+  
+  async setItem(key, value) {
+    try {
+      this._data.set(key, value);
+      return true;
+    } catch (error) {
+      console.error(`内存存储保存${key}失败:`, error);
+      return false;
+    }
+  },
+  
+  async getItem(key) {
+    try {
+      return this._data.get(key) || null;
+    } catch (error) {
+      console.error(`内存存储获取${key}失败:`, error);
+      return null;
+    }
+  },
+  
+  async removeItem(key) {
+    try {
+      this._data.delete(key);
+      return true;
+    } catch (error) {
+      console.error(`内存存储删除${key}失败:`, error);
+      return false;
+    }
+  }
+};
+
 // 移动端存储实现 (iOS/Android)
 const mobileStorage = {
   // 保存数据
   async setItem(key, value) {
     try {
-      // 为每个key提供service和account参数，解决iOS上的getGenericPasswordForOptions Null错误
-      await Keychain.setGenericPassword(key, value, {
-        service: 'financeApp',
-        account: key
-      });
-      return true;
+      // 检查Keychain是否可用
+      if (!isKeychainAvailable()) {
+        console.error(`Keychain不可用，使用内存存储保存${key}`);
+        return await memoryStorage.setItem(key, value);
+      }
+      
+      // 使用标准方法
+      try {
+        await Keychain.setGenericPassword(key, value, {
+          service: 'financeApp',
+          account: key
+        });
+        return true;
+      } catch (innerError) {
+        console.warn(`Keychain保存失败，使用内存存储作为备用: ${innerError.message}`);
+        return await memoryStorage.setItem(key, value);
+      }
     } catch (error) {
       console.error(`保存${key}失败:`, error);
-      return false;
+      return await memoryStorage.setItem(key, value);
     }
   },
   
   // 获取数据
   async getItem(key) {
     try {
-      // 为每个key提供service和account参数，解决iOS上的getGenericPasswordForOptions Null错误
-      const credentials = await Keychain.getGenericPassword({
-        service: 'financeApp',
-        account: key
-      });
-      return credentials ? credentials.password : null;
+      // 检查Keychain是否可用
+      if (!isKeychainAvailable()) {
+        console.warn(`Keychain不可用，使用内存存储获取${key}`);
+        return await memoryStorage.getItem(key);
+      }
+      
+      try {
+        // 为每个key提供service和account参数，解决iOS上的getGenericPasswordForOptions Null错误
+        const credentials = await Keychain.getGenericPassword({
+          service: 'financeApp',
+          account: key
+        });
+        return credentials ? credentials.password : null;
+      } catch (innerError) {
+        // 如果Keychain方法失败，使用内存存储
+        console.warn(`获取${key}时Keychain.getGenericPassword失败: ${innerError.message}`);
+        return await memoryStorage.getItem(key);
+      }
     } catch (error) {
       console.error(`获取${key}失败:`, error);
-      return null;
+      return await memoryStorage.getItem(key);
     }
   },
   
   // 删除数据
   async removeItem(key) {
     try {
-      // 为每个key提供service和account参数，解决iOS上的getGenericPasswordForOptions Null错误
-      await Keychain.resetGenericPassword({
-        service: 'financeApp',
-        account: key
-      });
-      return true;
+      // 检查Keychain是否可用
+      if (!isKeychainAvailable()) {
+        console.warn(`Keychain不可用，使用内存存储删除${key}`);
+        return await memoryStorage.removeItem(key);
+      }
+      
+      try {
+        // 为每个key提供service和account参数，解决iOS上的getGenericPasswordForOptions Null错误
+        await Keychain.resetGenericPassword({
+          service: 'financeApp',
+          account: key
+        });
+        // 同时从内存存储中删除
+        await memoryStorage.removeItem(key);
+        return true;
+      } catch (innerError) {
+        // 如果Keychain方法失败，至少从内存存储中删除
+        console.warn(`删除${key}时Keychain.resetGenericPassword失败: ${innerError.message}`);
+        return await memoryStorage.removeItem(key);
+      }
     } catch (error) {
       console.error(`删除${key}失败:`, error);
-      return false;
+      return await memoryStorage.removeItem(key);
     }
   }
 };
@@ -124,8 +226,22 @@ export const saveUserInfo = async (userInfo) => {
 // 从本地存储获取用户信息
 export const getUserInfo = async () => {
   try {
+    // 先尝试从存储中获取数据
     const userInfoString = await storage.getItem(USER_INFO_KEY);
-    return userInfoString ? JSON.parse(userInfoString) : null;
+    
+    // 如果获取到数据，尝试解析
+    if (userInfoString) {
+      try {
+        return JSON.parse(userInfoString);
+      } catch (parseError) {
+        console.error('解析用户信息JSON失败:', parseError);
+        // JSON解析失败，返回null
+        return null;
+      }
+    }
+    
+    // 没有获取到数据，返回null
+    return null;
   } catch (error) {
     console.error('获取用户信息失败:', error);
     return null;

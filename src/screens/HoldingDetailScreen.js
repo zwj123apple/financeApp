@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ScrollView, RefreshControl, Alert, StatusBar, SafeAreaView, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, ScrollView, RefreshControl, Alert, StatusBar, SafeAreaView, useWindowDimensions, KeyboardAvoidingView, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text, Button, Icon, Divider, ListItem, Input } from '@rneui/themed';
 import { useAssetStore } from '../store/assetStore';
@@ -156,10 +156,16 @@ const HoldingDetailScreen = ({ route, navigation }) => {
     >
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       <SafeAreaView style={styles.safeArea}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.container}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+        >
         <ScrollView 
           style={styles.container}
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           {/* 持仓概览部分 */}
@@ -281,6 +287,7 @@ const HoldingDetailScreen = ({ route, navigation }) => {
           {/* 底部填充，确保内容可以滚动到底部导航栏上方 */}
           <View style={styles.bottomPadding} />
         </ScrollView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </LinearGradient>
   );

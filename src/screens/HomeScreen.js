@@ -426,8 +426,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.COLORS.white,
     height: 44,
     borderRadius: theme.BORDER_RADIUS.md,
-    borderWidth: 1, // 增加边框宽度，使其更明显
-    borderColor: theme.COLORS.primaryLight,
+    borderWidth: 2, // 增加边框宽度，使其更明显
+    borderColor: theme.COLORS.primary, // 使用更深的蓝色，增强边框可见性
     ...theme.SHADOWS.sm,
   },
   // 轮播图样式优化
