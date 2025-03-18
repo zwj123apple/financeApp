@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     paddingBottom: theme.SPACING.md,
   },
   headerTitle: {
-    fontSize: theme.FONT_SIZES.xl,
+    fontSize: theme.FONT_SIZES.md,
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.textDark,
   },

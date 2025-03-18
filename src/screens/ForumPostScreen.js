@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ScrollView, RefreshControl, TouchableOpacity, TextInput, Alert, SafeAreaView, StatusBar } from 'react-native';
+import { StyleSheet, View, ScrollView, RefreshControl, TouchableOpacity, TextInput, Alert, SafeAreaView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, Icon, Button, Divider, Avatar } from '@rneui/themed';
 import { useForumStore } from '../store/forumStore';
 import { useAuthStore } from '../store/authStore';
@@ -93,108 +93,117 @@ const ForumPostScreen = ({ route, navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={theme.COLORS.backgroundLight} />
-      <ScrollView 
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoidContainer}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
       >
-        {/* 帖子内容区域 */}
-        <View style={styles.postContainer}>
-          <View style={styles.postHeader}>
-            <View style={styles.userInfo}>
-              <Avatar
-                rounded
-                source={{ uri: currentPost.avatar }}
-                size="medium"
-              />
-              <View style={styles.userTextInfo}>
-                <Text style={styles.username}>{currentPost.username}</Text>
-                <Text style={styles.postDate}>
-                  {new Date(currentPost.createdAt).toLocaleString()}
-                </Text>
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollViewContent}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* 帖子内容区域 */}
+          <View style={styles.postContainer}>
+            <View style={styles.postHeader}>
+              <View style={styles.userInfo}>
+                <Avatar
+                  rounded
+                  source={{ uri: currentPost.avatar }}
+                  size="medium"
+                />
+                <View style={styles.userTextInfo}>
+                  <Text style={styles.username}>{currentPost.username}</Text>
+                  <Text style={styles.postDate}>
+                    {new Date(currentPost.createdAt).toLocaleString()}
+                  </Text>
+                </View>
               </View>
+            </View>
+            
+            <Text style={styles.postTitle}>{currentPost.title}</Text>
+            <Divider style={styles.divider} />
+            
+            <Text style={styles.postContent}>{currentPost.content}</Text>
+            
+            <View style={styles.postActions}>
+              <TouchableOpacity style={styles.actionButton} onPress={handleLikePost}>
+                <Icon name="thumb-up" type="material" size={20} color="#666" />
+                <Text style={styles.actionText}>{currentPost.likesCount} 点赞</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionButton}>
+                <Icon name="comment" type="material" size={20} color="#666" />
+                <Text style={styles.actionText}>{comments.length} 评论</Text>
+              </TouchableOpacity>
             </View>
           </View>
           
-          <Text style={styles.postTitle}>{currentPost.title}</Text>
-          <Divider style={styles.divider} />
-          
-          <Text style={styles.postContent}>{currentPost.content}</Text>
-          
-          <View style={styles.postActions}>
-            <TouchableOpacity style={styles.actionButton} onPress={handleLikePost}>
-              <Icon name="thumb-up" type="material" size={20} color="#666" />
-              <Text style={styles.actionText}>{currentPost.likesCount} 点赞</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
-              <Icon name="comment" type="material" size={20} color="#666" />
-              <Text style={styles.actionText}>{comments.length} 评论</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        
-        {/* 评论列表区域 */}
-        <View style={styles.commentsContainer}>
-          <Text style={styles.commentsTitle}>评论 ({comments.length})</Text>
-          <Divider style={styles.divider} />
-          
-          {comments.length > 0 ? (
-            comments.map((comment, index) => (
-              <View key={index} style={styles.commentItem}>
-                <View style={styles.commentHeader}>
-                  <View style={styles.commentUserInfo}>
-                    <Avatar
-                      rounded
-                      source={{ uri: comment.avatar }}
-                      size="small"
-                    />
-                    <View style={styles.commentUserTextInfo}>
-                      <Text style={styles.commentUsername}>{comment.username}</Text>
-                      <Text style={styles.commentDate}>
-                        {new Date(comment.createdAt).toLocaleString()}
-                      </Text>
+          {/* 评论列表区域 */}
+          <View style={styles.commentsContainer}>
+            <Text style={styles.commentsTitle}>评论 ({comments.length})</Text>
+            <Divider style={styles.divider} />
+            
+            {comments.length > 0 ? (
+              comments.map((comment, index) => (
+                <View key={index} style={styles.commentItem}>
+                  <View style={styles.commentHeader}>
+                    <View style={styles.commentUserInfo}>
+                      <Avatar
+                        rounded
+                        source={{ uri: comment.avatar }}
+                        size="small"
+                      />
+                      <View style={styles.commentUserTextInfo}>
+                        <Text style={styles.commentUsername}>{comment.username}</Text>
+                        <Text style={styles.commentDate}>
+                          {new Date(comment.createdAt).toLocaleString()}
+                        </Text>
+                      </View>
                     </View>
+                    <TouchableOpacity onPress={() => handleLikeComment(comment.id)}>
+                      <View style={styles.commentLike}>
+                        <Icon name="thumb-up" type="material" size={16} color="#666" />
+                        <Text style={styles.commentLikeCount}>{comment.likesCount}</Text>
+                      </View>
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity onPress={() => handleLikeComment(comment.id)}>
-                    <View style={styles.commentLike}>
-                      <Icon name="thumb-up" type="material" size={16} color="#666" />
-                      <Text style={styles.commentLikeCount}>{comment.likesCount}</Text>
-                    </View>
-                  </TouchableOpacity>
+                  
+                  <Text style={styles.commentContent}>{comment.content}</Text>
+                  
+                  {index < comments.length - 1 && <Divider style={styles.commentDivider} />}
                 </View>
-                
-                <Text style={styles.commentContent}>{comment.content}</Text>
-                
-                {index < comments.length - 1 && <Divider style={styles.commentDivider} />}
-              </View>
-            ))
-          ) : (
-            <Text style={styles.emptyText}>暂无评论，快来发表第一条评论吧</Text>
-          )}
-        </View>
+              ))
+            ) : (
+              <Text style={styles.emptyText}>暂无评论，快来发表第一条评论吧</Text>
+            )}
+          </View>
+          
+          {/* 底部填充，确保内容不被底部导航栏和评论框遮挡 */}
+          <View style={styles.bottomPadding} />
+        </ScrollView>
         
-        {/* 底部填充，确保内容不被底部导航栏和评论框遮挡 */}
-        <View style={styles.bottomPadding} />
-      </ScrollView>
-      
-      {/* 评论输入框 */}
-      <View style={styles.commentInputContainer}>
-        <TextInput
-          style={styles.commentInput}
-          placeholder="写下你的评论..."
-          value={commentText}
-          onChangeText={setCommentText}
-          multiline
-        />
-        <Button
-          title="发送"
-          onPress={handleSubmitComment}
-          loading={isLoading}
-          buttonStyle={styles.sendButton}
-        />
-      </View>
+        {/* 评论输入框 */}
+        <View style={styles.commentInputContainer}>
+          <TextInput
+            style={styles.commentInput}
+            placeholder="写下你的评论..."
+            placeholderTextColor={theme.COLORS.placeholder}
+            value={commentText}
+            onChangeText={setCommentText}
+            multiline
+          />
+          <Button
+            title="发送"
+            onPress={handleSubmitComment}
+            loading={isLoading}
+            buttonStyle={styles.sendButton}
+            containerStyle={styles.sendButtonContainer}
+          />
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -208,6 +217,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  keyboardAvoidContainer: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,
@@ -342,10 +354,6 @@ const styles = StyleSheet.create({
     color: theme.COLORS.textLight
   },
   commentInputContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: theme.COLORS.white,
@@ -370,8 +378,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: theme.COLORS.primary
   },
+  sendButtonContainer: {
+    minWidth: 70,
+    height: 40
+  },
   bottomPadding: {
-    height: 80 // 为底部评论框和导航栏预留空间
+    height: 100 // 增加底部填充高度，为底部评论框和导航栏预留更多空间
   }
 });
 

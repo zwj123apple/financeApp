@@ -44,23 +44,7 @@ const AccountSettingsScreen = ({ navigation }) => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       
-      {/* 头部渐变背景 */}
-      <View style={styles.header}>
-        <LinearGradient
-          colors={theme.GRADIENTS.primary}
-          style={styles.headerGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        />
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Icon name="arrow-back" type="material" color={theme.COLORS.white} size={24} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>账户设置</Text>
-      </View>
-      
+    
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardContainer}
@@ -70,22 +54,24 @@ const AccountSettingsScreen = ({ navigation }) => {
           contentContainerStyle={styles.scrollViewContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* 头像区域 - 现代化设计 */}
+          {/* 头像区域 - 水平紧凑设计 */}
           <View style={styles.profileCard}>
             <View style={styles.avatarSection}>
               <View style={styles.avatarWrapper}>
                 <Avatar
                   rounded
-                  size={100}
+                  size={70}
                   source={{ uri: user?.avatar }}
                   containerStyle={styles.avatar}
                 />
                 <TouchableOpacity style={styles.cameraButton}>
-                  <Icon name="camera-alt" type="material" color={theme.COLORS.white} size={20} />
+                  <Icon name="camera-alt" type="material" color={theme.COLORS.white} size={16} />
                 </TouchableOpacity>
               </View>
-              <Text style={styles.avatarName}>{user?.username}</Text>
-              <Text style={styles.avatarEmail}>{user?.email}</Text>
+              <View style={styles.userInfoContainer}>
+                <Text style={styles.avatarName}>{user?.username}</Text>
+                <Text style={styles.avatarEmail}>{user?.email}</Text>
+              </View>
             </View>
           </View>
           
@@ -219,40 +205,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.COLORS.backgroundLight,
   },
-  // 头部样式
-  header: {
-    height: 120,
-    paddingTop: StatusBar.currentHeight || 40,
-    paddingHorizontal: theme.SPACING.md,
-    justifyContent: 'flex-end',
-    paddingBottom: theme.SPACING.md,
-    zIndex: 10,
-  },
-  headerGradient: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  headerTitle: {
-    fontSize: theme.FONT_SIZES.xl,
-    fontWeight: theme.FONT_WEIGHTS.bold,
-    color: theme.COLORS.white,
-    marginTop: theme.SPACING.sm,
-  },
-  backButton: {
-    position: 'absolute',
-    top: StatusBar.currentHeight + 10 || 50,
-    left: theme.SPACING.md,
-    zIndex: 20,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  
   keyboardContainer: {
     flex: 1,
   },
@@ -282,16 +235,18 @@ const styles = StyleSheet.create({
   },
   // 头像区域
   avatarSection: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: theme.SPACING.xl,
+    paddingVertical: theme.SPACING.md,
+    paddingHorizontal: theme.SPACING.md,
     backgroundColor: `${theme.COLORS.primary}10`,
   },
   avatarWrapper: {
     position: 'relative',
-    marginBottom: theme.SPACING.md,
+    marginRight: theme.SPACING.md,
   },
   avatar: {
-    borderWidth: 4,
+    borderWidth: 3,
     borderColor: theme.COLORS.white,
     ...theme.SHADOWS.md,
   },
@@ -300,17 +255,21 @@ const styles = StyleSheet.create({
     bottom: 0,
     right: 0,
     backgroundColor: theme.COLORS.primary,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
     ...theme.SHADOWS.sm,
     borderWidth: 2,
     borderColor: theme.COLORS.white,
   },
+  userInfoContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
   avatarName: {
-    fontSize: theme.FONT_SIZES.lg,
+    fontSize: theme.FONT_SIZES.md,
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.textDark,
     marginBottom: theme.SPACING.xxs,

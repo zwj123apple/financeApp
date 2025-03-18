@@ -82,7 +82,7 @@ const ProfileScreen = ({ navigation }) => {
   return (
   <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       
       <LinearGradient
         colors={theme.GRADIENTS.background}                                 
@@ -94,7 +94,14 @@ const ProfileScreen = ({ navigation }) => {
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
         >
+          {/* 顶部间距 */}
+          <View style={styles.headerSpacing} />
+          
           {/* 用户信息头部 - 现代化设计 */}
           <View style={styles.profileHeaderContainer}>
             <View style={styles.userInfoContainer}>
@@ -247,18 +254,20 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     zIndex: 1,
-    marginTop: theme.SPACING.md, // 顶部间距
   },
   scrollContent: {
-    paddingTop: theme.SPACING.md,
-    paddingBottom: theme.SPACING.xxxl,
     paddingHorizontal: theme.SPACING.md,
+    paddingBottom: theme.SPACING.xxxl,
+  },
+  headerSpacing: {
+    height: theme.SPACING.xl,
   },
   // 现代化用户信息头部样式
   profileHeaderContainer: {
     backgroundColor: theme.COLORS.white,
     borderRadius: theme.BORDER_RADIUS.lg,
     marginBottom: theme.SPACING.lg,
+    marginTop: theme.SPACING.md,
     overflow: 'hidden',
     ...theme.SHADOWS.md,
   },
@@ -266,6 +275,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: theme.SPACING.lg,
+    paddingVertical: theme.SPACING.xl,
     backgroundColor: theme.COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: theme.COLORS.borderLight,

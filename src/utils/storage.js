@@ -49,7 +49,11 @@ const mobileStorage = {
   // 保存数据
   async setItem(key, value) {
     try {
-      await Keychain.setGenericPassword(key, value);
+      // 为每个key提供service和account参数，解决iOS上的getGenericPasswordForOptions Null错误
+      await Keychain.setGenericPassword(key, value, {
+        service: 'financeApp',
+        account: key
+      });
       return true;
     } catch (error) {
       console.error(`保存${key}失败:`, error);
@@ -60,7 +64,11 @@ const mobileStorage = {
   // 获取数据
   async getItem(key) {
     try {
-      const credentials = await Keychain.getGenericPassword();
+      // 为每个key提供service和account参数，解决iOS上的getGenericPasswordForOptions Null错误
+      const credentials = await Keychain.getGenericPassword({
+        service: 'financeApp',
+        account: key
+      });
       return credentials ? credentials.password : null;
     } catch (error) {
       console.error(`获取${key}失败:`, error);
@@ -71,7 +79,11 @@ const mobileStorage = {
   // 删除数据
   async removeItem(key) {
     try {
-      await Keychain.resetGenericPassword();
+      // 为每个key提供service和account参数，解决iOS上的getGenericPasswordForOptions Null错误
+      await Keychain.resetGenericPassword({
+        service: 'financeApp',
+        account: key
+      });
       return true;
     } catch (error) {
       console.error(`删除${key}失败:`, error);

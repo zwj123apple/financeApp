@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
     elevation: 3
   },
   inputOuterContainer: {
-    marginBottom: theme.SPACING.sm, // 减小底部间距
+    marginBottom: theme.SPACING.xs,
     paddingHorizontal: theme.SPACING.xs,
     width: '100%'
   },
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     borderColor: theme.COLORS.primaryLight,
     borderRadius: theme.BORDER_RADIUS.md,
     paddingHorizontal: theme.SPACING.md,
-    height: theme.getResponsiveSize(44, 48, 52), // 减小高度，使其更紧凑
+    height: theme.getResponsiveSize(40, 44, 48),
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     marginVertical: 2,
     ...theme.SHADOWS.sm,
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'web' ? { outline: 'none' } : {})
   },
   buttonContainer: {
-    marginTop: theme.SPACING.md,
+    marginTop: theme.SPACING.sm,
     borderRadius: theme.BORDER_RADIUS.md,
     overflow: 'hidden',
     width: '100%',
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
   },
   registerButton: {
     backgroundColor: theme.COLORS.primary,
-    height: theme.getResponsiveSize(44, 48, 52), // 减小高度，使其更紧凑
+    height: theme.getResponsiveSize(40, 44, 48),
     borderRadius: theme.BORDER_RADIUS.md,
     ...theme.SHADOWS.md,
     elevation: 4
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5
   },
   loginButtonContainer: {
-    marginTop: theme.SPACING.md,
+    marginTop: theme.SPACING.xxs,
     alignSelf: 'center',
     marginBottom: theme.SPACING.md
   },

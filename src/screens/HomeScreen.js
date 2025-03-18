@@ -158,22 +158,18 @@ const HomeScreen = ({ navigation }) => {
           
           <View style={styles.productCardBody}>
             <View style={styles.productInfoRow}>
-              <View style={styles.productInfoItem}>
-                <Text style={styles.infoLabel}>预期收益</Text>
-                <Text style={[styles.infoValue, styles.returnValue, {fontSize: valueFontSize}]}>{item.expectedReturn}</Text>
-              </View>
-              
-              <View style={styles.productInfoItem}>
-                <Text style={styles.infoLabel}>投资期限</Text>
-                <Text style={styles.infoValue}>{item.investmentTerm}</Text>
-              </View>
+              <Text style={styles.infoLabel}>预期收益</Text>
+              <Text style={[styles.infoValue, styles.returnValue, {fontSize: valueFontSize}]}>{item.expectedReturn}</Text>
             </View>
             
             <View style={styles.productInfoRow}>
-              <View style={styles.productInfoItem}>
-                <Text style={styles.infoLabel}>最低投资</Text>
-                <Text style={styles.infoValue}>¥{item.minInvestment}</Text>
-              </View>
+              <Text style={styles.infoLabel}>投资期限</Text>
+              <Text style={styles.infoValue}>{item.investmentTerm}</Text>
+            </View>
+            
+            <View style={styles.productInfoRow}>
+              <Text style={styles.infoLabel}>最低投资</Text>
+              <Text style={styles.infoValue}>¥{item.minInvestment}</Text>
             </View>
           </View>
         </LinearGradient>
@@ -413,7 +409,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     paddingHorizontal: theme.SPACING.md,
     paddingTop: theme.SPACING.xs,
-    paddingBottom: theme.SPACING.xs,
+    paddingBottom: theme.SPACING.md, // 增加底部内边距，确保边框完全显示
     backgroundColor: 'transparent',
     zIndex: 10,
   },
@@ -423,12 +419,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
     paddingHorizontal: 0,
     marginBottom: theme.SPACING.sm,
+    height: 50, // 设置固定高度
+    overflow: 'visible', // 确保边框可见
   },
   searchBarInputContainer: {
     backgroundColor: theme.COLORS.white,
     height: 44,
     borderRadius: theme.BORDER_RADIUS.md,
-    borderWidth: 0.5,
+    borderWidth: 1, // 增加边框宽度，使其更明显
     borderColor: theme.COLORS.primaryLight,
     ...theme.SHADOWS.sm,
   },
@@ -638,13 +636,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.SPACING.md,
     paddingBottom: theme.SPACING.xxxl,
     marginTop: 0, // 移除顶部间距
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: 'column', // 改为列布局，一行一个产品
   },
   productItemContainer: {
     marginBottom: theme.SPACING.md, // 底部间距
-    width: '48%', // 响应式宽度，两列布局
+    width: '100%', // 宽度占满整行
   },
   productCard: {
     borderRadius: theme.BORDER_RADIUS.md,
@@ -653,10 +649,9 @@ const styles = StyleSheet.create({
     elevation: 2,
     borderWidth: 1,
     borderColor: theme.COLORS.borderLight,
-    height: '100%', // 确保卡片高度一致
   },
   productCardGradient: {
-    padding: theme.SPACING.xs, // 减小内边距
+    padding: theme.SPACING.sm, // 适当增加内边距
   },
   productCardHeader: {
     flexDirection: 'row',
@@ -669,21 +664,23 @@ const styles = StyleSheet.create({
   },
   productCardBody: {
     marginVertical: theme.SPACING.xxs, // 减小上下间距
+    flexDirection: 'row', // 改为横向布局
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   productInfoItem: {
-    width: '100%',
     marginBottom: theme.SPACING.xxs, // 减小底部间距
   },
   productInfoRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: theme.SPACING.xxs, // 减小顶部间距
   },
   infoLabel: {
     fontSize: theme.FONT_SIZES.xs,
     color: theme.COLORS.textLight,
-    marginBottom: 2, // 极小的底部间距
+    marginRight: theme.SPACING.xs, // 添加右侧间距
   },
   infoValue: {
     fontSize: theme.FONT_SIZES.sm,
@@ -696,22 +693,6 @@ const styles = StyleSheet.create({
     color: theme.COLORS.textDark,
     flex: 1,
     marginRight: theme.SPACING.xs,
-  },
-  productCardFooter: {
-    alignItems: 'flex-end',
-    marginTop: theme.SPACING.xxs, // 添加顶部间距
-    paddingTop: theme.SPACING.xxs,
-    borderTopWidth: 1,
-    borderTopColor: theme.COLORS.borderLight,
-  },
-  riskBadge: {
-    borderRadius: theme.BORDER_RADIUS.xs,
-    paddingHorizontal: theme.SPACING.xs,
-    height: 20,
-  },
-  riskBadgeText: {
-    fontSize: 10,
-    fontWeight: theme.FONT_WEIGHTS.medium,
   },
   returnValue: {
     color: theme.COLORS.success,

@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     fontSize: theme.FONT_SIZES.md
   },
   inputOuterContainer: {
-    marginBottom: theme.SPACING.md,
+    marginBottom: theme.SPACING.sm,
     paddingHorizontal: theme.SPACING.xs,
     width: '100%'
   },
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
     borderColor: theme.COLORS.primaryLight,
     borderRadius: theme.BORDER_RADIUS.md,
     paddingHorizontal: theme.SPACING.md,
-    height: theme.getResponsiveSize(48, 52, 56),
+    height: theme.getResponsiveSize(44, 48, 52),
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     marginVertical: 2,
     ...theme.SHADOWS.sm,
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'web' ? { outline: 'none' } : {})
   },
   buttonContainer: {
-    marginTop: theme.SPACING.md,
+    marginTop: theme.SPACING.sm,
     borderRadius: theme.BORDER_RADIUS.md,
     overflow: 'hidden',
     width: '100%',
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5
   },
   registerButtonContainer: {
-    marginTop: theme.SPACING.md,
+    marginTop: theme.SPACING.sm,
     marginBottom: theme.SPACING.xs
   },
   registerButtonTitle: {
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
     fontWeight: theme.FONT_WEIGHTS.medium
   },
   forgotPasswordContainer: {
-    marginTop: theme.SPACING.sm,
+    marginTop: theme.SPACING.xs,
     marginBottom: theme.SPACING.xs
   },
   forgotPasswordTitle: {
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   bottomButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: theme.SPACING.md,
+    marginTop: theme.SPACING.xxs,
     alignItems:'center',
     width: '100%'
   }
