@@ -85,7 +85,7 @@ const ProfileScreen = ({ navigation }) => {
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       
       <LinearGradient
-        colors={theme.GRADIENTS.background}                                 
+        colors={[theme.COLORS.backgroundGradientStart, theme.COLORS.backgroundGradientEnd]}
         style={styles.gradientBackground}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
@@ -210,53 +210,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.COLORS.backgroundLight,
   },
-
-  notLoginContainer: {
+  gradientBackground: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: theme.SPACING.xl,
-  },
-  notLoginIconContainer: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: `${theme.COLORS.primary}15`,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: theme.SPACING.md,
-    ...theme.SHADOWS.md,
-  },
-  notLoginText: {
-    fontSize: theme.FONT_SIZES.lg,
-    fontWeight: theme.FONT_WEIGHTS.bold,
-    color: theme.COLORS.textDark,
-    marginTop: theme.SPACING.md,
-  },
-  notLoginSubText: {
-    textAlign: 'center',
-    marginVertical: theme.SPACING.md,
-    color: theme.COLORS.textMuted,
-    fontSize: theme.FONT_SIZES.md,
-  },
-  loginButton: {
-    marginTop: theme.SPACING.md,
-    borderRadius: theme.BORDER_RADIUS.md,
-    backgroundColor: theme.COLORS.primary,
-    paddingVertical: theme.SPACING.sm,
-    minWidth: 150,
-    ...theme.SHADOWS.md,
-  },
-  loginButtonTitle: {
-    fontSize: theme.FONT_SIZES.md,
-    fontWeight: theme.FONT_WEIGHTS.semibold
+    width: '100%',
+    height: '100%',
+    paddingHorizontal: theme.SPACING.sm, // 添加水平内边距
+    paddingTop: theme.SPACING.xs, // 添加顶部内边距
   },
   scrollView: {
     flex: 1,
     zIndex: 1,
   },
   scrollContent: {
-    paddingHorizontal: theme.SPACING.md,
+    paddingHorizontal: theme.SPACING.sm,
     paddingBottom: theme.SPACING.xxxl,
   },
   headerSpacing: {
@@ -265,11 +231,30 @@ const styles = StyleSheet.create({
   // 现代化用户信息头部样式
   profileHeaderContainer: {
     backgroundColor: theme.COLORS.white,
-    borderRadius: theme.BORDER_RADIUS.lg,
+    borderRadius: theme.BORDER_RADIUS.xl, // 增加圆角半径
     marginBottom: theme.SPACING.lg,
     marginTop: theme.SPACING.md,
     overflow: 'hidden',
-    ...theme.SHADOWS.md,
+    ...theme.SHADOWS.lg, // 增强阴影效果
+    marginHorizontal: theme.SPACING.xs, // 添加水平边距
+  },
+  sectionContainer: {
+    backgroundColor: theme.COLORS.white,
+    borderRadius: theme.BORDER_RADIUS.xl, // 增加圆角半径
+    marginBottom: theme.SPACING.lg,
+    ...theme.SHADOWS.lg, // 增强阴影效果
+    overflow: 'hidden',
+    marginHorizontal: theme.SPACING.xs, // 添加水平边距
+  },
+  notLoginContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: theme.SPACING.xl,
+    margin: theme.SPACING.md, // 添加外边距
+    backgroundColor: theme.COLORS.white, // 添加背景色
+    borderRadius: theme.BORDER_RADIUS.xl, // 添加圆角
+    ...theme.SHADOWS.lg, // 添加阴影
   },
   userInfoContainer: {
     flexDirection: 'row',
@@ -355,30 +340,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: theme.SPACING.sm,
   },
+  loginButton: {
+    marginTop: theme.SPACING.md,
+    borderRadius: theme.BORDER_RADIUS.xl, // 增加圆角
+    backgroundColor: theme.COLORS.primary,
+    paddingVertical: theme.SPACING.sm,
+    minWidth: 150,
+    ...theme.SHADOWS.md,
+  },
   listItem: {
     paddingVertical: theme.SPACING.md,
     backgroundColor: theme.COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: theme.COLORS.borderLight,
-  },
-  listItemTitle: {
-    fontSize: theme.FONT_SIZES.md,
-    fontWeight: theme.FONT_WEIGHTS.medium,
-    color: theme.COLORS.text,
-    marginBottom: 2,
-  },
-  listItemSubtitle: {
-    fontSize: theme.FONT_SIZES.sm,
-    color: theme.COLORS.textLight,
+    marginHorizontal: theme.SPACING.xs, // 添加水平内边距
   },
   logoutButtonContainer: {
     marginTop: theme.SPACING.xl,
-    marginHorizontal: theme.SPACING.md,
+    marginHorizontal: theme.SPACING.lg, // 增加水平边距
   },
   logoutButton: {
     borderColor: theme.COLORS.error,
     borderWidth: 1,
-    borderRadius: theme.BORDER_RADIUS.lg,
+    borderRadius: theme.BORDER_RADIUS.xl, // 增加圆角
     paddingVertical: theme.SPACING.md,
     ...theme.SHADOWS.sm,
   },

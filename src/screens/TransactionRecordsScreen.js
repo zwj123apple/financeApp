@@ -72,16 +72,25 @@ const TransactionRecordsScreen = ({ navigation }) => {
       endDate: ''
     };
     setFilters(emptyFilters);
-    fetchTransactions(user.id, emptyFilters);
+    if (user) {
+      fetchTransactions(user.id, emptyFilters);
+    }
     setShowFilters(false);
   };
   
   // 切换筛选类型
   const toggleType = (type) => {
-    setFilters(prev => ({
-      ...prev,
-      type: prev.type === type ? '' : type
-    }));
+    setFilters(prev => {
+      const newFilters = {
+        ...prev,
+        type: prev.type === type ? '' : type
+      };
+      // 立即应用筛选条件
+      if (user) {
+        fetchTransactions(user.id, newFilters);
+      }
+      return newFilters;
+    });
   };
   
   // 计算交易活跃度数据
@@ -181,16 +190,14 @@ const TransactionRecordsScreen = ({ navigation }) => {
             <Text style={styles.sectionTitle}>交易活跃度</Text>
             <Divider style={styles.divider} />
             
-            <View style={styles.chartContainer}>
-              <LineChart
-                data={chartData}
-                title="交易活跃度"
-                height={220}
-                width={width * 0.9}
-                bezier
-                yAxisSuffix="次"
-              />
-            </View>
+            <LineChart
+              data={chartData}
+              title="交易活跃度"
+              height={220}
+              width={width * 0.9}
+              bezier
+              yAxisSuffix="次"
+            />
           </View>
           
           {/* 筛选器和交易记录 */}
@@ -310,7 +317,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flexGrow: 1,
-    paddingHorizontal: theme.SPACING.md,
+    paddingHorizontal: theme.SPACING.sm,
     paddingTop: theme.SPACING.md,
     paddingBottom: theme.SPACING.xl,
   },

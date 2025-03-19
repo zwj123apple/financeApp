@@ -81,17 +81,12 @@ const LineChart = ({
         style={{
           marginVertical: 8,
           borderRadius: 16,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 3,
-          elevation: 3,
           paddingLeft: 10 // 增加左侧间距
         }}
         withInnerLines={false}
         withOuterLines={true}
         withDots={true}
-        withShadow={true}
+        withShadow={false}
       />
     </View>
   );

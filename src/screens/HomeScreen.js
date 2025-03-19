@@ -97,10 +97,10 @@ const HomeScreen = ({ navigation }) => {
   // 筛选产品
   const filterProducts = async (riskLevel) => {
     if (riskLevel === '全部') {
+      // 先重置store中的筛选状态，再获取产品
+      useProductStore.getState().resetFilters();
       // 点击"全部"时重置所有筛选条件
       await fetchProducts({});
-      // 确保重置store中的筛选状态
-      useProductStore.getState().resetFilters();
     } else {
       // 点击其他风险等级时设置对应筛选条件
       await fetchProducts({ riskLevel });
@@ -163,20 +163,24 @@ const HomeScreen = ({ navigation }) => {
             />
           </View>
           
+           <Divider style={styles.productDivider} />
+          
           <View style={styles.productCardBody}>
-            <View style={styles.productInfoRow}>
-              <Text style={styles.infoLabel}>预期收益</Text>
+            <View style={styles.productMainInfo}>
               <Text style={[styles.infoValue, styles.returnValue, {fontSize: valueFontSize}]}>{item.expectedReturn}</Text>
+              <Text style={styles.infoLabel}>预期收益</Text>
             </View>
             
-            <View style={styles.productInfoRow}>
-              <Text style={styles.infoLabel}>投资期限</Text>
-              <Text style={styles.infoValue}>{item.investmentTerm}</Text>
-            </View>
-            
-            <View style={styles.productInfoRow}>
-              <Text style={styles.infoLabel}>最低投资</Text>
-              <Text style={styles.infoValue}>¥{item.minInvestment}</Text>
+            <View style={styles.productSideInfo}>
+              <View style={styles.infoColumn}>
+                <Text style={styles.infoValue}>{item.investmentTerm}</Text>
+                <Text style={styles.infoLabel}>投资期限</Text>
+              </View>
+              
+              <View style={styles.infoColumn}>
+                <Text style={styles.infoValue}>¥{item.minInvestment}</Text>
+                <Text style={styles.infoLabel}>最低投资</Text>
+              </View>
             </View>
           </View>
         </LinearGradient>
@@ -663,41 +667,49 @@ const styles = StyleSheet.create({
     borderColor: theme.COLORS.borderLight,
   },
   productCardGradient: {
-    padding: theme.SPACING.sm, // 适当增加内边距
+    padding: theme.SPACING.md, // 增加内边距使内容更加舒适
   },
   productCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.SPACING.xxs, // 减小底部间距
-    paddingBottom: theme.SPACING.xxs,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.COLORS.borderLight,
+    paddingBottom: theme.SPACING.xs,
+  },
+  productDivider: {
+    marginVertical: theme.SPACING.xs,
+    backgroundColor: theme.COLORS.borderLight,
   },
   productCardBody: {
-    marginVertical: theme.SPACING.xxs, // 减小上下间距
-    flexDirection: 'row', // 改为横向布局
-    flexWrap: 'wrap',
+    flexDirection: 'row', // 横向布局
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    paddingTop: theme.SPACING.xs,
   },
-  productInfoItem: {
-    marginBottom: theme.SPACING.xxs, // 减小底部间距
+  productMainInfo: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
   },
-  productInfoRow: {
+  productSideInfo: {
+    flex: 1,
     flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'flex-start',
+  },
+  infoColumn: {
     alignItems: 'center',
-    marginTop: theme.SPACING.xxs, // 减小顶部间距
+    justifyContent: 'center',
   },
   infoLabel: {
     fontSize: theme.FONT_SIZES.xs,
     color: theme.COLORS.textLight,
-    marginRight: theme.SPACING.xs, // 添加右侧间距
+    marginTop: theme.SPACING.xxs, // 在值的下方添加标签
   },
   infoValue: {
     fontSize: theme.FONT_SIZES.sm,
     color: theme.COLORS.textDark,
     fontWeight: theme.FONT_WEIGHTS.medium,
+    textAlign: 'center',
   },
   productName: {
     fontSize: theme.FONT_SIZES.md,
@@ -708,22 +720,11 @@ const styles = StyleSheet.create({
   },
   returnValue: {
     color: theme.COLORS.success,
-    fontSize: theme.FONT_SIZES.lg,
+    fontSize: theme.FONT_SIZES.xl,
     fontWeight: theme.FONT_WEIGHTS.bold,
+    marginBottom: theme.SPACING.xxs,
   },
-  investButton: {
-    backgroundColor: theme.COLORS.primary,
-    borderRadius: theme.BORDER_RADIUS.sm,
-    paddingVertical: theme.SPACING.xs,
-    paddingHorizontal: theme.SPACING.md,
-    ...theme.SHADOWS.xs,
-    elevation: 1,
-  },
-  investButtonText: {
-    fontSize: theme.FONT_SIZES.sm,
-    fontWeight: theme.FONT_WEIGHTS.semibold,
-    letterSpacing: 0.3,
-  },
+  // 移除了investButton和investButtonText样式
   loadingContainer: {
     padding: theme.SPACING.xl,
     alignItems: 'center',
