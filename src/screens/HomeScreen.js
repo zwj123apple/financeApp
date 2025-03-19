@@ -96,8 +96,15 @@ const HomeScreen = ({ navigation }) => {
   
   // 筛选产品
   const filterProducts = async (riskLevel) => {
-    const filter = riskLevel === '全部' ? {} : { riskLevel };
-    await fetchProducts(filter);
+    if (riskLevel === '全部') {
+      // 点击"全部"时重置所有筛选条件
+      await fetchProducts({});
+      // 确保重置store中的筛选状态
+      useProductStore.getState().resetFilters();
+    } else {
+      // 点击其他风险等级时设置对应筛选条件
+      await fetchProducts({ riskLevel });
+    }
   };
   
   // 搜索产品
@@ -248,7 +255,7 @@ const HomeScreen = ({ navigation }) => {
             containerStyle={styles.searchBarContainer}
             inputContainerStyle={styles.searchBarInputContainer}
             lightTheme
-            round
+            // 移除round属性，它会覆盖底部边框
           />
         </View>
         
@@ -426,9 +433,14 @@ const styles = StyleSheet.create({
     backgroundColor: theme.COLORS.white,
     height: 44,
     borderRadius: theme.BORDER_RADIUS.md,
-    borderWidth: 2, // 增加边框宽度，使其更明显
-    borderColor: theme.COLORS.primary, // 使用更深的蓝色，增强边框可见性
-    ...theme.SHADOWS.sm,
+    borderWidth: 0.5, // 增加边框宽度，确保所有边框都可见
+    borderBottomWidth: 0.5, // 增加底部边框宽度
+    borderColor: theme.COLORS.primaryLight, // 使用更深的蓝色，增强边框可见性
+    shadowColor: 'transparent', // 移除阴影效果，防止它干扰边框显示
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0
   },
   // 轮播图样式优化
   bannerContainer: {

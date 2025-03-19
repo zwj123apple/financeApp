@@ -123,7 +123,7 @@ const HoldingsScreen = ({ navigation }) => {
             containerStyle={styles.searchBarContainer}
             inputContainerStyle={styles.searchBarInputContainer}
             lightTheme
-            round
+            // 移除round属性，它会覆盖底部边框
           />
           
           {/* 持仓列表 */}

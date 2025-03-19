@@ -5,14 +5,18 @@ import { LinearGradient } from 'expo-linear-gradient';
 import theme from '../utils/theme';
 import { useAuthStore } from '../store/authStore';
 import { useTransactionStore } from '../store/transactionStore';
-import { LineChart } from 'react-native-chart-kit';
-import { Dimensions } from 'react-native';
+import { LineChart } from '../components/charts';
+import { Dimensions, useWindowDimensions } from 'react-native';
 
-const screenWidth = Dimensions.get('window').width;
+// 移除静态Dimensions获取方式
+// const screenWidth = Dimensions.get('window').width;
 
 const TransactionRecordsScreen = ({ navigation }) => {
   const { user } = useAuthStore();
   const { transactions, fetchTransactions, transactionFilters, isLoading } = useTransactionStore();
+  
+  // 使用useWindowDimensions钩子获取屏幕尺寸，这样在屏幕旋转或尺寸变化时会自动更新
+  const { width, height } = useWindowDimensions();
   
   // 筛选条件状态
   const [filters, setFilters] = useState({
@@ -180,29 +184,11 @@ const TransactionRecordsScreen = ({ navigation }) => {
             <View style={styles.chartContainer}>
               <LineChart
                 data={chartData}
-                width={screenWidth * 0.85} // 设置图表宽度为屏幕宽度的85%
+                title="交易活跃度"
                 height={220}
-                chartConfig={{
-                  backgroundColor: '#ffffff',
-                  backgroundGradientFrom: '#ffffff',
-                  backgroundGradientTo: '#ffffff',
-                  decimalPlaces: 0,
-                  color: (opacity = 1) => `rgba(32, 137, 220, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                  style: {
-                    borderRadius: 16
-                  },
-                  propsForDots: {
-                    r: '6',
-                    strokeWidth: '2',
-                    stroke: '#2089dc'
-                  }
-                }}
+                width={width * 0.9}
                 bezier
-                style={{
-                  marginVertical: 8,
-                  borderRadius: 16
-                }}
+                yAxisSuffix="次"
               />
             </View>
           </View>
@@ -336,9 +322,11 @@ const styles = StyleSheet.create({
     ...theme.SHADOWS.sm,
   },
   chartContainer: {
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: theme.SPACING.sm,
+    overflow: 'visible', // 允许图表内容溢出，解决图表被覆盖问题
   },
   loginContainer: {
     margin: theme.SPACING.lg,

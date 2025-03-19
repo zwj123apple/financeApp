@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.COLORS.borderLight,
   },
   sectionTitle: {
-    fontSize: theme.FONT_SIZES.lg,
+    fontSize: theme.FONT_SIZES.md,
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.textDark,
     letterSpacing: 0.5,
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   overviewValue: {
-    fontSize: theme.FONT_SIZES.xl,
+    fontSize: theme.FONT_SIZES.md,
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.textDark,
     textAlign: 'center',

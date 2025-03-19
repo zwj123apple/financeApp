@@ -291,8 +291,8 @@ export const getUserHoldings = async (userId) => {
 
 // 获取用户资产汇总
 export const getUserAssetSummary = async (userId) => {
-  // 模拟API请求
-  await delay(900);
+  // 模拟API请求 - 减少延迟时间从900ms到300ms
+  await delay(300);
   
   // 获取用户持仓
   const holdings = await getUserHoldings(userId);

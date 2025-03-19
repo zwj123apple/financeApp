@@ -373,14 +373,17 @@ const styles = StyleSheet.create({
     backgroundColor: theme.COLORS.backgroundLight
   },
   sendButton: {
-    height: 40,
-    paddingHorizontal: 20,
+    height: 44,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: theme.COLORS.primary
+    backgroundColor: theme.COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   sendButtonContainer: {
-    minWidth: 100,
-    height: 40
+    minWidth: 80,
+    height: 44
   },
   bottomPadding: {
     height: 60 // 增加底部填充高度，为底部评论框和导航栏预留更多空间

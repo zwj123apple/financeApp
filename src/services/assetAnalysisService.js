@@ -24,8 +24,8 @@ const generateMockMonthlyProfit = () => {
 
 // 获取月度收益数据
 export const getMonthlyProfitData = async (userId) => {
-  // 模拟API请求
-  await delay(800);
+  // 减少模拟API延迟时间，从800ms减少到300ms
+  await delay(300);
   
   const monthlyProfit = generateMockMonthlyProfit();
   

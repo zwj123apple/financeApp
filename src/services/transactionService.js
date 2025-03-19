@@ -42,13 +42,63 @@ let mockTransactions = [
     amount: 15000,
     date: '2023-06-05',
     status: '已完成'
+  },
+  {
+    id: 5,
+    userId: 1,
+    productId: 1,
+    productName: '稳健理财90天',
+    type: '买入',
+    amount: 3000,
+    date: '2023-01-12',
+    status: '已完成'
+  },
+  {
+    id: 6,
+    userId: 1,
+    productId: 2,
+    productName: '成长优选180天',
+    type: '卖出',
+    amount: 8000,
+    date: '2023-01-25',
+    status: '已完成'
+  },
+  {
+    id: 7,
+    userId: 1,
+    productId: 4,
+    productName: '创新科技基金',
+    type: '买入',
+    amount: 12000,
+    date: '2023-02-08',
+    status: '已完成'
+  },
+  {
+    id: 8,
+    userId: 1,
+    productId: 1,
+    productName: '稳健理财90天',
+    type: '卖出',
+    amount: 3000,
+    date: '2023-02-18',
+    status: '已完成'
+  },
+  {
+    id: 9,
+    userId: 1,
+    productId: 4,
+    productName: '创新科技基金',
+    type: '买入',
+    amount: 5000,
+    date: '2023-06-22',
+    status: '已完成'
   }
 ];
 
 // 获取用户交易记录
 export const getUserTransactions = async (userId, filters = {}) => {
-  // 模拟API请求
-  await delay(800);
+  // 模拟API请求 - 减少延迟时间从800ms到300ms
+  await delay(300);
   
   let transactions = mockTransactions.filter(t => t.userId === userId);
   
@@ -95,14 +145,24 @@ export const getTransactionStats = async (userId) => {
   
   const transactions = await getUserTransactions(userId);
   
-  // 按月份分组交易
+  // 确保生成完整的月度数据（从1月到当前月份）
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1;
+  
+  // 初始化所有月份的数据（从1月到当前月份）
   const transactionsByMonth = {};
+  for (let month = 1; month <= currentMonth; month++) {
+    const monthStr = `${currentYear}-${month.toString().padStart(2, '0')}`;
+    transactionsByMonth[monthStr] = 0;
+  }
+  
+  // 统计实际交易数据
   transactions.forEach(t => {
     const month = t.date.substring(0, 7); // 获取YYYY-MM格式
-    if (!transactionsByMonth[month]) {
-      transactionsByMonth[month] = 0;
+    if (transactionsByMonth[month] !== undefined) {
+      transactionsByMonth[month] += 1;
     }
-    transactionsByMonth[month] += 1;
   });
   
   // 转换为图表数据格式

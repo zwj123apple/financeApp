@@ -60,22 +60,32 @@ const AssetAnalysisScreen = ({ navigation }) => {
   
   const loadData = async () => {
     if (user) {
-      await Promise.all([
-        fetchAssetOverview(user.id),
-        fetchHoldings(user.id),
-        fetchAssetAnalysis(user.id)
-      ]);
+      // 设置加载状态
+      useAssetStore.setState({ isLoading: true });
       
-      // 获取月度收益数据
-      const monthlyProfitResult = await getMonthlyProfitData(user.id);
-      if (monthlyProfitResult.success) {
-        // 更新资产分析数据中的月度收益
-        useAssetStore.setState(state => ({
-          assetAnalysis: {
-            ...state.assetAnalysis,
-            monthlyProfit: monthlyProfitResult.monthlyProfit
-          }
-        }));
+      try {
+        // 使用Promise.all并行加载所有数据，减少总体加载时间
+        const [overviewResult, holdingsResult, analysisResult, monthlyProfitResult] = await Promise.all([
+          fetchAssetOverview(user.id),
+          fetchHoldings(user.id),
+          fetchAssetAnalysis(user.id),
+          getMonthlyProfitData(user.id)
+        ]);
+        
+        // 如果月度收益数据获取成功，立即更新到状态中
+        if (monthlyProfitResult.success) {
+          // 使用函数式更新确保获取最新状态
+          useAssetStore.setState(state => ({
+            assetAnalysis: {
+              ...state.assetAnalysis,
+              monthlyProfit: monthlyProfitResult.monthlyProfit
+            },
+            isLoading: false
+          }));
+        }
+      } catch (error) {
+        console.error('加载资产分析数据失败:', error);
+        useAssetStore.setState({ isLoading: false });
       }
     }
   };
@@ -189,6 +199,22 @@ const AssetAnalysisScreen = ({ navigation }) => {
   };
 
   
+  // 添加加载状态指示器
+  if (isLoading) {
+    return (
+      <LinearGradient
+        colors={theme.GRADIENTS.background}
+        style={styles.gradientContainer}
+      >
+        <SafeAreaView style={styles.container}>
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>加载资产分析数据...</Text>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+    );
+  }
+  
   return (
     <LinearGradient
       colors={theme.GRADIENTS.background}
@@ -291,6 +317,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: theme.SPACING.lg,
+  },
+  loadingText: {
+    fontSize: theme.FONT_SIZES.md,
+    color: theme.COLORS.primary,
+    marginTop: theme.SPACING.md,
   },
   contentContainer: {
     paddingTop: theme.SPACING.sm, // 减小顶部间距

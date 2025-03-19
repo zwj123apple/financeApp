@@ -66,8 +66,8 @@ const generateMockProfitTrend = (userId, months = 6) => {
 
 // 获取用户资产概览
 export const getUserAssetOverview = async (userId) => {
-  // 模拟API请求
-  await delay(800);
+  // 模拟API请求 - 减少延迟时间从800ms到300ms
+  await delay(300);
   
   // 获取用户资产汇总
   const assetSummary = await getUserAssetSummary(userId);
@@ -83,8 +83,8 @@ export const getUserAssetOverview = async (userId) => {
 
 // 获取资产配置建议
 export const getAssetAllocationSuggestion = async (riskPreference = 'moderate') => {
-  // 模拟API请求
-  await delay(600);
+  // 模拟API请求 - 减少延迟时间从600ms到200ms
+  await delay(200);
   
   const suggestion = mockAssetAllocationSuggestions[riskPreference] || mockAssetAllocationSuggestions.moderate;
   
@@ -93,8 +93,8 @@ export const getAssetAllocationSuggestion = async (riskPreference = 'moderate') 
 
 // 获取用户资产分析
 export const getUserAssetAnalysis = async (userId) => {
-  // 模拟API请求
-  await delay(1000);
+  // 模拟API请求 - 减少延迟时间从1000ms到300ms
+  await delay(300);
   
   // 获取用户资产汇总
   const assetSummary = await getUserAssetSummary(userId);

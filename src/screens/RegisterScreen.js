@@ -293,19 +293,22 @@ const styles = StyleSheet.create({
     width: '100%',
     ...theme.SHADOWS.sm,
     elevation: 2,
-    maxWidth: 500
+    maxWidth: 500,
+    minWidth: Platform.OS === 'ios' ? 120 : undefined
   },
   registerButton: {
     backgroundColor: theme.COLORS.primary,
-    height: theme.getResponsiveSize(40, 44, 48),
+    height: theme.getResponsiveSize(44, 48, 52),
     borderRadius: theme.BORDER_RADIUS.md,
+    paddingHorizontal: theme.SPACING.lg, // 增加水平内边距确保文字显示完整
     ...theme.SHADOWS.md,
     elevation: 4
   },
   buttonTitle: {
     fontSize: theme.FONT_SIZES.md,
     fontWeight: theme.FONT_WEIGHTS.bold,
-    letterSpacing: 0.5
+    letterSpacing: 1, // 增加字母间距
+    paddingHorizontal: theme.SPACING.sm // 增加水平内边距
   },
   loginButtonContainer: {
     marginTop: theme.SPACING.xxs,
