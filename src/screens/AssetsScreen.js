@@ -2,20 +2,17 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity, Animated, FlatList, useWindowDimensions, StatusBar, SafeAreaView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text, Button, ListItem, Icon, Divider } from '@rneui/themed';
-import { useAuthStore } from '../store/authStore';
-import { useAssetStore } from '../store/assetStore';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectUser, fetchAssetOverview, fetchHoldings, selectAssetOverview, selectHoldings, selectAssetLoading } from '../store';
 import PieChart from '../components/charts/PieChart';
 import theme from '../utils/theme';
 
 const AssetsScreen = ({ navigation }) => {
-  const { user } = useAuthStore();
-  const { 
-    assetOverview, 
-    holdings, 
-    fetchAssetOverview, 
-    fetchHoldings, 
-    isLoading 
-  } = useAssetStore();
+  const user = useSelector(selectUser);
+  const assetOverview = useSelector(selectAssetOverview);
+  const holdings = useSelector(selectHoldings);
+  const isLoading = useSelector(selectAssetLoading);
+  const dispatch = useDispatch();
   
   // 使用useWindowDimensions钩子获取屏幕尺寸，这样在屏幕旋转或尺寸变化时会自动更新
   const { width, height } = useWindowDimensions();
@@ -23,8 +20,8 @@ const AssetsScreen = ({ navigation }) => {
   // 加载资产数据
   useEffect(() => {
     if (user) {
-      fetchAssetOverview(user.id);
-      fetchHoldings(user.id);
+      dispatch(fetchAssetOverview(user.id));
+      dispatch(fetchHoldings(user.id));
     }
   }, [user]);
   

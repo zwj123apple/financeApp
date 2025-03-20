@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView, Platform, ScrollView, Dimensions, ImageBackground, useWindowDimensions } from 'react-native';
 import { Text, Input, Button, Icon, Card } from '@rneui/themed';
-import { useAuthStore } from '../store/authStore';
+import { useDispatch } from 'react-redux';
+import { resetPassword } from '../store';
 import { ErrorModal } from '../components';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -20,7 +21,8 @@ const ForgotPasswordScreen = ({ navigation }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [error, setError] = useState('');
   
-  const { resetPassword } = useAuthStore();
+  // 使用Redux的useDispatch替代useAuthStore
+  const dispatch = useDispatch();
   
   const handleSendVerificationCode = async () => {
     if (!email) {
@@ -33,7 +35,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
     
     try {
       // 调用发送验证码API
-      await resetPassword.sendResetPasswordCode(email);
+      await dispatch(resetPassword.sendResetPasswordCode(email)).unwrap();
       setIsLoading(false);
       setStep(2);
     } catch (err) {
@@ -53,7 +55,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
     
     try {
       // 调用验证码验证API
-      await resetPassword.verifyResetCode(email, verificationCode);
+      await dispatch(resetPassword.verifyResetCode(email, verificationCode)).unwrap();
       setIsLoading(false);
       setStep(3);
     } catch (err) {
@@ -78,7 +80,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
     
     try {
       // 调用重置密码API
-      const result = await resetPassword.resetPassword(email, newPassword);
+      const result = await dispatch(resetPassword({ email, newPassword })).unwrap();
       setIsLoading(false);
       if (result.success) {
         // 重置成功，跳转到登录页

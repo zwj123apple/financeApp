@@ -3,8 +3,9 @@ import { StyleSheet, View, ScrollView, TouchableOpacity, StatusBar, SafeAreaView
 import { Text, Button, ListItem, Icon, Divider } from '@rneui/themed';
 import { LinearGradient } from 'expo-linear-gradient';
 import theme from '../utils/theme';
-import { useAuthStore } from '../store/authStore';
-import { useTransactionStore } from '../store/transactionStore';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectUser } from '../store';
+import { fetchTransactions, resetTransactionFilters, selectTransactions, selectTransactionLoading, selectTransactionFilters } from '../store';
 import { LineChart } from '../components/charts';
 import { Dimensions, useWindowDimensions } from 'react-native';
 
@@ -12,8 +13,12 @@ import { Dimensions, useWindowDimensions } from 'react-native';
 // const screenWidth = Dimensions.get('window').width;
 
 const TransactionRecordsScreen = ({ navigation }) => {
-  const { user } = useAuthStore();
-  const { transactions, fetchTransactions, transactionFilters, isLoading } = useTransactionStore();
+  // 使用Redux的useSelector替代useAuthStore
+  const user = useSelector(selectUser);
+  const transactions = useSelector(selectTransactions);
+  const isLoading = useSelector(selectTransactionLoading);
+  const transactionFilters = useSelector(selectTransactionFilters);
+  const dispatch = useDispatch();
   
   // 使用useWindowDimensions钩子获取屏幕尺寸，这样在屏幕旋转或尺寸变化时会自动更新
   const { width, height } = useWindowDimensions();
@@ -31,9 +36,9 @@ const TransactionRecordsScreen = ({ navigation }) => {
   // 加载交易记录
   useEffect(() => {
     if (user) {
-      fetchTransactions(user.id);
+      dispatch(fetchTransactions({ userId: user.id }));
     }
-  }, [user]);
+  }, [user, dispatch]);
   
   // 如果用户未登录，显示登录按钮
   if (!user) {
@@ -60,7 +65,7 @@ const TransactionRecordsScreen = ({ navigation }) => {
   
   // 应用筛选条件
   const applyFilters = () => {
-    fetchTransactions(user.id, filters);
+    dispatch(fetchTransactions({ userId: user.id, filters }));
     setShowFilters(false);
   };
   
@@ -73,7 +78,8 @@ const TransactionRecordsScreen = ({ navigation }) => {
     };
     setFilters(emptyFilters);
     if (user) {
-      fetchTransactions(user.id, emptyFilters);
+      dispatch(resetTransactionFilters());
+      dispatch(fetchTransactions({ userId: user.id }));
     }
     setShowFilters(false);
   };
@@ -87,7 +93,7 @@ const TransactionRecordsScreen = ({ navigation }) => {
       };
       // 立即应用筛选条件
       if (user) {
-        fetchTransactions(user.id, newFilters);
+        dispatch(fetchTransactions({ userId: user.id, filters: newFilters }));
       }
       return newFilters;
     });
@@ -495,94 +501,7 @@ const styles = StyleSheet.create({
   bottomPadding: {
     height: 60// 增加底部填充高度，确保内容可以滚动到底部导航栏上方
   },
-  statItem: {
-    alignItems: 'center'
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2089dc'
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 5
-  },
-  filterHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5
-  },
-  filterTitle: {
-    fontSize: 18,
-    fontWeight: 'bold'
-  },
-  filtersContainer: {
-    marginBottom: 15
-  },
-  filterSectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginVertical: 10,
-    marginLeft: 10
-  },
-  typeFilters: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    marginBottom: 15
-  },
-  filterButtonContainer: {
-    marginHorizontal: 5
-  },
-  filterButton: {
-    paddingHorizontal: 15
-  },
-  filterActions: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 10
-  },
-  actionButtonContainer: {
-    marginHorizontal: 5,
-    width: '40%'
-  },
-  applyButton: {
-    borderRadius: 5
-  },
-  resetButton: {
-    borderRadius: 5,
-    borderColor: '#2089dc'
-  },
-  loadingText: {
-    textAlign: 'center',
-    marginVertical: 20,
-    color: '#666'
-  },
-  emptyText: {
-    textAlign: 'center',
-    marginVertical: 20,
-    color: '#666'
-  },
-  transactionTitle: {
-    fontWeight: 'bold'
-  },
-  transactionSubtitle: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 5
-  },
-  transactionAmount: {
-    fontWeight: 'bold',
-    fontSize: 16
-  },
-  buyAmount: {
-    color: '#F44336'
-  },
-  sellAmount: {
-    color: '#4CAF50'
-  }
+
 });
 
 export default TransactionRecordsScreen;

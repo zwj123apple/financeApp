@@ -4,6 +4,7 @@ import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-c
 import { ThemeProvider } from '@rneui/themed';
 import { Platform } from 'react-native';
 import AppNavigator from './src/navigation/AppNavigator';
+import { AppWrapper } from './src/store/AppWrapper';
 
 // 导入主题配置
 import theme from './src/utils/theme';
@@ -23,14 +24,16 @@ const appTheme = {
 
 export default function App() {
   return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <ThemeProvider theme={appTheme}>
-        <AppNavigator />
-        <StatusBar 
-          style="auto" 
-          translucent={Platform.OS === 'ios'}
-        />
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <AppWrapper>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <ThemeProvider theme={appTheme}>
+          <AppNavigator />
+          <StatusBar 
+            style="auto" 
+            translucent={Platform.OS === 'ios'}
+          />
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </AppWrapper>
   );
 }

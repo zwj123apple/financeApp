@@ -5,14 +5,16 @@ import { LinearGradient } from 'expo-linear-gradient';
 // 导入统一主题
 import theme from '../utils/theme';
 import { Text, Icon, ListItem, Divider } from '@rneui/themed';
-import { useForumStore } from '../store/forumStore';
-import { useAuthStore } from '../store/authStore';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectUser, fetchCategories, selectCategories, selectForumLoading } from '../store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const ForumScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
-  const { categories, fetchCategories, isLoading } = useForumStore();
-  const { user } = useAuthStore();
+  const user = useSelector(selectUser);
+  const categories = useSelector(selectCategories);
+  const isLoading = useSelector(selectForumLoading);
+  const dispatch = useDispatch();
   
   // 初始加载数据
   useEffect(() => {
@@ -22,7 +24,7 @@ const ForumScreen = ({ navigation }) => {
   // 加载数据函数
   const loadData = async () => {
     setRefreshing(true);
-    await fetchCategories();
+    await dispatch(fetchCategories());
     setRefreshing(false);
   };
   

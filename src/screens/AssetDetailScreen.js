@@ -2,22 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, Animated, TouchableOpacity, StatusBar, SafeAreaView, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text, Button, Icon, Divider } from '@rneui/themed';
-import { useAssetStore } from '../store/assetStore';
-import { useAuthStore } from '../store/authStore';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchHoldings, fetchAssetOverview, selectHoldings, selectAssetOverview, selectAssetLoading, selectUser } from '../store';
+// 移除 useAuthStore 导入
 import { LineChart, PieChart } from '../components/charts';
 import theme from '../utils/theme';
 
 const AssetDetailScreen = ({ route, navigation }) => {
   const { assetId } = route.params;
   const [refreshing, setRefreshing] = useState(false);
-  const { user } = useAuthStore();
-  const { 
-    holdings, 
-    assetOverview, 
-    fetchHoldings, 
-    fetchAssetOverview, 
-    isLoading 
-  } = useAssetStore();
+  // 使用Redux的useSelector替代useAuthStore
+  const user = useSelector(selectUser);
+  const holdings = useSelector(selectHoldings);
+  const assetOverview = useSelector(selectAssetOverview);
+  const isLoading = useSelector(selectAssetLoading);
+  const dispatch = useDispatch();
   const [currentAsset, setCurrentAsset] = useState(null);
   
   // 使用useWindowDimensions钩子获取屏幕尺寸
@@ -34,16 +33,14 @@ const AssetDetailScreen = ({ route, navigation }) => {
     
     if (user) {
       // 获取资产概览
-      await fetchAssetOverview(user.id);
+      await dispatch(fetchAssetOverview(user.id));
       
       // 获取持仓列表
-      const result = await fetchHoldings(user.id);
+      await dispatch(fetchHoldings(user.id));
       
-      if (result.success) {
-        // 找到当前资产
-        const asset = result.holdings.find(h => h.id === assetId);
-        setCurrentAsset(asset);
-      }
+      // 找到当前资产
+      const asset = holdings.find(h => h.id === assetId);
+      setCurrentAsset(asset);
     }
     
     setRefreshing(false);

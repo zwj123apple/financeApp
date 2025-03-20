@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView, Platform, ScrollView, Animated, SafeAreaView, ImageBackground, useWindowDimensions } from 'react-native';
 import { Text, Input, Button, Icon, Card } from '@rneui/themed';
-import { useAuthStore } from '../store/authStore';
+import { useDispatch } from 'react-redux';
+import { loginUser } from '../store';
 import { ErrorModal } from '../components';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,7 +26,7 @@ const LoginScreen = ({ navigation }) => {
   const fadeAnim = useState(new Animated.Value(0))[0];
   const slideAnim = useState(new Animated.Value(50))[0];
   
-  const { login } = useAuthStore();
+  const dispatch = useDispatch();
   
   useEffect(() => {
     // 启动进入动画
@@ -66,21 +67,29 @@ const LoginScreen = ({ navigation }) => {
     }
     
     setIsLoading(true);
-    const result = await login({ username, password });
-    setIsLoading(false);
-    
-    if (result.success) {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Main' }],
-      });
-    } else if (result.error) {
-      // 后端错误只在密码框下方显示一次
-      if (result.error.includes('用户名或密码错误')) {
-        setPasswordError('用户名或密码错误');
-      } else {
-        setPasswordError(result.error);
+    try {
+      await dispatch(loginUser({ username, password })).unwrap();
+      const result = { success: true };
+      
+      if (result.success) {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        });
       }
+    } catch (error) {
+      const result = { success: false, error: error.message || '登录失败，请重试' };
+      
+      if (result.error) {
+        // 后端错误只在密码框下方显示一次
+        if (result.error.includes('用户名或密码错误')) {
+          setPasswordError('用户名或密码错误');
+        } else {
+          setPasswordError(result.error);
+        }
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
   

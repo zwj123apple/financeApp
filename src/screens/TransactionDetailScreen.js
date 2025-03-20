@@ -1,12 +1,13 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView, StatusBar, SafeAreaView } from 'react-native';
 import { Text, Button, Icon, Divider } from '@rneui/themed';
-import { useTransactionStore } from '../store/transactionStore';
+import { useSelector } from 'react-redux';
+import { selectTransactions } from '../store';
 import theme from '../utils/theme';
 
 const TransactionDetailScreen = ({ route, navigation }) => {
   const { transactionId } = route.params;
-  const { transactions } = useTransactionStore();
+  const transactions = useSelector(selectTransactions);
   
   // 查找对应的交易记录
   const transaction = transactions.find(t => t.id === transactionId);
@@ -16,8 +17,6 @@ const TransactionDetailScreen = ({ route, navigation }) => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.contentContainer}>
-          <Text style={styles.title}>交易详情</Text>
-          <Divider style={styles.divider} />
           <Text style={styles.errorText}>未找到该交易记录</Text>
           <Button
             title="返回"
@@ -34,9 +33,6 @@ const TransactionDetailScreen = ({ route, navigation }) => {
       <StatusBar barStyle="dark-content" backgroundColor={theme.COLORS.backgroundLight} />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.contentContainer}>
-          <Text style={styles.title}>交易详情</Text>
-          <Divider style={styles.divider} />
-          
           <View style={styles.headerContainer}>
             <Icon
               name={transaction.type === '买入' ? 'arrow-downward' : 'arrow-upward'}
@@ -55,7 +51,6 @@ const TransactionDetailScreen = ({ route, navigation }) => {
               {transaction.type === '买入' ? '-' : '+'}{transaction.amount}元
             </Text>
           </View>
-          
           <Divider style={styles.divider} />
           
           <View style={styles.detailContainer}>
@@ -109,9 +104,6 @@ const TransactionDetailScreen = ({ route, navigation }) => {
             buttonStyle={styles.backButton}
             containerStyle={styles.buttonContainer}
           />
-          
-          {/* 添加底部填充，确保内容不被底部导航栏遮挡 */}
-          <View style={styles.bottomPadding} />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -121,109 +113,127 @@ const TransactionDetailScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.COLORS.backgroundLight
+    backgroundColor: theme.COLORS.backgroundLight,
   },
   scrollView: {
-    flex: 1
+    flex: 1,
   },
   scrollViewContent: {
     flexGrow: 1,
-    width: '100%',
-    paddingHorizontal: theme.SPACING.md,
-    paddingTop: theme.SPACING.md,
-    paddingBottom: theme.SPACING.md
+    paddingBottom: theme.SPACING.md,
   },
   contentContainer: {
-    backgroundColor: theme.COLORS.white,
-    borderRadius: theme.BORDER_RADIUS.md,
+    flex: 1,
     padding: theme.SPACING.md,
-    ...theme.SHADOWS.sm
   },
   title: {
-    fontSize: theme.FONT_SIZES.lg,
+    fontSize: theme.FONT_SIZES.xl,
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.textDark,
-    marginBottom: theme.SPACING.xs,
-    textAlign: 'center'
+    marginVertical: theme.SPACING.sm,
+    textAlign: 'center',
   },
   divider: {
-    marginVertical: theme.SPACING.md
-  },
-  errorText: {
-    textAlign: 'center',
-    marginVertical: 20,
-    color: theme.COLORS.error
+    marginVertical: theme.SPACING.sm,
+    backgroundColor: theme.COLORS.borderLight,
+    height: 1,
   },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: theme.SPACING.md
+    justifyContent: 'space-between',
+    backgroundColor: theme.COLORS.cardBackground,
+    borderRadius: theme.BORDER_RADIUS.md,
+    padding: theme.SPACING.md,
+    marginVertical: theme.SPACING.sm,
+    ...theme.SHADOWS.md,
   },
   iconContainer: {
     backgroundColor: theme.COLORS.backgroundLight,
-    padding: 10,
-    borderRadius: 50
+    borderRadius: theme.BORDER_RADIUS.round,
+    padding: theme.SPACING.xs,
+    marginRight: theme.SPACING.md,
   },
   headerInfo: {
     flex: 1,
-    marginLeft: 15
   },
   productName: {
-    fontSize: theme.FONT_SIZES.md,
-    fontWeight: theme.FONT_WEIGHTS.bold
+    fontSize: theme.FONT_SIZES.lg,
+    fontWeight: theme.FONT_WEIGHTS.semibold,
+    color: theme.COLORS.textDark,
+    marginBottom: theme.SPACING.xs,
   },
   transactionType: {
-    fontSize: theme.FONT_SIZES.sm,
+    fontSize: theme.FONT_SIZES.md,
     color: theme.COLORS.textLight,
-    marginTop: 5
   },
   amount: {
-    fontSize: theme.FONT_SIZES.lg,
-    fontWeight: theme.FONT_WEIGHTS.bold
+    fontSize: theme.FONT_SIZES.xl,
+    fontWeight: theme.FONT_WEIGHTS.bold,
   },
   buyAmount: {
-    color: theme.COLORS.error
+    color: theme.COLORS.error,
   },
   sellAmount: {
-    color: theme.COLORS.success
+    color: theme.COLORS.success,
   },
   detailContainer: {
-    marginBottom: theme.SPACING.md
+    backgroundColor: theme.COLORS.cardBackground,
+    borderRadius: theme.BORDER_RADIUS.md,
+    padding: theme.SPACING.md,
+    marginVertical: theme.SPACING.sm,
+    ...theme.SHADOWS.md,
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12
+    alignItems: 'center',
+    paddingVertical: theme.SPACING.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.COLORS.borderLight,
   },
   detailLabel: {
-    fontSize: theme.FONT_SIZES.sm,
-    color: theme.COLORS.textLight
+    fontSize: theme.FONT_SIZES.md,
+    color: theme.COLORS.textLight,
+    flex: 1,
   },
   detailValue: {
-    fontSize: theme.FONT_SIZES.sm,
-    fontWeight: theme.FONT_WEIGHTS.bold
+    fontSize: theme.FONT_SIZES.md,
+    color: theme.COLORS.textDark,
+    fontWeight: theme.FONT_WEIGHTS.medium,
+    textAlign: 'right',
+    flex: 1,
   },
   remarkContainer: {
-    marginTop: 10
+    marginTop: theme.SPACING.sm,
+    paddingTop: theme.SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: theme.COLORS.borderLight,
   },
   remarkText: {
-    fontSize: theme.FONT_SIZES.sm,
-    marginTop: 5,
-    color: theme.COLORS.text,
-    backgroundColor: theme.COLORS.backgroundLight,
-    padding: 10,
-    borderRadius: theme.BORDER_RADIUS.sm
-  },
-  buttonContainer: {
-    marginTop: theme.SPACING.md
+    fontSize: theme.FONT_SIZES.md,
+    color: theme.COLORS.textDark,
+    marginTop: theme.SPACING.xs,
   },
   backButton: {
+    backgroundColor: theme.COLORS.primary,
     borderRadius: theme.BORDER_RADIUS.sm,
-    backgroundColor: theme.COLORS.primary
+    paddingVertical: theme.SPACING.sm,
   },
-  bottomPadding: {
-    height: 60 // 为底部导航栏预留空间
-  }
+  buttonContainer: {
+    marginTop: theme.SPACING.md,
+  },
+  errorText: {
+    fontSize: theme.FONT_SIZES.lg,
+    color: theme.COLORS.error,
+    textAlign: 'center',
+    marginVertical: theme.SPACING.md,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 export default TransactionDetailScreen;

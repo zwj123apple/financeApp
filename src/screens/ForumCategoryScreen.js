@@ -3,12 +3,16 @@ import { StyleSheet, View, ScrollView, RefreshControl, TouchableOpacity, StatusB
 import { Text, Icon, ListItem, Button, Divider } from '@rneui/themed';
 import { LinearGradient } from 'expo-linear-gradient';
 import theme from '../utils/theme';
-import { useForumStore } from '../store/forumStore';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchCategoryPosts, selectPosts, selectPagination, selectForumLoading, loadMorePosts } from '../store';
 
 const ForumCategoryScreen = ({ route, navigation }) => {
   const { categoryId, categoryName } = route.params;
   const [refreshing, setRefreshing] = useState(false);
-  const { posts, pagination, fetchCategoryPosts, isLoading } = useForumStore();
+  const posts = useSelector(selectPosts);
+  const pagination = useSelector(selectPagination);
+  const isLoading = useSelector(selectForumLoading);
+  const dispatch = useDispatch();
   
   // 初始加载数据
   useEffect(() => {
@@ -18,7 +22,7 @@ const ForumCategoryScreen = ({ route, navigation }) => {
   // 加载数据函数
   const loadData = async (page = 1) => {
     setRefreshing(true);
-    await fetchCategoryPosts(categoryId, page);
+    await dispatch(fetchCategoryPosts({ categoryId, page }));
     setRefreshing(false);
   };
   
@@ -30,7 +34,7 @@ const ForumCategoryScreen = ({ route, navigation }) => {
   // 加载更多
   const loadMore = () => {
     if (pagination.page < pagination.totalPages) {
-      loadData(pagination.page + 1);
+      dispatch(loadMorePosts({ categoryId, page: pagination.page + 1 }));
     }
   };
   

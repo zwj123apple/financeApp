@@ -5,24 +5,31 @@ import { LinearGradient } from 'expo-linear-gradient';
 // 导入统一主题
 import theme from '../utils/theme';
 import { Text, Button, Icon, Divider } from '@rneui/themed';
-import { useAuthStore } from '../store/authStore';
-import { useAssetStore } from '../store/assetStore';
+// 使用Redux Toolkit替代zustand
+import { useSelector, useDispatch } from 'react-redux';
+import { 
+  fetchAssetOverview, 
+  fetchHoldings,
+  fetchAssetAnalysis,
+  selectAssetOverview,
+  selectHoldings,
+  selectAssetAnalysis,
+  selectAssetLoading,
+  selectUser
+} from '../store';
 import { LineChart, PieChart, BarChart } from '../components/charts';
 import { getMonthlyProfitData } from '../services/assetAnalysisService';
 
 // 使用useWindowDimensions钩子替代静态Dimensions
 
 const AssetAnalysisScreen = ({ navigation }) => {
-  const { user } = useAuthStore();
-  const { 
-    assetOverview, 
-    holdings, 
-    assetAnalysis,
-    fetchAssetOverview, 
-    fetchHoldings,
-    fetchAssetAnalysis,
-    isLoading 
-  } = useAssetStore();
+  const user = useSelector(selectUser);
+  // 使用Redux选择器替代zustand store
+  const assetOverview = useSelector(selectAssetOverview);
+  const holdings = useSelector(selectHoldings);
+  const assetAnalysis = useSelector(selectAssetAnalysis);
+  const isLoading = useSelector(selectAssetLoading);
+  const dispatch = useDispatch();
   
   // 使用useWindowDimensions钩子获取屏幕尺寸，这样在屏幕旋转或尺寸变化时会自动更新
   const { width, height } = useWindowDimensions();
@@ -61,31 +68,30 @@ const AssetAnalysisScreen = ({ navigation }) => {
   const loadData = async () => {
     if (user) {
       // 设置加载状态
-      useAssetStore.setState({ isLoading: true });
+      dispatch({ type: 'asset/setLoading', payload: true });
       
       try {
-        // 使用Promise.all并行加载所有数据，减少总体加载时间
-        const [overviewResult, holdingsResult, analysisResult, monthlyProfitResult] = await Promise.all([
-          fetchAssetOverview(user.id),
-          fetchHoldings(user.id),
-          fetchAssetAnalysis(user.id),
-          getMonthlyProfitData(user.id)
+        // 先获取月度收益数据
+        const monthlyProfitResult = await getMonthlyProfitData(user.id);
+        
+        // 使用Promise.all并行加载其他数据，减少总体加载时间
+        await Promise.all([
+          // 使用Redux dispatch
+          dispatch(fetchAssetOverview(user.id)),
+          dispatch(fetchHoldings(user.id)),
+          dispatch(fetchAssetAnalysis(user.id))
         ]);
         
-        // 如果月度收益数据获取成功，立即更新到状态中
-        if (monthlyProfitResult.success) {
-          // 使用函数式更新确保获取最新状态
-          useAssetStore.setState(state => ({
-            assetAnalysis: {
-              ...state.assetAnalysis,
-              monthlyProfit: monthlyProfitResult.monthlyProfit
-            },
-            isLoading: false
-          }));
+        // 如果月度收益数据获取成功，更新到Redux状态中
+        if (monthlyProfitResult && monthlyProfitResult.success) {
+          // 更新月度收益数据到Redux状态
+          dispatch({
+            type: 'asset/updateAssetAnalysis',
+            payload: { monthlyProfit: monthlyProfitResult.monthlyProfit }
+          });
         }
       } catch (error) {
         console.error('加载资产分析数据失败:', error);
-        useAssetStore.setState({ isLoading: false });
       }
     }
   };
@@ -197,7 +203,6 @@ const AssetAnalysisScreen = ({ navigation }) => {
       }]
     };
   };
-
   
   // 添加加载状态指示器
   if (isLoading) {

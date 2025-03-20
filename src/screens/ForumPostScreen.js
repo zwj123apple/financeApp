@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, TouchableOpacity, TextInput, Alert, SafeAreaView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, Icon, Button, Divider, Avatar } from '@rneui/themed';
-import { useForumStore } from '../store/forumStore';
-import { useAuthStore } from '../store/authStore';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectUser, fetchPostDetail, createCommentThunk, likePostThunk, likeCommentThunk, selectCurrentPost, selectComments, selectForumLoading, clearCurrentPost, updatePostLikeInList ,updateCommentLikeInList} from '../store';
 import theme from '../utils/theme';
 
 const ForumPostScreen = ({ route, navigation }) => {
   const { postId } = route.params;
   const [refreshing, setRefreshing] = useState(false);
   const [commentText, setCommentText] = useState('');
-  const { currentPost, comments, fetchPostDetail, createComment, likePost, likeComment, isLoading } = useForumStore();
-  const { user } = useAuthStore();
+  const currentPost = useSelector(selectCurrentPost);
+  const comments = useSelector(selectComments);
+  const isLoading = useSelector(selectForumLoading);
+  const user = useSelector(selectUser);
+  const dispatch = useDispatch();
   
   // 初始加载数据
   useEffect(() => {
@@ -18,14 +21,14 @@ const ForumPostScreen = ({ route, navigation }) => {
     
     // 组件卸载时清除当前帖子
     return () => {
-      useForumStore.getState().clearCurrentPost();
+      dispatch(clearCurrentPost());
     };
   }, [postId]);
   
   // 加载数据函数
   const loadData = async () => {
     setRefreshing(true);
-    await fetchPostDetail(postId);
+    await dispatch(fetchPostDetail(postId));
     setRefreshing(false);
   };
   
@@ -41,7 +44,23 @@ const ForumPostScreen = ({ route, navigation }) => {
       return;
     }
     
-    await likePost(postId);
+    try {
+      // 确保postId是数字类型
+      const numericPostId = parseInt(postId);
+      if (isNaN(numericPostId)) {
+        throw new Error('无效的帖子ID');
+      }
+      // 调用Redux action并等待结果
+      const result = await dispatch(likePostThunk(numericPostId)).unwrap();
+      
+      // 更新帖子列表中的点赞数
+      if (result) {
+        dispatch(updatePostLikeInList(result));
+      }
+    } catch (error) {
+      console.error('点赞失败:', error);
+      Alert.alert('提示', '点赞失败，请稍后再试');
+    }
   };
   
   // 处理点赞评论
@@ -51,7 +70,23 @@ const ForumPostScreen = ({ route, navigation }) => {
       return;
     }
     
-    await likeComment(commentId);
+    try {
+      // 确保commentId是数字类型
+      const numericCommentId = parseInt(commentId);
+      if (isNaN(numericCommentId)) {
+        throw new Error('无效的评论ID');
+      }
+      // 调用Redux action并等待结果
+      const result = await dispatch(likeCommentThunk(numericCommentId)).unwrap();
+      
+      // 不需要额外更新UI，Redux store会自动更新
+      if (result) {
+        dispatch(updateCommentLikeInList(result));
+      }
+    } catch (error) {
+      console.error('点赞评论失败:', error);
+      Alert.alert('提示', '点赞失败，请稍后再试');
+    }
   };
   
   // 处理发表评论
@@ -66,15 +101,17 @@ const ForumPostScreen = ({ route, navigation }) => {
       return;
     }
     
-    const result = await createComment({
+    const commentData = {
       postId,
       userId: user.id,
       username: user.username,
       avatar: user.avatar,
       content: commentText.trim()
-    });
+    };
     
-    if (result.success) {
+    const result = await dispatch(createCommentThunk(commentData)).unwrap().catch(err => ({ success: false, error: err }));
+    
+    if (!result.error) {
       setCommentText('');
     }
   };
@@ -198,9 +235,8 @@ const ForumPostScreen = ({ route, navigation }) => {
           <Button
             title="发送"
             onPress={handleSubmitComment}
+            buttonStyle={styles.commentButton}
             loading={isLoading}
-            buttonStyle={styles.sendButton}
-            containerStyle={styles.sendButtonContainer}
           />
         </View>
       </KeyboardAvoidingView>
@@ -211,7 +247,7 @@ const ForumPostScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.COLORS.backgroundLight,
+    backgroundColor: theme.COLORS.backgroundLight
   },
   loadingContainer: {
     flex: 1,
@@ -225,20 +261,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollViewContent: {
-    flexGrow: 1,
-    width: '100%',
-    paddingHorizontal: theme.SPACING.md,
-    paddingTop: theme.SPACING.md,
-    paddingBottom: theme.SPACING.md
+    padding: theme.SPACING.md,
   },
   postContainer: {
-    backgroundColor: theme.COLORS.white,
-    borderRadius: theme.BORDER_RADIUS.md,
-    padding: theme.SPACING.md,
-    marginBottom: theme.SPACING.md,
-    ...theme.SHADOWS.sm
-  },
-  commentsContainer: {
     backgroundColor: theme.COLORS.white,
     borderRadius: theme.BORDER_RADIUS.md,
     padding: theme.SPACING.md,
@@ -248,81 +273,89 @@ const styles = StyleSheet.create({
   postHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 15
+    alignItems: 'center',
+    marginBottom: theme.SPACING.md
   },
   userInfo: {
     flexDirection: 'row',
     alignItems: 'center'
   },
   userTextInfo: {
-    marginLeft: 10
+    marginLeft: theme.SPACING.sm
   },
   username: {
+    fontSize: theme.FONT_SIZES.md,
     fontWeight: theme.FONT_WEIGHTS.bold,
-    fontSize: theme.FONT_SIZES.md
+    color: theme.COLORS.textDark
   },
   postDate: {
-    fontSize: theme.FONT_SIZES.xs,
-    color: theme.COLORS.textLight
+    fontSize: theme.FONT_SIZES.sm,
+    color: theme.COLORS.textLight,
+    marginTop: 2
   },
   postTitle: {
     fontSize: theme.FONT_SIZES.lg,
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.textDark,
-    marginTop: 10,
-    marginBottom: 5
+    marginBottom: theme.SPACING.sm
   },
   divider: {
     marginVertical: theme.SPACING.sm
   },
   postContent: {
     fontSize: theme.FONT_SIZES.md,
-    lineHeight: 24,
-    marginVertical: theme.SPACING.md,
-    color: theme.COLORS.text
+    color: theme.COLORS.textDark,
+    lineHeight: 22,
+    marginBottom: theme.SPACING.md
   },
   postActions: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: theme.SPACING.sm,
-    paddingTop: theme.SPACING.sm,
     borderTopWidth: 1,
-    borderTopColor: theme.COLORS.borderLight
+    borderTopColor: theme.COLORS.borderLight,
+    paddingTop: theme.SPACING.sm,
+    marginTop: theme.SPACING.sm
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10
+    marginRight: theme.SPACING.lg
   },
   actionText: {
     marginLeft: 5,
+    fontSize: theme.FONT_SIZES.sm,
     color: theme.COLORS.textLight
+  },
+  commentsContainer: {
+    backgroundColor: theme.COLORS.white,
+    borderRadius: theme.BORDER_RADIUS.md,
+    padding: theme.SPACING.md,
+    ...theme.SHADOWS.sm
   },
   commentsTitle: {
     fontSize: theme.FONT_SIZES.md,
     fontWeight: theme.FONT_WEIGHTS.bold,
-    color: theme.COLORS.textDark,
-    marginBottom: 5
+    color: theme.COLORS.textDark
   },
   commentItem: {
-    marginBottom: 15
+    marginVertical: theme.SPACING.sm
   },
   commentHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 5
+    marginBottom: theme.SPACING.xs
   },
   commentUserInfo: {
     flexDirection: 'row',
     alignItems: 'center'
   },
   commentUserTextInfo: {
-    marginLeft: 10
+    marginLeft: theme.SPACING.sm
   },
   commentUsername: {
-    fontWeight: theme.FONT_WEIGHTS.bold,
-    fontSize: theme.FONT_SIZES.sm
+    fontSize: theme.FONT_SIZES.sm,
+    fontWeight: theme.FONT_WEIGHTS.semibold,
+    color: theme.COLORS.textDark
   },
   commentDate: {
     fontSize: theme.FONT_SIZES.xs,
@@ -333,60 +366,55 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   commentLikeCount: {
+    marginLeft: 3,
     fontSize: theme.FONT_SIZES.xs,
-    color: theme.COLORS.textLight,
-    marginLeft: 3
+    color: theme.COLORS.textLight
   },
   commentContent: {
     fontSize: theme.FONT_SIZES.sm,
-    lineHeight: 20,
-    marginTop: 5,
-    marginLeft: 40, // 与头像对齐
-    color: theme.COLORS.text
+    color: theme.COLORS.textDark,
+    lineHeight: 20
   },
   commentDivider: {
-    marginTop: 15,
-    marginBottom: 15
+    marginVertical: theme.SPACING.sm,
+    backgroundColor: theme.COLORS.borderLight
   },
   emptyText: {
     textAlign: 'center',
-    padding: 20,
+    padding: theme.SPACING.md,
     color: theme.COLORS.textLight
+  },
+  bottomPadding: {
+    height: 80
   },
   commentInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: theme.COLORS.white,
-    padding: 10,
     borderTopWidth: 1,
     borderTopColor: theme.COLORS.borderLight,
-    ...theme.SHADOWS.md
+    padding: theme.SPACING.md,
+    ...theme.SHADOWS.sm
   },
   commentInput: {
     flex: 1,
-    height: 40,
+    backgroundColor: theme.COLORS.backgroundLight,
+    borderRadius: theme.BORDER_RADIUS.md,
+    paddingHorizontal: theme.SPACING.md,
+    paddingVertical: theme.SPACING.sm,
+    maxHeight: 100,
+    fontSize: theme.FONT_SIZES.sm,
     borderWidth: 1,
-    borderColor: theme.COLORS.borderLight,
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    marginRight: 10,
-    backgroundColor: theme.COLORS.backgroundLight
+    borderColor: theme.COLORS.primaryLight,
+    color: theme.COLORS.textDark
   },
-  sendButton: {
-    height: 44,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 20,
+  commentButton: {
+    marginLeft: theme.SPACING.md,
+    paddingHorizontal: theme.SPACING.md,
+    paddingVertical: theme.SPACING.sm,
     backgroundColor: theme.COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  sendButtonContainer: {
-    minWidth: 80,
-    height: 44
-  },
-  bottomPadding: {
-    height: 60 // 增加底部填充高度，为底部评论框和导航栏预留更多空间
+    borderRadius: theme.BORDER_RADIUS.md,
+    ...theme.SHADOWS.sm
   }
 });
 

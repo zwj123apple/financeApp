@@ -2,18 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, Alert, StatusBar, SafeAreaView, useWindowDimensions, KeyboardAvoidingView, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text, Button, Icon, Divider, ListItem, Input } from '@rneui/themed';
-import { useAssetStore } from '../store/assetStore';
-import { useProductStore } from '../store/productStore';
-import { useAuthStore } from '../store/authStore';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchHoldings, sellHolding, selectHoldings, selectAssetLoading, fetchProductDetail, selectCurrentProduct, selectUser } from '../store';
 import { LineChart } from '../components/charts';
 import theme from '../utils/theme';
 
 const HoldingDetailScreen = ({ route, navigation }) => {
   const { holdingId } = route.params;
   const [refreshing, setRefreshing] = useState(false);
-  const { user } = useAuthStore();
-  const { fetchProductDetail, currentProduct } = useProductStore();
-  const { holdings, fetchHoldings, sellHolding, isLoading } = useAssetStore();
+  // 使用Redux的useSelector替代useAuthStore
+  const user = useSelector(selectUser);
+  const currentProduct = useSelector(selectCurrentProduct);
+  const holdings = useSelector(selectHoldings);
+  const isLoading = useSelector(selectAssetLoading);
+  const dispatch = useDispatch();
   const [currentHolding, setCurrentHolding] = useState(null);
   
   // 使用useWindowDimensions钩子获取屏幕尺寸
@@ -29,17 +31,15 @@ const HoldingDetailScreen = ({ route, navigation }) => {
     setRefreshing(true);
     
     // 获取持仓列表
-    const result = await fetchHoldings(user?.id || 1);
+    await dispatch(fetchHoldings(user?.id || 1));
     
-    if (result.success) {
-      // 找到当前持仓
-      const holding = result.holdings.find(h => h.id === holdingId);
-      setCurrentHolding(holding);
-      
-      // 获取产品详情
-      if (holding) {
-        await fetchProductDetail(holding.productId);
-      }
+    // 找到当前持仓
+    const holding = holdings.find(h => h.id === holdingId);
+    setCurrentHolding(holding);
+    
+    // 获取产品详情
+    if (holding) {
+      await dispatch(fetchProductDetail(holding.productId));
     }
     
     setRefreshing(false);
@@ -82,22 +82,20 @@ const HoldingDetailScreen = ({ route, navigation }) => {
         { 
           text: '确定', 
           onPress: async () => {
-            const result = await sellHolding({
+            await dispatch(sellHolding({
               userId: user?.id || 1,
               holdingId: currentHolding.id,
               amount: amount
-            });
+            }));
             
-            if (result.success) {
-              Alert.alert('卖出成功', '您已成功卖出该产品', [
-                { text: '查看交易记录', onPress: () => navigation.navigate('TransactionRecords') },
-                { text: '确定', onPress: () => {
-                  setSellAmount('');
-                  setShowSellForm(false);
-                  navigation.goBack();
-                }}
-              ]);
-            }
+            Alert.alert('卖出成功', '您已成功卖出该产品', [
+              { text: '查看交易记录', onPress: () => navigation.navigate('TransactionRecords') },
+              { text: '确定', onPress: () => {
+                setSellAmount('');
+                setShowSellForm(false);
+                navigation.goBack();
+              }}
+            ]);
           } 
         }
       ]

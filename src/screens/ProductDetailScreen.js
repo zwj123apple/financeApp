@@ -5,8 +5,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 // 导入统一主题
 import theme from '../utils/theme';
 import { Text, Button, Icon, Divider, Input, Card, Badge } from '@rneui/themed';
-import { useProductStore } from '../store/productStore';
-import { useAuthStore } from '../store/authStore';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchProductDetail, purchaseProductThunk, selectCurrentProduct, selectProductLoading, selectUser ,clearCurrentProduct} from '../store';
 import { LineChart } from '../components/charts';
 
 const ProductDetailScreen = ({ route, navigation }) => {
@@ -14,8 +14,11 @@ const ProductDetailScreen = ({ route, navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [purchaseAmount, setPurchaseAmount] = useState('');
   const [activeTab, setActiveTab] = useState('description');
-  const { user } = useAuthStore();
-  const { currentProduct, fetchProductDetail, purchaseProduct, isLoading } = useProductStore();
+  // 使用Redux的useSelector替代useAuthStore
+  const user = useSelector(selectUser);
+  const currentProduct = useSelector(selectCurrentProduct);
+  const isLoading = useSelector(selectProductLoading);
+  const dispatch = useDispatch();
   
   // 使用useWindowDimensions钩子获取屏幕尺寸，这样在屏幕旋转或尺寸变化时会自动更新
   const { width, height } = useWindowDimensions();
@@ -26,7 +29,9 @@ const ProductDetailScreen = ({ route, navigation }) => {
   
   // 初始加载数据
   useEffect(() => {
-    loadData();
+    if (productId) {
+      loadData();
+    }
     
     // 启动进入动画
     Animated.parallel([
@@ -41,13 +46,28 @@ const ProductDetailScreen = ({ route, navigation }) => {
         useNativeDriver: true
       })
     ]).start();
-  }, [productId]);
+    
+    // 组件卸载时清除当前产品
+    return () => {
+      dispatch(clearCurrentProduct());
+    };
+  }, [productId, dispatch, fadeAnim, slideAnim]);
   
   // 加载数据函数
   const loadData = async () => {
     setRefreshing(true);
-    await fetchProductDetail(productId);
-    setRefreshing(false);
+    try {
+      // 确保productId是数字类型
+      const numericProductId = parseInt(productId);
+      if (isNaN(numericProductId)) {
+        throw new Error('无效的产品ID');
+      }
+      await dispatch(fetchProductDetail(numericProductId));
+    } catch (error) {
+      console.error('加载产品详情失败:', error);
+    } finally {
+      setRefreshing(false);
+    }
   };
   
   // 下拉刷新
@@ -70,11 +90,11 @@ const ProductDetailScreen = ({ route, navigation }) => {
     }
     
     // 执行购买
-    const result = await purchaseProduct({
+    const result = await dispatch(purchaseProductThunk({
       userId: user?.id || 1,
       productId: currentProduct.id,
       amount: amount
-    });
+    })).unwrap();
     
     if (result.success) {
       Alert.alert('购买成功', '您已成功购买该产品', [

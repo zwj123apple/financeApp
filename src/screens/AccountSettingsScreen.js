@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, Alert, KeyboardAvoidingView, Platform, SafeAreaView, StatusBar, TouchableOpacity, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text, Button, Input, Avatar, Divider, Icon } from '@rneui/themed';
-import { useAuthStore } from '../store/authStore';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectUser, selectAuthLoading, updateUserProfile } from '../store';
 import theme from '../utils/theme';
 
 const AccountSettingsScreen = ({ navigation }) => {
-  const { user, updateUserProfile, isLoading } = useAuthStore();
+  // 使用Redux的useSelector和useDispatch替代useAuthStore
+  const user = useSelector(selectUser);
+  const isLoading = useSelector(selectAuthLoading);
+  const dispatch = useDispatch();
   
   const [username, setUsername] = useState(user?.username || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -33,10 +37,13 @@ const AccountSettingsScreen = ({ navigation }) => {
     };
     
     // 调用更新接口
-    const result = await updateUserProfile(updateData);
-    
-    if (result.success) {
-      Alert.alert('成功', '个人信息更新成功');
+    try {
+      const result = await dispatch(updateUserProfile(updateData)).unwrap();
+      if (result.success) {
+        Alert.alert('成功', '个人信息更新成功');
+      }
+    } catch (error) {
+      Alert.alert('错误', error.message || '更新失败，请重试');
     }
   };
   

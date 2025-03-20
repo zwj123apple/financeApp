@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { getToken, removeToken } from './storage';
-import { useErrorStore } from '../store/errorStore';
+import { store } from '../store';
+import { setError } from '../store';
 
 // API基础URL配置
 const BASE_URL = 'https://api.example.com';
@@ -67,8 +68,7 @@ http.interceptors.response.use(
     }
     
     // 使用全局错误状态管理显示错误
-    const errorStore = useErrorStore.getState();
-    errorStore.setError(message);
+    store.dispatch(setError(message));
     
     return Promise.reject(error);
   }

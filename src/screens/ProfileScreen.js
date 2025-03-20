@@ -5,11 +5,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 // 导入统一主题
 import theme from '../utils/theme';
 import { Text, Button, Avatar, ListItem, Icon, Divider } from '@rneui/themed';
-import { useAuthStore } from '../store/authStore';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectUser, logoutUser } from '../store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const ProfileScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const { user, logout } = useAuthStore();
+  // 使用Redux的useSelector和useDispatch替代useAuthStore
+  const user = useSelector(selectUser);
+  const dispatch = useDispatch();
   const scrollY = React.useRef(new Animated.Value(0)).current;
   
   // 根据滚动位置计算头部动画效果
@@ -75,7 +78,7 @@ const ProfileScreen = ({ navigation }) => {
   
   // 处理退出登录
   const handleLogout = async () => {
-    await logout();
+    await dispatch(logoutUser());
     navigation.navigate('Login');
   };
   

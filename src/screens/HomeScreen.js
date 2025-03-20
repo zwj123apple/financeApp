@@ -2,8 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { StyleSheet, View, ScrollView, RefreshControl, SafeAreaView, useWindowDimensions, TouchableOpacity, Animated, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text, Button, Icon, SearchBar, Chip, Card, Badge, Divider } from '@rneui/themed';
-import { useProductStore } from '../store/productStore';
-import { useAuthStore } from '../store/authStore';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchProducts, resetFilters, selectProducts, selectProductFilters, selectProductLoading, selectUser } from '../store';
 import { getRecommendedProducts } from '../services/recommendService';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // 导入统一主题
@@ -16,8 +16,12 @@ const HomeScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [recommendedProducts, setRecommendedProducts] = useState([]);
-  const { user } = useAuthStore();
-  const { products, fetchProducts, filters, isLoading } = useProductStore();
+  // 使用Redux的useSelector替代useAuthStore
+  const user = useSelector(selectUser);
+  const products = useSelector(selectProducts);
+  const filters = useSelector(selectProductFilters);
+  const isLoading = useSelector(selectProductLoading);
+  const dispatch = useDispatch();
   
   // 轮播图状态
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
@@ -83,7 +87,7 @@ const HomeScreen = ({ navigation }) => {
     setRefreshing(true);
     
     // 请求产品数据
-    await fetchProducts();
+    await dispatch(fetchProducts());
     
     // 获取热门推荐产品
     const recommendResult = await getRecommendedProducts();
@@ -98,12 +102,12 @@ const HomeScreen = ({ navigation }) => {
   const filterProducts = async (riskLevel) => {
     if (riskLevel === '全部') {
       // 先重置store中的筛选状态，再获取产品
-      useProductStore.getState().resetFilters();
+      dispatch(resetFilters());
       // 点击"全部"时重置所有筛选条件
-      await fetchProducts({});
+      await dispatch(fetchProducts({}));
     } else {
       // 点击其他风险等级时设置对应筛选条件
-      await fetchProducts({ riskLevel });
+      await dispatch(fetchProducts({ riskLevel }));
     }
   };
   

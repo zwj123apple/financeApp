@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, FlatList, RefreshControl, TouchableOpacity, ScrollView } from 'react-native';
 import { Text, Button, Icon, SearchBar, Chip } from '@rneui/themed';
-import { useProductStore } from '../store/productStore';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchProducts, resetFilters, selectProducts, selectProductFilters, selectProductLoading } from '../store';
 import { LinearGradient } from 'expo-linear-gradient';
 
 // 导入统一主题
@@ -10,7 +11,10 @@ import theme from '../utils/theme';
 const ProductsScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { products, fetchProducts, filters, isLoading } = useProductStore();
+  const products = useSelector(selectProducts);
+  const filters = useSelector(selectProductFilters);
+  const isLoading = useSelector(selectProductLoading);
+  const dispatch = useDispatch();
   
   // 风险等级选项
   const riskLevels = ['全部', '低风险', '中风险', '中高风险', '高风险'];
@@ -23,7 +27,7 @@ const ProductsScreen = ({ navigation }) => {
   // 加载数据函数
   const loadData = async () => {
     setRefreshing(true);
-    await fetchProducts();
+    await dispatch(fetchProducts());
     setRefreshing(false);
   };
   
@@ -35,7 +39,7 @@ const ProductsScreen = ({ navigation }) => {
   // 筛选产品
   const filterProducts = async (riskLevel) => {
     const filter = riskLevel === '全部' ? {} : { riskLevel };
-    await fetchProducts(filter);
+    await dispatch(fetchProducts(filter));
   };
   
   // 搜索产品

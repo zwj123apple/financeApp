@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, ScrollView, TextInput, Alert, KeyboardAvoidingView, Platform, SafeAreaView, StatusBar } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text, Button, Input, Divider } from '@rneui/themed';
-import { useForumStore } from '../store/forumStore';
-import { useAuthStore } from '../store/authStore';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCategories, selectCategories, selectForumLoading, createPostThunk, selectUser } from '../store';
 import theme from '../utils/theme';
 
 const CreatePostScreen = ({ route, navigation }) => {
@@ -12,13 +12,15 @@ const CreatePostScreen = ({ route, navigation }) => {
   const [content, setContent] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(categoryId || null);
   
-  const { categories, fetchCategories, createPost, isLoading } = useForumStore();
-  const { user } = useAuthStore();
+  const categories = useSelector(selectCategories);
+  const isLoading = useSelector(selectForumLoading);
+  const user = useSelector(selectUser);
+  const dispatch = useDispatch();
   
   // 初始加载分类数据
   useEffect(() => {
     if (!categories.length) {
-      fetchCategories();
+      dispatch(fetchCategories());
     }
   }, []);
   
@@ -51,9 +53,9 @@ const CreatePostScreen = ({ route, navigation }) => {
     };
     
     // 调用发布接口
-    const result = await createPost(postData);
+    const result = await dispatch(createPostThunk(postData)).unwrap().catch(err => ({ success: false, error: err }));
     
-    if (result.success) {
+    if (!result.error) {
       Alert.alert('成功', '帖子发布成功', [
         { text: '确定', onPress: () => navigation.goBack() }
       ]);

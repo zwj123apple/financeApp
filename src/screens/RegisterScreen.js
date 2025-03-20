@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView, Platform, ScrollView, Animated, Dimensions, ImageBackground, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text, Input, Button, Icon } from '@rneui/themed';
-import { useAuthStore } from '../store/authStore';
+import { useDispatch } from 'react-redux';
+import { registerUser } from '../store';
 import { ErrorModal } from '../components';
 
 // 导入统一主题
@@ -40,7 +41,8 @@ const RegisterScreen = ({ navigation }) => {
     ]).start();
   }, []);
   
-  const { register } = useAuthStore();
+  // 使用Redux的useDispatch替代useAuthStore
+  const dispatch = useDispatch();
   
   const handleRegister = async () => {
     // 简单验证
@@ -65,14 +67,20 @@ const RegisterScreen = ({ navigation }) => {
       avatar: `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'men' : 'women'}/${Math.floor(Math.random() * 100)}.jpg`
     };
     
-    const result = await register(userData);
-    setIsLoading(false);
-    
-    if (result.success) {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Main' }],
-      });
+    try {
+      await dispatch(registerUser(userData)).unwrap();
+      const result = { success: true };
+      
+      if (result.success) {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        });
+      }
+    } catch (error) {
+      setError(error.message || '注册失败，请重试');
+    } finally {
+      setIsLoading(false);
     }
   };
   

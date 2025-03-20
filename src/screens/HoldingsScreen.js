@@ -2,16 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, FlatList, RefreshControl, Animated, StatusBar, SafeAreaView, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text, Button, Icon, ListItem, SearchBar, Divider } from '@rneui/themed';
-import { useAssetStore } from '../store/assetStore';
-import { useAuthStore } from '../store/authStore';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchHoldings, selectHoldings, selectAssetLoading, selectUser } from '../store';
+// 移除 useAuthStore 导入
 import theme from '../utils/theme';
 
 const HoldingsScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [fadeAnim] = useState(new Animated.Value(0));
-  const { user } = useAuthStore();
-  const { holdings, fetchHoldings, isLoading } = useAssetStore();
+  // 使用Redux的useSelector替代useAuthStore
+  const user = useSelector(selectUser);
+  const holdings = useSelector(selectHoldings);
+  const isLoading = useSelector(selectAssetLoading);
+  const dispatch = useDispatch();
   
   // 初始加载数据
   useEffect(() => {
@@ -32,7 +36,7 @@ const HoldingsScreen = ({ navigation }) => {
   // 加载数据函数
   const loadData = async () => {
     setRefreshing(true);
-    await fetchHoldings(user?.id || 1);
+    await dispatch(fetchHoldings(user?.id || 1));
     setRefreshing(false);
   };
   
