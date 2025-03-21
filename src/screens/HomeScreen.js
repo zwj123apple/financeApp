@@ -247,8 +247,10 @@ const HomeScreen = ({ navigation }) => {
     <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
     <View style={styles.container}>
       <LinearGradient
-        colors={theme.GRADIENTS.background}
+        colors={[theme.COLORS.backgroundGradientStart, theme.COLORS.backgroundGradientEnd]}
         style={styles.gradientBackground}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
       >
         {/* 搜索栏 - 优化样式 */}
         <View style={styles.searchContainer}>
@@ -420,7 +422,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     paddingHorizontal: theme.SPACING.md,
     paddingTop: theme.SPACING.xs,
-    paddingBottom: theme.SPACING.md, // 增加底部内边距，确保边框完全显示
+    paddingBottom: theme.SPACING.xs, // 减少底部内边距，从md改为xs
     backgroundColor: 'transparent',
     zIndex: 10,
   },
@@ -429,9 +431,9 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderBottomWidth: 0,
     paddingHorizontal: 0,
-    marginBottom: theme.SPACING.sm,
-    height: 50, // 设置固定高度
-    overflow: 'visible', // 确保边框可见
+    marginBottom: theme.SPACING.xs, // 减少底部外边距，从sm改为xs
+    height: 50,
+    overflow: 'visible',
   },
   searchBarInputContainer: {
     backgroundColor: theme.COLORS.white,
@@ -449,11 +451,13 @@ const styles = StyleSheet.create({
   // 轮播图样式优化
   bannerContainer: {
     height: 180,
-    marginBottom: theme.SPACING.md,
+    marginBottom: theme.SPACING.xxs, // 进一步减少底部外边距
     marginHorizontal: theme.SPACING.md,
-    borderRadius: theme.BORDER_RADIUS.lg,
+    borderRadius: theme.BORDER_RADIUS.md, // 统一圆角半径
     overflow: 'hidden',
     ...theme.SHADOWS.sm,
+    borderWidth: 1, // 添加细边框
+    borderColor: theme.COLORS.borderLight, // 边框颜色
   },
   bannerItem: {
     height: 180,
@@ -524,20 +528,27 @@ const styles = StyleSheet.create({
   },
   // 热门推荐样式优化
   recommendSection: {
-    marginVertical: theme.SPACING.sm,
-    paddingHorizontal: theme.SPACING.md,
+    marginVertical: theme.SPACING.xxs, // 进一步减少垂直外边距
+    paddingHorizontal: 0, // 移除水平内边距
+    paddingTop: theme.SPACING.xxs, // 保持顶部内边距
+    paddingBottom: theme.SPACING.xxs, // 减少底部内边距
+    backgroundColor: `${theme.COLORS.backgroundLight}30`, // 保持微妙的背景色
+    borderRadius: 0, // 移除圆角
+    marginHorizontal: theme.SPACING.md, // 保持水平外边距，与轮播图一致
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: theme.SPACING.xs,
+    paddingHorizontal: theme.SPACING.xxs, // 移除水平内边距，确保标题与产品对齐
   },
   sectionTitle: {
     fontSize: theme.FONT_SIZES.lg,
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.textDark,
     letterSpacing: 0.5,
+    paddingHorizontal: theme.SPACING.xxs,
   },
   viewMoreButton: {
     flexDirection: 'row',
@@ -551,17 +562,20 @@ const styles = StyleSheet.create({
     marginRight: theme.SPACING.xxs,
   },
   recommendScrollContent: {
-    paddingVertical: theme.SPACING.xs,
+    paddingVertical: theme.SPACING.xs, // 减少垂直内边距
+    paddingHorizontal: 0, // 移除水平内边距，使内容与标题左侧对齐
+    gap: theme.SPACING.xs, // 减少卡片间间距
     flex:1,
-    justifyContent: 'space-between',
+    justifyContent:'space-between',
   },
   recommendCard: {
     width: 160,
     height: 120, // 减小高度，使卡片更紧凑
-    borderRadius: theme.BORDER_RADIUS.md,
+    borderRadius: 0, // 移除圆角，改为方形
     overflow: 'hidden',
     ...theme.SHADOWS.sm,
     elevation: 2,
+    marginRight: 0, // 移除右边距
   },
   recommendCardGradient: {
     flex: 1,
@@ -606,13 +620,13 @@ const styles = StyleSheet.create({
   },
   // 筛选区域样式优化
   filterContainer: {
-    marginBottom: theme.SPACING.md,
-    paddingTop: theme.SPACING.sm,
+    marginBottom: theme.SPACING.sm, // 减少底部外边距
+    paddingTop: theme.SPACING.xs, // 减少顶部内边距
     marginHorizontal: theme.SPACING.md,
     ...theme.SHADOWS.xs,
   },
   filterScrollContent: {
-    paddingVertical: theme.SPACING.sm,
+    paddingVertical: theme.SPACING.xs, // 减少垂直内边距
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'flex-start',
@@ -650,16 +664,18 @@ const styles = StyleSheet.create({
   // 产品列表样式优化 - 响应式布局
   productListContainer: {
     paddingHorizontal: theme.SPACING.md,
-    paddingBottom: theme.SPACING.xxxl,
-    marginTop: 0, // 移除顶部间距
-    flexDirection: 'column', // 改为列布局，一行一个产品
+    paddingBottom: theme.SPACING.xl, // 减少底部内边距
+    marginTop: 0, // 保持移除顶部间距
+    flexDirection: 'column', // 保持列布局
   },
   productItemContainer: {
-    marginBottom: theme.SPACING.md, // 底部间距
-    width: '100%', // 宽度占满整行
+    marginBottom: 0, // 移除底部间距
+    width: '100%', // 保持宽度占满整行
+    borderBottomWidth: 1, // 添加底部边框作为分隔线
+    borderBottomColor: theme.COLORS.borderLight, // 边框颜色
   },
   productCard: {
-    borderRadius: theme.BORDER_RADIUS.md,
+    borderRadius: 0, // 移除圆角，改为方形
     overflow: 'hidden',
     ...theme.SHADOWS.sm,
     elevation: 2,
@@ -667,23 +683,24 @@ const styles = StyleSheet.create({
     borderColor: theme.COLORS.borderLight,
   },
   productCardGradient: {
-    padding: theme.SPACING.md, // 增加内边距使内容更加舒适
+    padding: theme.SPACING.sm, // 减少内边距
   },
   productCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: theme.SPACING.xs,
+    paddingBottom: theme.SPACING.xxs, // 减少底部内边距
   },
   productDivider: {
-    marginVertical: theme.SPACING.xs,
+    marginVertical: theme.SPACING.xxs, // 减少垂直外边距
     backgroundColor: theme.COLORS.borderLight,
+    height: 1,
   },
   productCardBody: {
     flexDirection: 'row', // 横向布局
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    paddingTop: theme.SPACING.xs,
+    paddingTop: theme.SPACING.xxs, // 减少顶部内边距
   },
   productMainInfo: {
     flex: 1,
@@ -739,6 +756,14 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: theme.FONT_SIZES.md,
     color: theme.COLORS.textLight,
+  },
+  // 添加卡片连接器样式
+  cardConnector: {
+    width: 2,
+    height: 20,
+    backgroundColor: theme.COLORS.borderLight,
+    alignSelf: 'center',
+    marginVertical: -theme.SPACING.xs // 负边距使连接器与卡片更紧密
   },
 });
 

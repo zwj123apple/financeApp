@@ -194,14 +194,28 @@ const ForumPostScreen = ({ route, navigation }) => {
             value={commentText}
             onChangeText={setCommentText}
             multiline
+            maxLength={500}
+            textAlignVertical="center"
+            autoCapitalize="none"
           />
           <Button
             title="发送"
             onPress={handleSubmitComment}
             loading={isLoading}
+            loadingProps={{ color: theme.COLORS.white, size: 'small' }}
             buttonStyle={styles.sendButton}
             containerStyle={styles.sendButtonContainer}
-          />
+            titleStyle={{ fontSize: theme.FONT_SIZES.sm, fontWeight: theme.FONT_WEIGHTS.medium }}
+            activeOpacity={0.7}
+            icon={{
+              name: 'send',
+              type: 'material',
+              size: 16,
+              color: theme.COLORS.white,
+              style: { marginLeft: 5 }
+            }}
+            iconRight
+           />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -357,33 +371,43 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: theme.COLORS.white,
-    padding: 10,
+    padding: theme.SPACING.sm,
+    paddingHorizontal: theme.SPACING.md,
     borderTopWidth: 1,
     borderTopColor: theme.COLORS.borderLight,
     ...theme.SHADOWS.md
   },
   commentInput: {
     flex: 1,
-    height: 40,
+    minHeight: 44,
+    maxHeight: 100,
     borderWidth: 1,
-    borderColor: theme.COLORS.borderLight,
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    marginRight: 10,
-    backgroundColor: theme.COLORS.backgroundLight
+    borderColor: theme.COLORS.primaryLight,
+    borderRadius: theme.BORDER_RADIUS.round,
+    paddingHorizontal: theme.SPACING.md,
+    paddingVertical: theme.SPACING.xs,
+    marginRight: theme.SPACING.sm,
+    backgroundColor: theme.COLORS.backgroundLight,
+    fontSize: theme.FONT_SIZES.sm,
+    color: theme.COLORS.text,
+    ...theme.SHADOWS.xs
   },
   sendButton: {
     height: 44,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: theme.SPACING.md,
+    paddingVertical: 0,
+    borderRadius: theme.BORDER_RADIUS.round,
     backgroundColor: theme.COLORS.primary,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    ...theme.SHADOWS.sm,
+    elevation: 3
   },
   sendButtonContainer: {
-    minWidth: 80,
-    height: 44
+    minWidth: 70,
+    height: 44,
+    borderRadius: theme.BORDER_RADIUS.round,
+    overflow: 'hidden'
   },
   bottomPadding: {
     height: 60 // 增加底部填充高度，为底部评论框和导航栏预留更多空间

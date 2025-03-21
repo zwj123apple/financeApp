@@ -99,8 +99,6 @@ const ProfileScreen = ({ navigation }) => {
             { useNativeDriver: false }
           )}
         >
-          {/* 顶部间距 */}
-          <View style={styles.headerSpacing} />
           
           {/* 用户信息头部 - 现代化设计 */}
           <View style={styles.profileHeaderContainer}>
@@ -122,28 +120,12 @@ const ProfileScreen = ({ navigation }) => {
                 <Icon name="edit" type="material" size={22} color={theme.COLORS.white} />
               </TouchableOpacity>
             </View>
-            
-            {/* 用户数据概览 */}
-            <View style={styles.userStatsContainer}>
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>12</Text>
-                <Text style={styles.statLabel}>交易</Text>
-              </View>
-              <Divider orientation="vertical" width={1} color={theme.COLORS.borderLight} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>3</Text>
-                <Text style={styles.statLabel}>资产</Text>
-              </View>
-              <Divider orientation="vertical" width={1} color={theme.COLORS.borderLight} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>5</Text>
-                <Text style={styles.statLabel}>收藏</Text>
-              </View>
-            </View>
           </View>
+        
+          {/* 连接元素 */}
+          <View style={styles.cardConnector} />
           
           {/* 功能列表 - 现代化设计 */}
-          <Text style={styles.sectionTitle}>账户管理</Text>
           <View style={styles.sectionContainer}>        
             <ListItem onPress={navigateToAccountSettings} containerStyle={styles.listItem}>
               <View style={[styles.iconBackground, { backgroundColor: `${theme.COLORS.primary}20` }]}>
@@ -214,37 +196,30 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
-    paddingHorizontal: theme.SPACING.sm, // 添加水平内边距
-    paddingTop: theme.SPACING.xs, // 添加顶部内边距
   },
   scrollView: {
     flex: 1,
     zIndex: 1,
   },
   scrollContent: {
-    paddingHorizontal: theme.SPACING.sm,
     paddingBottom: theme.SPACING.xxxl,
-  },
-  headerSpacing: {
-    height: theme.SPACING.xl,
   },
   // 现代化用户信息头部样式
   profileHeaderContainer: {
     backgroundColor: theme.COLORS.white,
-    borderRadius: theme.BORDER_RADIUS.xl, // 增加圆角半径
-    marginBottom: theme.SPACING.lg,
-    marginTop: theme.SPACING.md,
     overflow: 'hidden',
-    ...theme.SHADOWS.lg, // 增强阴影效果
-    marginHorizontal: theme.SPACING.xs, // 添加水平边距
+    ...theme.SHADOWS.md, // 调整阴影效果
+    borderWidth: 1, // 添加细边框
+    borderColor: theme.COLORS.borderLight, // 边框颜色
   },
   sectionContainer: {
     backgroundColor: theme.COLORS.white,
-    borderRadius: theme.BORDER_RADIUS.xl, // 增加圆角半径
-    marginBottom: theme.SPACING.lg,
-    ...theme.SHADOWS.lg, // 增强阴影效果
+    marginBottom: theme.SPACING.md, // 减小底部边距
+    ...theme.SHADOWS.md, // 调整阴影效果
     overflow: 'hidden',
-    marginHorizontal: theme.SPACING.xs, // 添加水平边距
+    marginHorizontal: theme.SPACING.xxs, // 减小水平边距，使卡片更充分利用屏幕空间
+    borderWidth: 1, // 添加细边框
+    borderColor: theme.COLORS.borderLight, // 边框颜色
   },
   notLoginContainer: {
     flex: 1,
@@ -294,40 +269,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     ...theme.SHADOWS.sm,
   },
-  // 用户数据统计区域
-  userStatsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: theme.SPACING.md,
-    backgroundColor: theme.COLORS.backgroundLight,
-  },
-  statItem: {
-    alignItems: 'center',
-    paddingHorizontal: theme.SPACING.md,
-  },
-  statValue: {
-    fontSize: theme.FONT_SIZES.lg,
-    fontWeight: theme.FONT_WEIGHTS.bold,
-    color: theme.COLORS.primary,
-    marginBottom: theme.SPACING.xxs,
-  },
-  statLabel: {
-    fontSize: theme.FONT_SIZES.sm,
-    color: theme.COLORS.textLight,
-  },
-  // 分区标题
-  sectionTitle: {
-    fontSize: theme.FONT_SIZES.md,
-    fontWeight: theme.FONT_WEIGHTS.bold,
-    color: theme.COLORS.textDark,
-    marginBottom: theme.SPACING.sm,
-    marginLeft: theme.SPACING.xs,
-  },
   sectionContainer: {
     backgroundColor: theme.COLORS.white,
-    borderRadius: theme.BORDER_RADIUS.lg,
-    marginBottom: theme.SPACING.lg,
     ...theme.SHADOWS.md,
     overflow: 'hidden',
   },
@@ -353,11 +296,11 @@ const styles = StyleSheet.create({
     backgroundColor: theme.COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: theme.COLORS.borderLight,
-    marginHorizontal: theme.SPACING.xs, // 添加水平内边距
+    marginHorizontal: theme.SPACING.xxs, // 减小水平内边距
   },
   logoutButtonContainer: {
-    marginTop: theme.SPACING.xl,
-    marginHorizontal: theme.SPACING.lg, // 增加水平边距
+    marginTop: theme.SPACING.lg, // 减小顶部边距
+    marginHorizontal: theme.SPACING.md, // 调整水平边距
   },
   logoutButton: {
     borderColor: theme.COLORS.error,
