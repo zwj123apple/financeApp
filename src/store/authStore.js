@@ -95,9 +95,34 @@ export const useAuthStore = create(
       },
 
       // 检查认证状态
-      checkAuth: () => {
-        const user = get().user;
-        return !!user;
+      checkAuth: async () => {
+        // 首先检查当前状态中是否有用户信息
+        let user = get().user;
+        let token = null;
+        
+        // 如果当前状态中没有用户信息，则尝试从本地存储中获取
+        if (!user) {
+          try {
+            // 同时检查token和用户信息
+            token = await getToken();
+            user = await getUserInfo();
+            
+            // 如果从本地存储中获取到了用户信息，更新状态
+            if (user) {
+              set({ user });
+            }
+          } catch (error) {
+            console.error('从本地存储获取用户信息失败:', error);
+          }
+        }
+        
+        // 只有同时存在用户信息和token才认为是已认证状态
+        const isAuthenticated = !!(user && (token || get().isAuthenticated));
+        console.log('认证状态检查结果:', { hasUser: !!user, hasToken: !!token, isAuthenticated });
+        
+        // 更新认证状态
+        set({ isAuthenticated });
+        return isAuthenticated;
       },
 
       // 清除错误

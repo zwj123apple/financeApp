@@ -135,7 +135,9 @@ const ProfileScreen = ({ navigation }) => {
                 <ListItem.Title style={styles.listItemTitle}>账户设置</ListItem.Title>
                 <ListItem.Subtitle style={styles.listItemSubtitle}>管理您的个人信息和账户安全</ListItem.Subtitle>
               </ListItem.Content>
-              <ListItem.Chevron color={theme.COLORS.primary} />
+              <View>
+                <Icon name="chevron-right" type="material" color={theme.COLORS.primary} size={22} />
+              </View>
             </ListItem>
             
             <ListItem onPress={navigateToTransactionRecords} containerStyle={styles.listItem}>
@@ -146,7 +148,9 @@ const ProfileScreen = ({ navigation }) => {
                 <ListItem.Title style={styles.listItemTitle}>交易记录</ListItem.Title>
                 <ListItem.Subtitle style={styles.listItemSubtitle}>查看您的所有交易历史</ListItem.Subtitle>
               </ListItem.Content>
-              <ListItem.Chevron color={theme.COLORS.primary} />
+              <View>
+                <Icon name="chevron-right" type="material" color={theme.COLORS.primary} size={22} />
+              </View>
             </ListItem>
             
             <ListItem onPress={navigateToAssets} containerStyle={styles.listItem}>
@@ -157,7 +161,9 @@ const ProfileScreen = ({ navigation }) => {
                 <ListItem.Title style={styles.listItemTitle}>我的资产</ListItem.Title>
                 <ListItem.Subtitle style={styles.listItemSubtitle}>管理您的资产组合</ListItem.Subtitle>
               </ListItem.Content>
-              <ListItem.Chevron color={theme.COLORS.primary} />
+              <View>
+                <Icon name="chevron-right" type="material" color={theme.COLORS.primary} size={22} />
+              </View>
             </ListItem>
           </View>
           

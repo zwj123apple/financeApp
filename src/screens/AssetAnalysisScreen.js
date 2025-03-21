@@ -295,6 +295,21 @@ const AssetAnalysisScreen = ({ navigation }) => {
             <Text style={styles.chartDescription}>
               展示您每月的收益情况，帮助您了解资产收益的周期性变化。
             </Text>
+            <Button
+              title="详细"
+              type="outline"
+              size="sm"
+              buttonStyle={styles.detailButton}
+              titleStyle={styles.detailButtonText}
+              icon={{
+                name: 'arrow-right',
+                type: 'font-awesome',
+                size: 15,
+                color: theme.COLORS.primary
+              }}
+              iconRight
+              onPress={() => navigation.navigate('AssetAnalysisDetail')}
+            />
           </Animated.View>
           
           {/* 底部填充，确保内容可以滚动到底部导航栏上方 */}
@@ -396,6 +411,17 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 40 // 减小底部填充高度
+  },
+  detailButton: {
+    marginTop: theme.SPACING.sm,
+    borderColor: theme.COLORS.primary,
+    borderRadius: theme.BORDER_RADIUS.sm,
+    paddingHorizontal: theme.SPACING.md
+  },
+  detailButtonText: {
+    color: theme.COLORS.primary,
+    fontSize: theme.FONT_SIZES.sm,
+    marginRight: theme.SPACING.xs
   }
 });
 

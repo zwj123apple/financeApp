@@ -204,9 +204,9 @@ const HomeScreen = ({ navigation }) => {
   
   // 渲染轮播项
   const renderBannerItem = (item, index) => {
-    // 根据屏幕宽度计算响应式样式
-    const titleSize = getResponsiveSize(theme.FONT_SIZES.lg, theme.FONT_SIZES.xl, theme.FONT_SIZES.xxl);
-    const subtitleSize =  getResponsiveSize(theme.FONT_SIZES.sm, theme.FONT_SIZES.md,  theme.FONT_SIZES.lg);
+    // 根据屏幕宽度计算响应式样式 - 减小字体大小
+    const titleSize = getResponsiveSize(theme.FONT_SIZES.md, theme.FONT_SIZES.lg, theme.FONT_SIZES.xl);
+    const subtitleSize = getResponsiveSize(theme.FONT_SIZES.xs, theme.FONT_SIZES.sm, theme.FONT_SIZES.md);
     const buttonPadding = width < 380 ? theme.SPACING.xxs : theme.SPACING.xs;
     
     return (
@@ -477,17 +477,17 @@ const styles = StyleSheet.create({
     paddingVertical: theme.SPACING.xxs, // 添加更小的垂直内边距
   },
   bannerTitle: {
-    fontSize: theme.FONT_SIZES.sm, // 减小字体大小，从md改为sm
+    fontSize: theme.FONT_SIZES.xs, // 进一步减小字体大小，从sm改为xs
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.white,
-    marginBottom: theme.SPACING.xxs, // 减少底部外边距，从sm改为xxs
-    letterSpacing: 0.5,
+    marginBottom: theme.SPACING.xxs, // 保持较小的底部外边距
+    letterSpacing: 0.3, // 减小字母间距
   },
   bannerSubtitle: {
-    fontSize: theme.FONT_SIZES.xs, // 减小字体大小，从sm改为xs
+    fontSize: 10, // 使用固定值进一步减小字体大小
     color: theme.COLORS.white,
-    marginBottom: theme.SPACING.xs, // 减少底部外边距，从lg改为xs
-    letterSpacing: 0.3,
+    marginBottom: theme.SPACING.xxs, // 进一步减少底部外边距，从xs改为xxs
+    letterSpacing: 0.2, // 减小字母间距
   },
   bannerButton: {
     backgroundColor: theme.COLORS.white,

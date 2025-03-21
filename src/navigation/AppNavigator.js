@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -26,6 +26,7 @@ import TransactionDetailScreen from '../screens/TransactionDetailScreen';
 import AssetsScreen from '../screens/AssetsScreen';
 import AssetDetailScreen from '../screens/AssetDetailScreen';
 import AssetAnalysisScreen from '../screens/AssetAnalysisScreen';
+import AssetAnalysisDetailScreen from '../screens/AssetAnalysisDetailScreen';
 
 // 创建导航器
 const Stack = createStackNavigator();
@@ -38,10 +39,10 @@ const ForumStack = createStackNavigator();
 const HomeStackNavigator = () => (
   <HomeStack.Navigator
     screenOptions={{
-      // 确保在切换标签时完全卸载屏幕
-      detachInactiveScreens: true,
-      // 添加以下选项确保屏幕在不活跃时被正确卸载
-      unmountOnBlur: true
+      // 保留屏幕状态，不完全卸载屏幕
+      detachInactiveScreens: false,
+      // 移除此选项，确保屏幕在不活跃时不被卸载
+      unmountOnBlur: false
     }}
     // 确保导航栈在每次返回时都重置到初始路由
     initialRouteName="HomeMain"
@@ -68,10 +69,10 @@ const HomeStackNavigator = () => (
 const ProfileStackNavigator = () => (
   <ProfileStack.Navigator
     screenOptions={{
-      // 确保在切换标签时完全卸载屏幕
-      detachInactiveScreens: true,
-      // 添加以下选项确保屏幕在不活跃时被正确卸载
-      unmountOnBlur: true
+      // 保留屏幕状态，不完全卸载屏幕
+      detachInactiveScreens: false,
+      // 移除此选项，确保屏幕在不活跃时不被卸载
+      unmountOnBlur: false
     }}
     // 确保导航栈在每次返回时都重置到初始路由
     initialRouteName="ProfileMain"
@@ -112,6 +113,11 @@ const ProfileStackNavigator = () => (
       options={{ title: '资产分析' }}
     />
     <ProfileStack.Screen 
+      name="AssetAnalysisDetail" 
+      component={AssetAnalysisDetailScreen} 
+      options={{ title: '资产分析详情' }}
+    />
+    <ProfileStack.Screen 
       name="HoldingDetail" 
       component={HoldingDetailScreen} 
       options={{ title: '持仓详情' }}
@@ -123,10 +129,10 @@ const ProfileStackNavigator = () => (
 const ForumStackNavigator = () => (
   <ForumStack.Navigator
     screenOptions={{
-      // 确保在切换标签时完全卸载屏幕
-      detachInactiveScreens: true,
-      // 添加以下选项确保屏幕在不活跃时被正确卸载
-      unmountOnBlur: true
+      // 保留屏幕状态，不完全卸载屏幕
+      detachInactiveScreens: false,
+      // 移除此选项，确保屏幕在不活跃时不被卸载
+      unmountOnBlur: false
     }}
     // 确保导航栈在每次返回时都重置到初始路由
     initialRouteName="ForumMain"
@@ -154,7 +160,7 @@ const ForumStackNavigator = () => (
   </ForumStack.Navigator>
 );
 
-// 主页面底部标签导航
+// 主页面底部标签导航 - 只有在已登录状态下才会显示
 const MainTabNavigator = () => (
   <Tab.Navigator
     screenOptions={({ route }) => ({
@@ -173,48 +179,32 @@ const MainTabNavigator = () => (
       },
       tabBarActiveTintColor: '#2089dc',
       tabBarInactiveTintColor: 'gray',
-      // 确保在切换标签时完全卸载屏幕
-      detachInactiveScreens: true,
-      // 添加重置导航栈的选项，确保每次点击底部标签时都会重置到该标签的初始页面
-      unmountOnBlur: true,
-      // 添加resetOnBlur选项，确保每次点击底部标签时都会重置该标签的导航栈
-      resetOnBlur: true,
-      // 禁用懒加载，确保每次切换都重新加载
-      lazy: false,
+      // 修改为false，确保在切换标签时不会完全卸载屏幕
+      detachInactiveScreens: false,
+      // 确保屏幕在不活跃时不被卸载
+      unmountOnBlur: false,
+      // 启用懒加载，提高性能
+      lazy: true,
     })}
-    backBehavior="initialRoute"
+    // 保持初始路由行为，但不会在每次切换时重置
+    backBehavior="history"
   >
     <Tab.Screen 
       name="Home" 
       component={HomeStackNavigator} 
       options={{ 
         title: '首页', 
-        headerShown: false, 
-        unmountOnBlur: true,
-        // 确保每次点击都重置到初始路由
-        tabBarButton: (props) => {
-          return <TouchableOpacity 
-            {...props} 
-            onPress={() => {
-              // 重置导航栈并导航到初始路由
-              props.navigation.reset({
-                index: 0,
-                routes: [{ name: 'Home' }],
-              });
-            }} 
-          />;
-        }
+        headerShown: false
       }}
       listeners={({ navigation }) => ({
-        tabPress: e => {
-          // 防止默认行为
+        tabPress: (e) => {
+          // 阻止默认行为
           e.preventDefault();
-          // 重置导航栈并导航到初始路由
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Home' }],
+          // 重置Home导航栈到初始路由
+          navigation.navigate('Home', {
+            screen: 'HomeMain'
           });
-        },
+        }
       })}
     />
     <Tab.Screen 
@@ -222,19 +212,17 @@ const MainTabNavigator = () => (
       component={ForumStackNavigator} 
       options={{ 
         title: '论坛', 
-        headerShown: false, 
-        unmountOnBlur: true
+        headerShown: false
       }}
       listeners={({ navigation }) => ({
-        tabPress: e => {
-          // 防止默认行为
+        tabPress: (e) => {
+          // 阻止默认行为
           e.preventDefault();
-          // 重置导航栈并导航到初始路由
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Forum' }],
+          // 重置Forum导航栈到初始路由
+          navigation.navigate('Forum', {
+            screen: 'ForumMain'
           });
-        },
+        }
       })}
     />
     <Tab.Screen 
@@ -242,19 +230,17 @@ const MainTabNavigator = () => (
       component={ProfileStackNavigator} 
       options={{ 
         title: '我的', 
-        headerShown: false, 
-        unmountOnBlur: true
+        headerShown: false
       }}
       listeners={({ navigation }) => ({
-        tabPress: e => {
-          // 防止默认行为
+        tabPress: (e) => {
+          // 阻止默认行为
           e.preventDefault();
-          // 重置导航栈并导航到初始路由
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Profile' }],
+          // 重置Profile导航栈到初始路由
+          navigation.navigate('Profile', {
+            screen: 'ProfileMain'
           });
-        },
+        }
       })}
     />
   </Tab.Navigator>
@@ -263,10 +249,72 @@ const MainTabNavigator = () => (
 // 应用导航容器
 const AppNavigator = () => {
   // 使用authStore检查用户是否已登录
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, checkAuth } = useAuthStore();
+  // 添加本地状态来跟踪认证状态
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isUserAuthenticated, setIsUserAuthenticated] = useState(false); // 默认设置为未认证状态
   
-  // 根据登录状态决定初始路由
-  const initialRouteName = user ? "Main" : "Login";
+  // 在组件挂载时检查用户认证状态 - 只在应用启动时执行一次
+  useEffect(() => {
+    // 检查用户认证状态（异步操作）
+    const checkAuthStatus = async () => {
+      try {
+        console.log('正在检查认证状态...');
+        // 设置一个超时，确保不会无限等待认证检查
+        const timeoutPromise = new Promise(resolve => {
+          setTimeout(() => {
+            console.log('认证状态检查超时，默认为未认证');
+            resolve(false);
+          }, 5000); // 增加超时时间到5秒
+        });
+        
+        // 使用Promise.race确保认证检查不会无限等待
+        const authStatus = await Promise.race([
+          checkAuth(),
+          timeoutPromise
+        ]);
+        
+        console.log('认证状态检查结果:', authStatus);
+        // 确保认证状态是布尔值
+        setIsUserAuthenticated(!!authStatus);
+      } catch (error) {
+        console.error('检查认证状态失败:', error);
+        setIsUserAuthenticated(false);
+      } finally {
+        console.log('认证状态检查完成，设置authChecked为true');
+        setAuthChecked(true);
+      }
+    };
+    
+    checkAuthStatus();
+    // 空依赖数组确保这个效果只在组件挂载时运行一次
+  }, []); // 移除checkAuth依赖，确保只在应用启动时执行一次
+  
+  // 监听认证状态变化，但只在应用启动时更新状态，避免在页面切换时错误跳转
+  // 这个useEffect不再需要，因为我们只在应用启动时检查一次认证状态
+  // 登录和退出操作会直接通过导航重置来处理，而不是依赖于状态变化
+  
+  // 根据用户登录状态设置初始路由，默认进入Login页面，强制用户登录
+  // 只有登录后才能访问应用内容
+  const initialRouteName = isUserAuthenticated ? "Main" : "Login";
+  console.log('设置初始路由:', initialRouteName, '认证状态:', isUserAuthenticated);
+  
+  // 在认证状态检查完成前，显示加载状态或默认显示登录页面
+  if (!authChecked) {
+    console.log('认证状态检查未完成，默认显示登录页面');
+    // 直接进入导航容器，默认显示登录页面
+    return (
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Login">
+          <Stack.Screen 
+            name="Login" 
+            component={LoginScreen} 
+            options={{ headerShown: false }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
   
   return (
     <NavigationContainer>
