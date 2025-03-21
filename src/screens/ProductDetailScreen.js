@@ -29,7 +29,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
     loadData();
     
     // 启动进入动画
-    Animated.parallel([
+    const animationSequence = Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: theme.ANIMATION.normal,
@@ -40,7 +40,28 @@ const ProductDetailScreen = ({ route, navigation }) => {
         duration: theme.ANIMATION.normal,
         useNativeDriver: true
       })
-    ]).start();
+    ]);
+    
+    animationSequence.start();
+    
+    // 清理函数，确保在组件卸载时停止动画
+    return () => {
+      // 确保停止所有动画
+      animationSequence.stop();
+      fadeAnim.setValue(0);
+      slideAnim.setValue(50);
+      
+      // 重置所有状态，确保下次进入时能正确加载
+      setPurchaseAmount('');
+      setActiveTab('description');
+      setRefreshing(false);
+      
+      // 确保在组件卸载时不会有任何挂起的操作
+      if (isLoading) {
+        // 如果有正在进行的加载操作，可以在这里处理
+        // 例如，可以通过store中的方法取消请求
+      }
+    };
   }, [productId]);
   
   // 加载数据函数
@@ -145,7 +166,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
           keyboardShouldPersistTaps="handled"
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.COLORS.primary]} />}
         >
-          {/* 产品基本信息区域 - 使用卡片设计 */}
+          {/* 产品基本信息区域 - 使用卡片设计 - 更紧凑的布局 */}
           <Animated.View style={[styles.card, styles.headerCard, {
             opacity: fadeAnim,
             transform: [{ translateY: slideAnim }]
@@ -169,12 +190,12 @@ const ProductDetailScreen = ({ route, navigation }) => {
             
             <View style={styles.infoRow}>
               <View style={styles.infoItem}>
-                <Icon name="schedule" type="material" size={20} color={theme.COLORS.primary} />
+                <Icon name="schedule" type="material" size={16} color={theme.COLORS.primary} />
                 <Text style={styles.infoLabel}>投资期限</Text>
                 <Text style={styles.infoValue}>{currentProduct.investmentTerm}</Text>
               </View>
               <View style={styles.infoItem}>
-                <Icon name="account-balance-wallet" type="material" size={20} color={theme.COLORS.primary} />
+                <Icon name="account-balance-wallet" type="material" size={16} color={theme.COLORS.primary} />
                 <Text style={styles.infoLabel}>最低投资</Text>
                 <Text style={styles.infoValue}>¥{currentProduct.minInvestment}</Text>
               </View>
@@ -296,6 +317,8 @@ const ProductDetailScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   gradientContainer: {
     flex: 1,
+    width: '100%',
+    height: '100%',
   },
   container: {
     flex: 1,
@@ -305,8 +328,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingVertical: theme.SPACING.md,
-    paddingHorizontal: 0,
-    paddingBottom: theme.SPACING.xl,
+    paddingHorizontal: theme.SPACING.sm,
+    paddingBottom: theme.SPACING.lg,
     width: '100%',
     alignItems: 'center'
   },
@@ -319,8 +342,8 @@ const styles = StyleSheet.create({
   // 卡片通用样式
   card: {
     borderRadius: theme.BORDER_RADIUS.lg,
-    padding: theme.SPACING.md,
-    marginBottom: theme.SPACING.md,
+    padding: theme.SPACING.sm,
+    marginBottom: theme.SPACING.sm,
     marginHorizontal: theme.SPACING.md,
     backgroundColor: theme.COLORS.white,
     ...theme.SHADOWS.md,
@@ -329,7 +352,7 @@ const styles = StyleSheet.create({
   },
   // 头部卡片样式
   headerCard: {
-    marginTop: theme.SPACING.sm,
+    marginTop: theme.SPACING.md,
   },
   chartCard: {
     paddingBottom: theme.SPACING.lg,
@@ -339,21 +362,21 @@ const styles = StyleSheet.create({
     marginBottom: theme.SPACING.xl,
   },
   cardTitle: {
-    fontSize: theme.FONT_SIZES.lg,
+    fontSize: theme.FONT_SIZES.md,
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.textDark,
-    marginBottom: theme.SPACING.xs
+    marginBottom: theme.SPACING.xxs
   },
   // 头部信息样式
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: theme.SPACING.md,
+    marginBottom: theme.SPACING.xs,
     width: '100%'
   },
   headerLeft: {
-    flex: 1.5,
+    flex: 2,
     paddingRight: theme.SPACING.sm
   },
   headerRight: {
@@ -361,32 +384,34 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end'
   },
   productName: {
-    fontSize: theme.FONT_SIZES.xl,
+    fontSize: theme.FONT_SIZES.md,
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.textDark,
     marginBottom: theme.SPACING.xs
   },
   riskBadge: {
+    height: 20,
     borderRadius: theme.BORDER_RADIUS.sm,
-    paddingHorizontal: theme.SPACING.sm
+    paddingHorizontal: theme.SPACING.xs,
+    alignSelf: 'flex-start'
   },
   riskBadgeText: {
     fontSize: theme.FONT_SIZES.xs,
-    fontWeight: theme.FONT_WEIGHTS.bold
+    fontWeight: theme.FONT_WEIGHTS.medium
   },
   returnLabel: {
     fontSize: theme.FONT_SIZES.xs,
     color: theme.COLORS.textLight,
-    marginBottom: theme.SPACING.xs
+    marginBottom: theme.SPACING.xxs
   },
   returnValue: {
-    fontSize: theme.FONT_SIZES.xl,
+    fontSize: theme.FONT_SIZES.lg,
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.success
   },
   // 基本信息行
   divider: {
-    marginBottom: theme.SPACING.md,
+    marginVertical: theme.SPACING.xs,
     backgroundColor: theme.COLORS.primaryLight,
     opacity: 0.5,
     height: 1
@@ -394,6 +419,7 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    marginTop: theme.SPACING.xxs,
     marginBottom: theme.SPACING.sm
   },
   infoItem: {
@@ -401,13 +427,13 @@ const styles = StyleSheet.create({
     flex: 1
   },
   infoLabel: {
-    fontSize: theme.FONT_SIZES.sm,
+    fontSize: theme.FONT_SIZES.xs,
     color: theme.COLORS.textLight,
-    marginTop: theme.SPACING.xs
+    marginTop: theme.SPACING.xxs
   },
   infoValue: {
-    fontSize: theme.FONT_SIZES.lg,
-    fontWeight: theme.FONT_WEIGHTS.bold,
+    fontSize: theme.FONT_SIZES.sm,
+    fontWeight: theme.FONT_WEIGHTS.semibold,
     marginTop: theme.SPACING.xs,
     color: theme.COLORS.textDark
   },

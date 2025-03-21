@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { TouchableOpacity } from 'react-native';
 import { Icon } from '@rneui/themed';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import { useAuthStore } from '../store/authStore';
 
 // 导入屏幕组件
 import LoginScreen from '../screens/LoginScreen';
@@ -34,7 +36,16 @@ const ForumStack = createStackNavigator();
 
 // Home页面的子导航栈
 const HomeStackNavigator = () => (
-  <HomeStack.Navigator>
+  <HomeStack.Navigator
+    screenOptions={{
+      // 确保在切换标签时完全卸载屏幕
+      detachInactiveScreens: true,
+      // 添加以下选项确保屏幕在不活跃时被正确卸载
+      unmountOnBlur: true
+    }}
+    // 确保导航栈在每次返回时都重置到初始路由
+    initialRouteName="HomeMain"
+  >
     <HomeStack.Screen 
       name="HomeMain" 
       component={HomeScreen} 
@@ -55,7 +66,16 @@ const HomeStackNavigator = () => (
 
 // Profile页面的子导航栈
 const ProfileStackNavigator = () => (
-  <ProfileStack.Navigator>
+  <ProfileStack.Navigator
+    screenOptions={{
+      // 确保在切换标签时完全卸载屏幕
+      detachInactiveScreens: true,
+      // 添加以下选项确保屏幕在不活跃时被正确卸载
+      unmountOnBlur: true
+    }}
+    // 确保导航栈在每次返回时都重置到初始路由
+    initialRouteName="ProfileMain"
+  >
     <ProfileStack.Screen 
       name="ProfileMain" 
       component={ProfileScreen} 
@@ -101,7 +121,16 @@ const ProfileStackNavigator = () => (
 
 // Forum页面的子导航栈
 const ForumStackNavigator = () => (
-  <ForumStack.Navigator>
+  <ForumStack.Navigator
+    screenOptions={{
+      // 确保在切换标签时完全卸载屏幕
+      detachInactiveScreens: true,
+      // 添加以下选项确保屏幕在不活跃时被正确卸载
+      unmountOnBlur: true
+    }}
+    // 确保导航栈在每次返回时都重置到初始路由
+    initialRouteName="ForumMain"
+  >
     <ForumStack.Screen 
       name="ForumMain" 
       component={ForumScreen} 
@@ -144,31 +173,104 @@ const MainTabNavigator = () => (
       },
       tabBarActiveTintColor: '#2089dc',
       tabBarInactiveTintColor: 'gray',
+      // 确保在切换标签时完全卸载屏幕
+      detachInactiveScreens: true,
+      // 添加重置导航栈的选项，确保每次点击底部标签时都会重置到该标签的初始页面
+      unmountOnBlur: true,
+      // 添加resetOnBlur选项，确保每次点击底部标签时都会重置该标签的导航栈
+      resetOnBlur: true,
+      // 禁用懒加载，确保每次切换都重新加载
+      lazy: false,
     })}
+    backBehavior="initialRoute"
   >
     <Tab.Screen 
       name="Home" 
       component={HomeStackNavigator} 
-      options={{ title: '首页', headerShown: false }}
+      options={{ 
+        title: '首页', 
+        headerShown: false, 
+        unmountOnBlur: true,
+        // 确保每次点击都重置到初始路由
+        tabBarButton: (props) => {
+          return <TouchableOpacity 
+            {...props} 
+            onPress={() => {
+              // 重置导航栈并导航到初始路由
+              props.navigation.reset({
+                index: 0,
+                routes: [{ name: 'Home' }],
+              });
+            }} 
+          />;
+        }
+      }}
+      listeners={({ navigation }) => ({
+        tabPress: e => {
+          // 防止默认行为
+          e.preventDefault();
+          // 重置导航栈并导航到初始路由
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+          });
+        },
+      })}
     />
     <Tab.Screen 
       name="Forum" 
       component={ForumStackNavigator} 
-      options={{ title: '论坛', headerShown: false }}
+      options={{ 
+        title: '论坛', 
+        headerShown: false, 
+        unmountOnBlur: true
+      }}
+      listeners={({ navigation }) => ({
+        tabPress: e => {
+          // 防止默认行为
+          e.preventDefault();
+          // 重置导航栈并导航到初始路由
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Forum' }],
+          });
+        },
+      })}
     />
     <Tab.Screen 
       name="Profile" 
       component={ProfileStackNavigator} 
-      options={{ title: '我的', headerShown: false }}
+      options={{ 
+        title: '我的', 
+        headerShown: false, 
+        unmountOnBlur: true
+      }}
+      listeners={({ navigation }) => ({
+        tabPress: e => {
+          // 防止默认行为
+          e.preventDefault();
+          // 重置导航栈并导航到初始路由
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Profile' }],
+          });
+        },
+      })}
     />
   </Tab.Navigator>
 );
 
 // 应用导航容器
 const AppNavigator = () => {
+  // 使用authStore检查用户是否已登录
+  const { user, isAuthenticated } = useAuthStore();
+  
+  // 根据登录状态决定初始路由
+  const initialRouteName = user ? "Main" : "Login";
+  
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName={initialRouteName}>
         {/* 认证相关页面 */}
         <Stack.Screen 
           name="Login" 

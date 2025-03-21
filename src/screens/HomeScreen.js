@@ -162,9 +162,6 @@ const HomeScreen = ({ navigation }) => {
               textStyle={styles.riskBadgeText}
             />
           </View>
-          
-           <Divider style={styles.productDivider} />
-          
           <View style={styles.productCardBody}>
             <View style={styles.productMainInfo}>
               <Text style={[styles.infoValue, styles.returnValue, {fontSize: valueFontSize}]}>{item.expectedReturn}</Text>
@@ -432,12 +429,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
     paddingHorizontal: 0,
     marginBottom: theme.SPACING.xs, // 减少底部外边距，从sm改为xs
-    height: 50,
+    height: 40,
     overflow: 'visible',
   },
   searchBarInputContainer: {
     backgroundColor: theme.COLORS.white,
-    height: 44,
+    height: 34,
     borderRadius: theme.BORDER_RADIUS.md,
     borderWidth: 0.5, // 增加边框宽度，确保所有边框都可见
     borderBottomWidth: 0.5, // 增加底部边框宽度
@@ -448,10 +445,10 @@ const styles = StyleSheet.create({
     shadowRadius: 0,
     elevation: 0
   },
-  // 轮播图样式优化
+  // 轮播图样式优化 - 更紧凑的设计
   bannerContainer: {
-    height: 180,
-    marginBottom: theme.SPACING.xxs, // 进一步减少底部外边距
+    height: 120,
+    marginBottom: theme.SPACING.xxs, // 减少底部外边距
     marginHorizontal: theme.SPACING.md,
     borderRadius: theme.BORDER_RADIUS.md, // 统一圆角半径
     overflow: 'hidden',
@@ -460,47 +457,50 @@ const styles = StyleSheet.create({
     borderColor: theme.COLORS.borderLight, // 边框颜色
   },
   bannerItem: {
-    height: 180,
-    borderRadius: theme.BORDER_RADIUS.lg,
+    height: 120,
+    borderRadius: theme.BORDER_RADIUS.md,
     overflow: 'hidden',
   },
   bannerGradient: {
     flex: 1,
     borderRadius: theme.BORDER_RADIUS.lg,
-    padding: theme.SPACING.md,
+    padding: theme.SPACING.xs, // 减少内边距，从md改为xs
   },
   bannerContent: {
     flex: 1,
     flexDirection: 'row',
+    alignItems: 'center', // 确保内容垂直居中
   },
   bannerTextContainer: {
     flex: 1,
     justifyContent: 'center',
+    paddingVertical: theme.SPACING.xxs, // 添加更小的垂直内边距
   },
   bannerTitle: {
-    fontSize: theme.FONT_SIZES.xl,
+    fontSize: theme.FONT_SIZES.sm, // 减小字体大小，从md改为sm
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.white,
-    marginBottom: theme.SPACING.sm,
+    marginBottom: theme.SPACING.xxs, // 减少底部外边距，从sm改为xxs
     letterSpacing: 0.5,
   },
   bannerSubtitle: {
-    fontSize: theme.FONT_SIZES.md,
+    fontSize: theme.FONT_SIZES.xs, // 减小字体大小，从sm改为xs
     color: theme.COLORS.white,
-    marginBottom: theme.SPACING.lg,
+    marginBottom: theme.SPACING.xs, // 减少底部外边距，从lg改为xs
     letterSpacing: 0.3,
   },
   bannerButton: {
     backgroundColor: theme.COLORS.white,
-    borderRadius: theme.BORDER_RADIUS.md,
-    paddingVertical: theme.SPACING.xs,
-    paddingHorizontal: theme.SPACING.md,
+    borderRadius: theme.BORDER_RADIUS.sm, // 减小圆角，从md改为sm
+    paddingVertical: theme.SPACING.xxs, // 减少垂直内边距，从xs改为xxs
+    paddingHorizontal: theme.SPACING.sm, // 减少水平内边距，从md改为sm
     alignSelf: 'flex-start',
     ...theme.SHADOWS.xs,
   },
   bannerButtonText: {
     color: theme.COLORS.primary,
     fontWeight: theme.FONT_WEIGHTS.medium,
+    fontSize: theme.FONT_SIZES.xs, // 添加更小的字体大小
   },
   bannerImageContainer: {
     flex: 1,
@@ -511,20 +511,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     position: 'absolute',
-    bottom: theme.SPACING.sm,
+    bottom: theme.SPACING.xs, // 减少底部位置，从sm改为xs
     width: '100%',
   },
   bannerDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 6, // 减小宽度，从8改为6
+    height: 6, // 减小高度，从8改为6
+    borderRadius: 3, // 调整圆角
     backgroundColor: theme.COLORS.white + '80',
-    marginHorizontal: 4,
+    marginHorizontal: 3, // 减少水平外边距，从4改为3
   },
   bannerDotActive: {
     backgroundColor: theme.COLORS.white,
-    width: 16, // 活动指示器宽度增加
-    borderRadius: 4,
+    width: 12, // 减小活动指示器宽度，从16改为12
+    borderRadius: 3, // 调整圆角
   },
   // 热门推荐样式优化
   recommendSection: {
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.SPACING.xxs, // 移除水平内边距，确保标题与产品对齐
   },
   sectionTitle: {
-    fontSize: theme.FONT_SIZES.lg,
+    fontSize: theme.FONT_SIZES.md,
     fontWeight: theme.FONT_WEIGHTS.bold,
     color: theme.COLORS.textDark,
     letterSpacing: 0.5,
@@ -677,7 +677,6 @@ const styles = StyleSheet.create({
   productCard: {
     borderRadius: 0, // 移除圆角，改为方形
     overflow: 'hidden',
-    ...theme.SHADOWS.sm,
     elevation: 2,
     borderWidth: 1,
     borderColor: theme.COLORS.borderLight,
@@ -690,11 +689,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingBottom: theme.SPACING.xxs, // 减少底部内边距
-  },
-  productDivider: {
-    marginVertical: theme.SPACING.xxs, // 减少垂直外边距
-    backgroundColor: theme.COLORS.borderLight,
-    height: 1,
   },
   productCardBody: {
     flexDirection: 'row', // 横向布局
