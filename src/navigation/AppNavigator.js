@@ -144,6 +144,8 @@ const MainTabNavigator = () => (
       },
       tabBarActiveTintColor: '#2089dc',
       tabBarInactiveTintColor: 'gray',
+      // 添加重置导航栈的选项，确保每次点击底部标签时都会重置到该标签的初始页面
+      unmountOnBlur: true,
     })}
   >
     <Tab.Screen 

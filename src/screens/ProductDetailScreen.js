@@ -29,6 +29,9 @@ const ProductDetailScreen = ({ route, navigation }) => {
   
   // 初始加载数据
   useEffect(() => {
+    // 先清除之前的产品数据，防止显示旧数据
+    dispatch(clearCurrentProduct());
+    
     if (productId) {
       loadData();
     }
@@ -62,7 +65,11 @@ const ProductDetailScreen = ({ route, navigation }) => {
       if (isNaN(numericProductId)) {
         throw new Error('无效的产品ID');
       }
-      await dispatch(fetchProductDetail(numericProductId));
+      // 使用await确保数据加载完成
+      const result = await dispatch(fetchProductDetail(numericProductId)).unwrap();
+      if (!result || !result.product) {
+        console.error('产品详情数据无效');
+      }
     } catch (error) {
       console.error('加载产品详情失败:', error);
     } finally {
@@ -98,7 +105,15 @@ const ProductDetailScreen = ({ route, navigation }) => {
     
     if (result.success) {
       Alert.alert('购买成功', '您已成功购买该产品', [
-        { text: '查看持仓', onPress: () => navigation.navigate('Holdings') },
+        { text: '查看持仓', onPress: () => {
+          // 先导航到Main，然后导航到Profile标签，再导航到Assets页面
+          navigation.navigate('Main', {
+            screen: 'Profile',
+            params: {
+              screen: 'Assets'
+            }
+          });
+        }},
         { text: '确定', onPress: () => setPurchaseAmount('') }
       ]);
     }
