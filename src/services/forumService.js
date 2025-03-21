@@ -205,7 +205,7 @@ export const getPostDetail = async (postId) => {
   // 模拟API请求
   await delay(700);
   
-  const post = mockPosts.find(p => p.id === parseInt(postId));
+  let post = mockPosts.find(p => p.id === parseInt(postId));
   
   if (!post) {
     throw new Error('帖子不存在');
@@ -303,18 +303,43 @@ export const likePost = async (postId, userId) => {
   // 模拟API请求
   await delay(500);
   
-  const post = mockPosts.find(p => p.id === parseInt(postId));
+  // 使用parseInt确保postId是数字类型
+  const numericPostId = parseInt(postId);
   
-  if (!post) {
+  // 找到帖子对象
+  const postIndex = mockPosts.findIndex(p => p.id === numericPostId);
+  
+  if (postIndex === -1) {
     throw new Error('帖子不存在');
   }
   
-  // 增加点赞数
-  post.likesCount += 1;
+  // 获取当前帖子
+  const post = mockPosts[postIndex];
+  
+  // 确保likesCount是数字类型
+  const currentLikes = Number(post.likesCount);
+  
+  // 计算新的点赞数
+  const newLikesCount = currentLikes + 1;
+  
+  // 创建更新后的帖子对象（不可变更新）
+  const updatedPost = {
+    ...post,
+    likesCount: newLikesCount
+  };
+  
+  // 更新mockPosts数组
+  mockPosts[postIndex] = updatedPost;
+  
+  console.log("服务层更新点赞数:", {
+    postId: updatedPost.id,
+    oldValue: currentLikes,
+    newValue: updatedPost.likesCount
+  });
   
   return {
     success: true,
-    likesCount: post.likesCount
+    likesCount: updatedPost.likesCount
   };
 };
 
@@ -323,18 +348,43 @@ export const likeComment = async (commentId, userId) => {
   // 模拟API请求
   await delay(500);
   
-  const comment = mockComments.find(c => c.id === parseInt(commentId));
+  // 使用parseInt确保commentId是数字类型
+  const numericCommentId = parseInt(commentId);
   
-  if (!comment) {
+  // 找到评论对象
+  const commentIndex = mockComments.findIndex(c => c.id === numericCommentId);
+  
+  if (commentIndex === -1) {
     throw new Error('评论不存在');
   }
   
-  // 增加点赞数
-  comment.likesCount += 1;
+  // 获取当前评论
+  const comment = mockComments[commentIndex];
+  
+  // 确保likesCount是数字类型
+  const currentLikes = Number(comment.likesCount);
+  
+  // 计算新的点赞数
+  const newLikesCount = currentLikes + 1;
+  
+  // 创建更新后的评论对象（不可变更新）
+  const updatedComment = {
+    ...comment,
+    likesCount: newLikesCount
+  };
+  
+  // 更新mockComments数组
+  mockComments[commentIndex] = updatedComment;
+  
+  console.log("服务层更新评论点赞数:", {
+    commentId: updatedComment.id,
+    oldValue: currentLikes,
+    newValue: updatedComment.likesCount
+  });
   
   return {
     success: true,
-    likesCount: comment.likesCount
+    likesCount: updatedComment.likesCount
   };
 };
 

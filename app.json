@@ -20,7 +20,8 @@
         "UIViewControllerBasedStatusBarAppearance": true,
         "UIStatusBarHidden": false,
         "UILaunchStoryboardName": "SplashScreen"
-      }
+      },
+      "jsEngine": "jsc"
     },
     "android": {
       "adaptiveIcon": {
@@ -30,6 +31,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "jsEngine": "hermes"
   }
 }

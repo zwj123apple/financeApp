@@ -25,6 +25,17 @@ const ForumPostScreen = ({ route, navigation }) => {
     };
   }, [postId]);
   
+  // 监听帖子和评论状态变化，用于调试
+  useEffect(() => {
+    if (currentPost) {
+      console.log('帖子状态已更新:', { 
+        postId: currentPost.id, 
+        likesCount: currentPost.likesCount,
+        commentsCount: comments.length
+      });
+    }
+  }, [currentPost, comments]);
+  
   // 加载数据函数
   const loadData = async () => {
     setRefreshing(true);
@@ -50,13 +61,26 @@ const ForumPostScreen = ({ route, navigation }) => {
       if (isNaN(numericPostId)) {
         throw new Error('无效的帖子ID');
       }
-      // 调用Redux action并等待结果
+      
+      // 添加调试日志 - 点赞前
+      console.log('点赞前状态:', { 
+        postId: numericPostId, 
+        currentLikes: currentPost?.likesCount,
+        currentPostRef: currentPost
+      });
+      
+      // 调用Redux action并等待结果 - likePostThunk的extraReducer会自动更新currentPost
       const result = await dispatch(likePostThunk(numericPostId)).unwrap();
       
-      // 更新帖子列表中的点赞数
-      if (result) {
-        dispatch(updatePostLikeInList(result));
-      }
+      // 添加调试日志 - 点赞后
+      console.log('点赞后状态:', { 
+        postId: numericPostId, 
+        newLikes: result.likesCount,
+        currentPostLikes: currentPost?.likesCount,
+        currentPostRef: currentPost
+      });
+      
+      // 不需要再次调用updatePostLikeInList，因为likePostThunk的extraReducer已经更新了currentPost
     } catch (error) {
       console.error('点赞失败:', error);
       Alert.alert('提示', '点赞失败，请稍后再试');
@@ -76,13 +100,28 @@ const ForumPostScreen = ({ route, navigation }) => {
       if (isNaN(numericCommentId)) {
         throw new Error('无效的评论ID');
       }
-      // 调用Redux action并等待结果
+      
+      // 添加调试日志 - 点赞前
+      const commentBefore = comments.find(c => c.id === numericCommentId);
+      console.log('评论点赞前状态:', { 
+        commentId: numericCommentId, 
+        currentLikes: commentBefore?.likesCount,
+        commentRef: commentBefore
+      });
+      
+      // 调用Redux action并等待结果 - likeCommentThunk的extraReducer会自动更新comments
       const result = await dispatch(likeCommentThunk(numericCommentId)).unwrap();
       
-      // 不需要额外更新UI，Redux store会自动更新
-      if (result) {
-        dispatch(updateCommentLikeInList(result));
-      }
+      // 添加调试日志 - 点赞后
+      const commentAfter = comments.find(c => c.id === numericCommentId);
+      console.log('评论点赞后状态:', { 
+        commentId: numericCommentId, 
+        newLikes: result.likesCount,
+        currentCommentLikes: commentAfter?.likesCount,
+        commentRef: commentAfter
+      });
+      
+      // 不需要再次调用updateCommentLikeInList，因为likeCommentThunk的extraReducer已经更新了comments
     } catch (error) {
       console.error('点赞评论失败:', error);
       Alert.alert('提示', '点赞失败，请稍后再试');

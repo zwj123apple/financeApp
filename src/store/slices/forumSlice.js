@@ -88,6 +88,7 @@ export const likePostThunk = createAsyncThunk(
   async (postId, { dispatch, rejectWithValue }) => {
     try {
       const result = await likePost(postId);
+      console.log("update result", result);
       return { postId: parseInt(postId), likesCount: result.likesCount };
     } catch (error) {
       dispatch(setError(error.message || '点赞失败'));
@@ -193,10 +194,10 @@ export const forumSlice = createSlice({
       }
     },
     updateCommentLikeInList: (state, action) => {
-      const { postId, likesCount } = action.payload;
-      const postIndex = state.posts.findIndex(post => post.id === postId);
-      if (postIndex !== -1) {
-        state.comments[postIndex].likesCount = likesCount;
+      const { commentId, likesCount } = action.payload;
+      const commentIndex = state.comments.findIndex(comment => comment.id === commentId);
+      if (commentIndex !== -1) {
+        state.comments[commentIndex].likesCount = likesCount;
       }
     }
   },
@@ -282,24 +283,43 @@ export const forumSlice = createSlice({
       
       // 点赞帖子
       .addCase(likePostThunk.fulfilled, (state, action) => {
+        console.log('Redux更新点赞状态:', action.payload);
+        
+        // 使用完全不可变的方式更新currentPost
         if (state.currentPost && state.currentPost.id === action.payload.postId) {
-          state.currentPost.likesCount = action.payload.likesCount;
+          // 确保创建一个全新的对象引用
+          state.currentPost = {
+            ...state.currentPost,
+            likesCount: action.payload.likesCount
+          };
+          console.log('更新后的currentPost:', state.currentPost);
         }
+        
         // 同时更新帖子列表中的点赞数
         const postIndex = state.posts.findIndex(post => post.id === action.payload.postId);
         if (postIndex !== -1) {
-          state.posts[postIndex].likesCount = action.payload.likesCount;
+          // 创建一个新的数组引用以确保UI更新
+          state.posts = state.posts.map(post => 
+            post.id === action.payload.postId 
+              ? { ...post, likesCount: action.payload.likesCount }
+              : post
+          );
         }
       })
       
       // 点赞评论
       .addCase(likeCommentThunk.fulfilled, (state, action) => {
-        const commentIndex = state.comments.findIndex(
-          comment => comment.id === action.payload.commentId
+        console.log('Redux更新评论点赞状态:', action.payload);
+        
+        // 使用map方法进行完全不可变的更新
+        state.comments = state.comments.map(comment => 
+          comment.id === action.payload.commentId
+            ? { ...comment, likesCount: action.payload.likesCount }
+            : comment
         );
-        if (commentIndex !== -1) {
-          state.comments[commentIndex].likesCount = action.payload.likesCount;
-        }
+        
+        // 确保数组引用已更新
+        console.log('更新后的评论数量:', state.comments.length);
       })
       
       // 搜索帖子
