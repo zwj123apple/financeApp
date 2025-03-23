@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity, Animated, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -7,75 +7,42 @@ import theme from '../utils/theme';
 import { Text, Divider, Tab } from '@rneui/themed';
 import { LineChart, PieChart, BarChart } from './charts';
 
-const AnalysisView = ({
-  periodIndex,
-  typeIndex,
-  setTypeIndex,
-  assetDetailData,
-  fadeAnim,
-  slideAnim,
-  isLoading,
-}) => {
+/**
+ * 通用的财务分析视图组件
+ * @param {Object} props 组件属性
+ * @param {number} props.periodIndex - 当前选择的周期索引（0: 月度, 1: 年度）
+ * @param {number} props.typeIndex - 当前选择的类型索引（0: 收入, 1: 支出）
+ * @param {Function} props.setTypeIndex - 设置类型索引的函数
+ * @param {Object} props.assetDetailData - 资产详情数据
+ * @param {number} props.assetDetailData.totalAmount - 总金额
+ * @param {number} props.assetDetailData.comparePercentage - 同比百分比
+ * @param {Array} props.assetDetailData.timeFilters - 时间筛选选项数组
+ * @param {string} props.assetDetailData.timeFilters[].label - 时间筛选选项标签
+ * @param {string|number} props.assetDetailData.timeFilters[].value - 时间筛选选项值
+ * @param {Function} props.assetDetailData.onTimeFilterChange - 时间筛选变更回调函数 (index, value) => void
+ * @param {Object} props.barChartData - 柱状图数据，格式为 {labels: string[], datasets: [{data: number[]}]}
+ * @param {Object} props.pieChartData - 饼图数据，格式为 [{name: string, value: number, color: string}]
+ * @param {Object} props.trendChartData - 趋势图数据，格式为 {labels: string[], datasets: [{data: number[], color: function, strokeWidth: number}]}
+ * @param {boolean} props.isLoading - 是否正在加载
+ */
+const AnalysisView = (props) => {
+  const {
+    periodIndex,
+    typeIndex,
+    setTypeIndex,
+    assetDetailData,
+    barChartData,
+    pieChartData,
+    trendChartData,
+    isLoading,
+    onDataUpdate
+  } = props;
   // 添加时间筛选状态
   const [selectedTimeFilter, setSelectedTimeFilter] = useState(0);
   const { width, height } = useWindowDimensions();
-
-  // 准备柱状图数据
-  const prepareBarChartData = () => {
-    if (!assetDetailData || !assetDetailData.categoryData) {
-      return {
-        labels: [],
-        datasets: [{ data: [] }]
-      };
-    }
-    
-    const labels = assetDetailData.categoryData.map(item => item.category);
-    const data = assetDetailData.categoryData.map(item => item.amount);
-    
-    return {
-      labels,
-      datasets: [{ data }]
-    };
-  };
   
-  // 准备饼图数据
-  const preparePieChartData = () => {
-    if (!assetDetailData || !assetDetailData.categoryData) {
-      return [];
-    }
-    
-    // 饼图颜色
-    const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
-    
-    return assetDetailData.categoryData.map((item, index) => ({
-      name: item.category,
-      value: item.amount,
-      color: colors[index % colors.length]
-    }));
-  };
-  
-  // 准备趋势图数据
-  const prepareTrendData = () => {
-    // 如果没有数据，返回空数据结构
-    if (!assetDetailData || !assetDetailData.trendData) {
-      return {
-        labels: [],
-        datasets: [{ data: [] }]
-      };
-    }
-    
-    const labels = assetDetailData.trendData.map(item => item.date);
-    const data = assetDetailData.trendData.map(item => item.amount);
-    
-    return {
-      labels,
-      datasets: [{
-        data,
-        color: (opacity = 1) => `rgba(37, 99, 235, ${opacity})`,
-        strokeWidth: 2
-      }]
-    };
-  };
+  // 添加动画值
+  const [fadeAnim] = useState(new Animated.Value(1));
 
   return (
     <ScrollView
@@ -90,9 +57,9 @@ const AnalysisView = ({
         indicatorStyle={{
           backgroundColor: theme.COLORS.primary,
           height: 3,
-          borderRadius: theme.BORDER_RADIUS.full,
-          width: '40%',
-          marginLeft: '5%',
+          borderRadius: 0, // 使用方形设计
+          width: '45%',
+          marginLeft: '2.5%',
           transform: [{ translateX: typeIndex === 0 ? 0 : '100%' }],
           transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         }}
@@ -115,11 +82,13 @@ const AnalysisView = ({
           }}
           buttonStyle={(active) => ({
             backgroundColor: active ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
-            borderRadius: theme.BORDER_RADIUS.md,
-            paddingVertical: theme.SPACING.xs,
-            paddingHorizontal: theme.SPACING.sm,
-            marginHorizontal: theme.SPACING.xxs,
+            borderRadius: 0, // 使用方形设计
+            paddingVertical: theme.SPACING.sm,
+            paddingHorizontal: theme.SPACING.xs,
+            marginHorizontal: 0,
+            borderBottom: active ? `2px solid ${theme.COLORS.primary}` : 'none',
             transition: 'all 0.3s ease',
+            flex: 1, // 让Tab项平均分配空间
           })}
         />
         <Tab.Item
@@ -138,89 +107,106 @@ const AnalysisView = ({
           }}
           buttonStyle={(active) => ({
             backgroundColor: active ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
-            borderRadius: theme.BORDER_RADIUS.md,
-            paddingVertical: theme.SPACING.xs,
-            paddingHorizontal: theme.SPACING.sm,
-            marginHorizontal: theme.SPACING.xxs,
+            borderRadius: 0, // 使用方形设计
+            paddingVertical: theme.SPACING.sm,
+            paddingHorizontal: theme.SPACING.xs,
+            marginHorizontal: 0,
+            borderBottom: active ? `2px solid ${theme.COLORS.primary}` : 'none',
             transition: 'all 0.3s ease',
+            flex: 1, // 让Tab项平均分配空间
           })}
         />
       </Tab>
       
-      {/* 金额显示区域 */}
-      <Animated.View style={[styles.amountContainer, {
-        opacity: fadeAnim,
-        transform: [{ translateY: slideAnim }],
+      {/* 金额显示区域和时间筛选区域的整合设计 */}
+      <View style={[styles.combinedContainer, {
         width: width * 0.9,
         maxWidth: 500
       }]}>
+        {/* 金额显示区域 */}
         <LinearGradient
           colors={typeIndex === 0 ? theme.GRADIENTS.success : theme.GRADIENTS.error}
           style={styles.amountGradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <Text style={styles.amountLabel}>
-            {periodIndex === 0 ? '本月' : '本年'}{typeIndex === 0 ? '收入' : '支出'}
-          </Text>
-          <Text style={styles.amountValue}>
-            ¥ {assetDetailData?.totalAmount?.toFixed(2) || '0.00'}
-          </Text>
-          <Text style={styles.amountCompare}>
-            较{periodIndex === 0 ? '上月' : '去年'}{assetDetailData?.comparePercentage > 0 ? '增长' : '减少'} {Math.abs(assetDetailData?.comparePercentage || 0).toFixed(2)}%
-          </Text>
-        </LinearGradient>
-      </Animated.View>
-      
-      {/* 时间筛选区域 */}
-      <Animated.View style={[styles.filterContainer, {
-        opacity: fadeAnim,
-        transform: [{ translateY: slideAnim }],
-        width: width * 0.9,
-        maxWidth: 500
-      }]}>
-        <Text style={styles.filterTitle}>时间筛选</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.timeFilterContainer}
-        >
-          {assetDetailData?.timeFilters?.map((filter, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.timeFilterItem, 
-                selectedTimeFilter === index && styles.timeFilterItemActive
-              ]}
-              onPress={() => {
-                // 更新选中的时间筛选
-                setSelectedTimeFilter(index);
-                
-                // 这里应该调用API获取对应时间的数据
-                // 实际项目中，这里应该调用一个函数来获取新的数据
-                console.log('选择时间筛选:', filter.label);
-                
-                // 模拟数据更新 - 在实际应用中应替换为API调用
-                if (assetDetailData && assetDetailData.onTimeFilterChange) {
-                  assetDetailData.onTimeFilterChange(index, filter.value);
-                }
-              }}
-            >
-              <Text style={[
-                styles.timeFilterText, 
-                selectedTimeFilter === index && styles.timeFilterTextActive
-              ]}>
-                {filter.label}
+          <View style={styles.amountContent}>
+            <View style={styles.amountTextContainer}>
+              <Text style={styles.amountLabel}>
+                {periodIndex === 0 ? '本月' : '本年'}{typeIndex === 0 ? '收入' : '支出'}
               </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </Animated.View>
+              <Text style={styles.amountValue}>
+                ¥ {assetDetailData?.totalAmount?.toFixed(2) || '0.00'}
+              </Text>
+            </View>
+            <Text style={styles.amountCompare}>
+              较{periodIndex === 0 ? '上月' : '去年'}{assetDetailData?.comparePercentage > 0 ? '增长' : '减少'} {Math.abs(assetDetailData?.comparePercentage || 0).toFixed(2)}%
+            </Text>
+          </View>
+        </LinearGradient>
+        
+        {/* 时间筛选区域 */}
+        <View style={styles.filterSection}>
+          <Text style={styles.filterTitle}>时间筛选</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.timeFilterContainer}
+          >
+            {assetDetailData?.timeFilters?.map((filter, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.timeFilterItem, 
+                  selectedTimeFilter === index && styles.timeFilterItemActive
+                ]}
+                onPress={() => {
+                  // 更新选中的时间筛选
+                  setSelectedTimeFilter(index);
+                  
+                  // 显示加载状态
+                  if (isLoading) return;
+                  
+                  // 创建动画效果
+                  Animated.sequence([
+                    Animated.timing(fadeAnim, {
+                      toValue: 0.5,
+                      duration: 200,
+                      useNativeDriver: true
+                    }),
+                    Animated.timing(fadeAnim, {
+                      toValue: 1,
+                      duration: 300,
+                      useNativeDriver: true
+                    })
+                  ]).start();
+                  
+                  // 调用外部传入的时间筛选变更回调并更新数据
+                  if (assetDetailData?.onTimeFilterChange) {
+                    // 获取更新后的数据并通知父组件
+                    const updatedData = assetDetailData.onTimeFilterChange(index, filter.value);
+                    
+                    // 如果父组件提供了更新函数，则调用它更新数据
+                    if (props.onDataUpdate) {
+                      props.onDataUpdate(updatedData);
+                    }
+                  }
+                }}
+              >
+                <Text style={[
+                  styles.timeFilterText, 
+                  selectedTimeFilter === index && styles.timeFilterTextActive
+                ]}>
+                  {filter.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </View>
       
       {/* 柱状图 */}
-      <Animated.View style={[styles.chartContainer, {
-        opacity: fadeAnim,
-        transform: [{ translateY: fadeAnim.interpolate({inputRange: [0, 1], outputRange: [100, 0]}) }],
+      <View style={[styles.chartContainer, {
         width: width * 0.9,
         maxWidth: 500
       }]}>
@@ -228,7 +214,7 @@ const AnalysisView = ({
         <Divider style={styles.divider} />
         <View style={styles.chartWrapper}>
           <BarChart
-            data={prepareBarChartData()}
+            data={barChartData}
             title={`${typeIndex === 0 ? (periodIndex === 0 ? '月度收入' : '年度收入') : (periodIndex === 0 ? '月度支出' : '年度支出')}类别统计`}
             height={Math.min(180, height * 0.25)}
             width={width * 0.85}
@@ -239,12 +225,10 @@ const AnalysisView = ({
         <Text style={styles.chartDescription}>
           展示您的{typeIndex === 0 ? '收入' : '支出'}在不同类别间的分布情况。
         </Text>
-      </Animated.View>
+      </View>
       
       {/* 饼图 */}
-      <Animated.View style={[styles.chartContainer, {
-        opacity: fadeAnim,
-        transform: [{ translateY: fadeAnim.interpolate({inputRange: [0, 1], outputRange: [150, 0]}) }],
+      <View style={[styles.chartContainer, {
         width: width * 0.9,
         maxWidth: 500
       }]}>
@@ -252,7 +236,7 @@ const AnalysisView = ({
         <Divider style={styles.divider} />
         <View style={styles.chartWrapper}>
           <PieChart
-            data={preparePieChartData()}
+            data={pieChartData}
             title={`${typeIndex === 0 ? (periodIndex === 0 ? '月度收入' : '年度收入') : (periodIndex === 0 ? '月度支出' : '年度支出')}占比`}
             height={Math.min(220, height * 0.3)}
             width={width * 0.85}
@@ -262,12 +246,10 @@ const AnalysisView = ({
         <Text style={styles.chartDescription}>
           展示您的{typeIndex === 0 ? (periodIndex === 0 ? '月度收入' : '年度收入') : (periodIndex === 0 ? '月度支出' : '年度支出')}在不同类别间的占比情况。
         </Text>
-      </Animated.View>
+      </View>
       
       {/* 趋势图 */}
-      <Animated.View style={[styles.chartContainer, {
-        opacity: fadeAnim,
-        transform: [{ translateY: fadeAnim.interpolate({inputRange: [0, 1], outputRange: [200, 0]}) }],
+      <View style={[styles.chartContainer, {
         width: width * 0.9,
         maxWidth: 500
       }]}>
@@ -275,7 +257,7 @@ const AnalysisView = ({
         <Divider style={styles.divider} />
         <View style={styles.chartWrapper}>
           <LineChart
-            data={prepareTrendData()}
+            data={trendChartData}
             title={`${typeIndex === 0 ? (periodIndex === 0 ? '月度收入' : '年度收入') : (periodIndex === 0 ? '月度支出' : '年度支出')}趋势`}
             height={Math.min(180, height * 0.25)}
             width={width * 0.85}
@@ -286,7 +268,7 @@ const AnalysisView = ({
         <Text style={styles.chartDescription}>
           展示您的{typeIndex === 0 ? (periodIndex === 0 ? '月度收入' : '年度收入') : (periodIndex === 0 ? '月度支出' : '年度支出')}随时间变化的趋势。
         </Text>
-      </Animated.View>
+      </View>
     </ScrollView>
   );
 };
@@ -296,91 +278,88 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingBottom: theme.SPACING.xxl,
+    paddingBottom: theme.SPACING.xl,
     alignItems: 'center',
   },
   innerTabContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: theme.COLORS.white,
     marginVertical: theme.SPACING.md,
-    borderRadius: theme.BORDER_RADIUS.lg,
-    paddingHorizontal: theme.SPACING.xs,
-    paddingVertical: theme.SPACING.xxs,
+    borderRadius: theme.BORDER_RADIUS.sm,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: theme.COLORS.borderLight,
+    ...theme.SHADOWS.xs,
+    display: 'flex', // 使用flex布局
+    flexDirection: 'row', // 水平排列
+  },
+  combinedContainer: {
+    marginVertical: theme.SPACING.sm,
+    borderRadius: theme.BORDER_RADIUS.md,
     overflow: 'hidden',
     ...theme.SHADOWS.sm,
+    backgroundColor: theme.COLORS.white,
     borderWidth: 1,
-    borderColor: 'rgba(229, 231, 235, 0.5)',
-    elevation: 1,
-    shadowColor: theme.COLORS.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    backdropFilter: 'blur(8px)',
+    borderColor: theme.COLORS.borderLight,
   },
-  amountContainer: {
-    marginVertical: theme.SPACING.md,
-    borderRadius: theme.BORDER_RADIUS.lg,
-    overflow: 'hidden',
-    ...theme.SHADOWS.md,
+  amountContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  amountTextContainer: {
+    flex: 1,
   },
   amountGradient: {
-    padding: theme.SPACING.lg,
-    borderRadius: theme.BORDER_RADIUS.lg,
-    alignItems: 'center',
+    padding: theme.SPACING.md,
+    borderRadius: theme.BORDER_RADIUS.md,
+    margin: theme.SPACING.xxs,
   },
   amountLabel: {
     color: theme.COLORS.white,
-    fontSize: theme.FONT_SIZES.md,
+    fontSize: theme.FONT_SIZES.sm,
     fontWeight: theme.FONT_WEIGHTS.medium,
-    marginBottom: theme.SPACING.xs,
+    marginBottom: theme.SPACING.xxs,
   },
   amountValue: {
     color: theme.COLORS.white,
-    fontSize: theme.FONT_SIZES.xxxl,
+    fontSize: theme.FONT_SIZES.xxl,
     fontWeight: theme.FONT_WEIGHTS.bold,
-    marginBottom: theme.SPACING.sm,
   },
   amountCompare: {
     color: theme.COLORS.white,
-    fontSize: theme.FONT_SIZES.sm,
+    fontSize: theme.FONT_SIZES.xs,
     fontWeight: theme.FONT_WEIGHTS.medium,
     opacity: 0.9,
+    textAlign: 'right',
+    marginLeft: theme.SPACING.sm,
   },
-  filterContainer: {
-    marginVertical: theme.SPACING.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: theme.BORDER_RADIUS.lg,
-    padding: theme.SPACING.md,
-    ...theme.SHADOWS.sm,
-    borderWidth: 1,
-    borderColor: 'rgba(229, 231, 235, 0.5)',
-    elevation: 1,
-    shadowColor: theme.COLORS.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    backdropFilter: 'blur(8px)',
+  filterSection: {
+    padding: theme.SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: theme.COLORS.borderLight,
   },
   filterTitle: {
     fontSize: theme.FONT_SIZES.md,
     fontWeight: theme.FONT_WEIGHTS.semibold,
     color: theme.COLORS.text,
-    marginBottom: theme.SPACING.sm,
+    marginBottom: theme.SPACING.xs,
   },
   timeFilterContainer: {
-    paddingVertical: theme.SPACING.xs,
+    paddingVertical: theme.SPACING.xxs,
   },
   timeFilterItem: {
-    paddingHorizontal: theme.SPACING.md,
+    paddingHorizontal: theme.SPACING.sm,
     paddingVertical: theme.SPACING.xs,
-    borderRadius: theme.BORDER_RADIUS.full,
-    backgroundColor: 'rgba(243, 244, 246, 0.7)',
-    marginRight: theme.SPACING.sm,
+    borderRadius: theme.BORDER_RADIUS.sm,
+    backgroundColor: theme.COLORS.backgroundLight,
+    marginRight: theme.SPACING.xs,
     borderWidth: 1,
-    borderColor: 'transparent',
-    transition: 'all 0.3s ease',
+    borderColor: theme.COLORS.borderLight,
   },
   timeFilterItemActive: {
-    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+    backgroundColor: 'rgba(37, 99, 235, 0.08)',
     borderColor: theme.COLORS.primary,
   },
   timeFilterText: {
@@ -393,37 +372,32 @@ const styles = StyleSheet.create({
     fontWeight: theme.FONT_WEIGHTS.medium,
   },
   chartContainer: {
-    marginVertical: theme.SPACING.md,
+    marginVertical: theme.SPACING.sm,
     backgroundColor: theme.COLORS.white,
-    borderRadius: theme.BORDER_RADIUS.lg,
-    padding: theme.SPACING.md,
-    ...theme.SHADOWS.sm,
-    elevation: 3,
-    shadowColor: theme.COLORS.shadow,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 5,
-    borderWidth: 0.5,
+    borderRadius: theme.BORDER_RADIUS.md,
+    padding: theme.SPACING.sm,
+    borderWidth: 1,
     borderColor: theme.COLORS.borderLight,
+    ...theme.SHADOWS.xs,
   },
   chartTitle: {
     fontSize: theme.FONT_SIZES.md,
     fontWeight: theme.FONT_WEIGHTS.semibold,
     color: theme.COLORS.text,
-    marginBottom: theme.SPACING.xs,
+    marginBottom: theme.SPACING.xxs,
   },
   divider: {
-    marginVertical: theme.SPACING.sm,
+    marginVertical: theme.SPACING.xs,
   },
   chartWrapper: {
     alignItems: 'center',
-    marginVertical: theme.SPACING.sm,
+    marginVertical: theme.SPACING.xs,
   },
   chartDescription: {
     fontSize: theme.FONT_SIZES.sm,
     color: theme.COLORS.textLight,
     textAlign: 'center',
-    marginTop: theme.SPACING.sm,
+    marginTop: theme.SPACING.xs,
   }
 });
 

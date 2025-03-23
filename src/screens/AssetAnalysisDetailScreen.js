@@ -18,6 +18,16 @@ const AssetAnalysisDetailScreen = ({ navigation }) => {
   const [typeIndex, setTypeIndex] = useState(0); // 0: 收入, 1: 支出
   const [assetDetailData, setAssetDetailData] = useState(null);
   
+  // 添加数据更新函数，用于时间筛选器变化时更新图表数据
+  const onDataUpdate = (updatedData) => {
+    if (updatedData) {
+      setAssetDetailData(prevData => ({
+        ...prevData,
+        ...updatedData
+      }));
+    }
+  };
+  
   // 动画值
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(50));
@@ -80,11 +90,9 @@ const AssetAnalysisDetailScreen = ({ navigation }) => {
   // 如果用户未登录，显示登录按钮
   if (!user) {
     return (
-      <LinearGradient
-        colors={theme.GRADIENTS.background}
-        style={styles.gradientContainer}
-      >
-        <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+        <SafeAreaView style={styles.safeArea}>
           <View style={styles.loginContainer}>
             <Text style={styles.sectionTitle}>您尚未登录</Text>
             <Divider style={styles.divider} />
@@ -93,10 +101,19 @@ const AssetAnalysisDetailScreen = ({ navigation }) => {
               title="去登录"
               onPress={() => navigation.navigate('Login')}
               buttonStyle={styles.loginButton}
+              titleStyle={styles.loginButtonText}
+              containerStyle={styles.loginButtonContainer}
+              icon={{
+                name: 'login',
+                type: 'material-community',
+                color: theme.COLORS.white,
+                size: 18,
+                style: { marginRight: theme.SPACING.xs }
+              }}
             />
           </View>
         </SafeAreaView>
-      </LinearGradient>
+      </View>
     );
   }
   
@@ -105,24 +122,21 @@ const AssetAnalysisDetailScreen = ({ navigation }) => {
   // 添加加载状态指示器
   if (isLoading) {
     return (
-      <LinearGradient
-        colors={theme.GRADIENTS.background}
-        style={styles.gradientContainer}
-      >
-        <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+        <SafeAreaView style={styles.safeArea}>
           <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>加载资产分析详情数据...</Text>
+            <View style={styles.loadingIndicator}>
+              <Text style={styles.loadingText}>加载资产分析详情数据...</Text>
+            </View>
           </View>
         </SafeAreaView>
-      </LinearGradient>
+      </View>
     );
   }
   
   return (
-    <LinearGradient
-      colors={theme.GRADIENTS.background}
-      style={styles.gradientContainer}
-    >
+    <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       <SafeAreaView style={styles.safeArea}>
         {/* 顶部时间维度切换 */}
@@ -130,31 +144,48 @@ const AssetAnalysisDetailScreen = ({ navigation }) => {
           value={periodIndex}
           onChange={setPeriodIndex}
           indicatorStyle={{
-            backgroundColor: theme.COLORS.primary,
-            height: 3,
-            borderRadius: theme.BORDER_RADIUS.full,
+            backgroundColor: `${theme.COLORS.primary}40`, // 增加透明度，使颜色更明显
+            height: '100%',
+            width: '50%',
+            borderRadius: theme.BORDER_RADIUS.md,
+            transform: [{ translateX: periodIndex === 0 ? 0 : '100%' }],
+            transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            zIndex: 0, // 保持在文字和图标下方
+            borderBottomWidth: 3,
+            borderBottomColor: theme.COLORS.primary,
           }}
           containerStyle={styles.tabContainer}
-          variant="primary"
+          variant="default"
         >
           <Tab.Item
             title="月度分析"
             titleStyle={(active) => ({
               color: active ? theme.COLORS.primary : theme.COLORS.textLight,
               fontSize: theme.FONT_SIZES.sm,
-              fontWeight: active ? theme.FONT_WEIGHTS.semibold : theme.FONT_WEIGHTS.regular,
-              transition: '0.3s',
+              fontWeight: active ? theme.FONT_WEIGHTS.bold : theme.FONT_WEIGHTS.medium,
+              marginLeft: theme.SPACING.xs, // 增加左侧边距
+              transition: 'all 0.3s ease',
+              zIndex: 2, // 增加zIndex确保文字在最上层
+              flexShrink: 1, // 允许文本在空间不足时缩小
             })}
             icon={{
               name: 'calendar-month',
               type: 'material-community',
               color: periodIndex === 0 ? theme.COLORS.primary : theme.COLORS.textLight,
-              size: 20,
+              size: 16,
+              style: { zIndex: 2 } // 增加zIndex确保图标在最上层
             }}
             buttonStyle={(active) => ({
-              backgroundColor: active ? theme.COLORS.backgroundLight : 'transparent',
+              backgroundColor: 'transparent',
+              paddingVertical: theme.SPACING.sm,
+              paddingHorizontal: theme.SPACING.md, // 增加水平内边距
+              marginHorizontal: 0,
               borderRadius: theme.BORDER_RADIUS.md,
-              paddingVertical: theme.SPACING.xs,
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              transition: 'all 0.3s ease',
+              zIndex: 1,
             })}
           />
           <Tab.Item
@@ -162,19 +193,30 @@ const AssetAnalysisDetailScreen = ({ navigation }) => {
             titleStyle={(active) => ({
               color: active ? theme.COLORS.primary : theme.COLORS.textLight,
               fontSize: theme.FONT_SIZES.sm,
-              fontWeight: active ? theme.FONT_WEIGHTS.semibold : theme.FONT_WEIGHTS.regular,
-              transition: '0.3s',
+              fontWeight: active ? theme.FONT_WEIGHTS.bold : theme.FONT_WEIGHTS.medium,
+              marginLeft: theme.SPACING.xs, // 增加左侧边距
+              transition: 'all 0.3s ease',
+              zIndex: 2, // 增加zIndex确保文字在最上层
+              flexShrink: 1, // 允许文本在空间不足时缩小
             })}
             icon={{
               name: 'calendar',
               type: 'material-community',
               color: periodIndex === 1 ? theme.COLORS.primary : theme.COLORS.textLight,
-              size: 20,
+              size: 16,
+              style: { zIndex: 2 } // 增加zIndex确保图标在最上层
             }}
             buttonStyle={(active) => ({
-              backgroundColor: active ? theme.COLORS.backgroundLight : 'transparent',
+              backgroundColor: 'transparent',
+              paddingVertical: theme.SPACING.sm,
+              paddingHorizontal: theme.SPACING.md, // 增加水平内边距
+              marginHorizontal: 0,
               borderRadius: theme.BORDER_RADIUS.md,
-              paddingVertical: theme.SPACING.xs,
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              transition: 'all 0.3s ease',
+              zIndex: 1,
             })}
           />
         </Tab>
@@ -182,63 +224,105 @@ const AssetAnalysisDetailScreen = ({ navigation }) => {
         <TabView
           value={periodIndex}
           onChange={setPeriodIndex}
-          animationType="spring"
-          animationConfig={{
-            friction: 8,
-            tension: 50,
-          }}
+          animationType="spring" // 修改为有效的动画类型
+          disableTransition={true} // 添加禁用过渡效果属性
           containerStyle={styles.tabViewContainer}
         >
           {/* 月度分析视图 */}
           <TabView.Item style={styles.tabViewItem}>
-            <Animated.View style={[styles.tabContentContainer, {
-              opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }]
-            }]}>
+            <View style={styles.tabContentContainer}>
               <AnalysisView
                 periodIndex={periodIndex}
                 typeIndex={typeIndex}
                 setTypeIndex={setTypeIndex}
                 assetDetailData={assetDetailData}
-                fadeAnim={fadeAnim}
-                slideAnim={slideAnim}
+                onDataUpdate={onDataUpdate}
                 isLoading={isLoading}
+                barChartData={assetDetailData ? {
+                  labels: assetDetailData.categoryData?.map(item => item.category) || [],
+                  datasets: [{
+                    data: assetDetailData.categoryData?.map(item => item.amount) || []
+                  }]
+                } : {labels: [], datasets: [{data: []}]}}
+                pieChartData={assetDetailData ? assetDetailData.categoryData?.map((item, index) => ({
+                  name: item.category,
+                  value: item.amount,
+                  color: [
+                    '#2563eb', // 蓝色
+                    '#10b981', // 绿色
+                    '#f59e0b', // 橙色
+                    '#8b5cf6', // 紫色
+                    '#ec4899', // 粉色
+                    '#14b8a6', // 青色
+                    '#f43f5e'  // 红色
+                  ][index % 7]
+                })) || [] : []}
+                trendChartData={assetDetailData ? {
+                  labels: assetDetailData.trendData?.map(item => item.date) || [],
+                  datasets: [{
+                    data: assetDetailData.trendData?.map(item => item.amount) || [],
+                    color: (opacity = 1) => `rgba(37, 99, 235, ${opacity})`,
+                    strokeWidth: 2
+                  }]
+                } : {labels: [], datasets: [{data: []}]}}
               />
-            </Animated.View>
+            </View>
           </TabView.Item>
           
           {/* 年度分析视图 */}
           <TabView.Item style={styles.tabViewItem}>
-            <Animated.View style={[styles.tabContentContainer, {
-              opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }]
-            }]}>
+            <View style={styles.tabContentContainer}>
               <AnalysisView
                 periodIndex={periodIndex}
                 typeIndex={typeIndex}
                 setTypeIndex={setTypeIndex}
                 assetDetailData={assetDetailData}
-                fadeAnim={fadeAnim}
-                slideAnim={slideAnim}
+                onDataUpdate={onDataUpdate}
                 isLoading={isLoading}
+                barChartData={assetDetailData ? {
+                  labels: assetDetailData.categoryData?.map(item => item.category) || [],
+                  datasets: [{
+                    data: assetDetailData.categoryData?.map(item => item.amount) || []
+                  }]
+                } : {labels: [], datasets: [{data: []}]}}
+                pieChartData={assetDetailData ? assetDetailData.categoryData?.map((item, index) => ({
+                  name: item.category,
+                  value: item.amount,
+                  color: [
+                    '#2563eb', // 蓝色
+                    '#10b981', // 绿色
+                    '#f59e0b', // 橙色
+                    '#8b5cf6', // 紫色
+                    '#ec4899', // 粉色
+                    '#14b8a6', // 青色
+                    '#f43f5e'  // 红色
+                  ][index % 7]
+                })) || [] : []}
+                trendChartData={assetDetailData ? {
+                  labels: assetDetailData.trendData?.map(item => item.date) || [],
+                  datasets: [{
+                    data: assetDetailData.trendData?.map(item => item.amount) || [],
+                    color: (opacity = 1) => `rgba(37, 99, 235, ${opacity})`,
+                    strokeWidth: 2
+                  }]
+                } : {labels: [], datasets: [{data: []}]}}
               />
-            </Animated.View>
+            </View>
           </TabView.Item>
         </TabView>
       </SafeAreaView>
-    </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  gradientContainer: {
+  container: {
     flex: 1,
+    backgroundColor: theme.COLORS.backgroundLight,
   },
   safeArea: {
     flex: 1,
-  },
-  container: {
-    flex: 1,
+    paddingTop: 0, // 移除顶部内边距
   },
   scrollView: {
     flex: 1,
@@ -249,21 +333,36 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     backgroundColor: theme.COLORS.white,
-    marginTop: theme.SPACING.md,
-    marginBottom: theme.SPACING.sm,
-    borderRadius: theme.BORDER_RADIUS.lg,
-    paddingHorizontal: theme.SPACING.xs,
-    paddingVertical: theme.SPACING.xxs,
+    marginTop: 0, // 移除顶部间距
+    marginBottom: 0, // 移除底部间距，使Tab与内容区域紧密连接
+    paddingHorizontal: theme.SPACING.md, // 增加水平内边距，确保文本显示完整
+    paddingVertical: theme.SPACING.sm, // 增加垂直内边距，提供更好的视觉空间
+    marginHorizontal: 0, // 移除水平外边距
+    borderTopLeftRadius: theme.BORDER_RADIUS.md,
+    borderTopRightRadius: theme.BORDER_RADIUS.md,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    borderWidth: 1,
+    borderColor: theme.COLORS.borderLight,
+    borderBottomWidth: 0, // 移除底部边框
+    ...theme.SHADOWS.xs,
+    width: '100%', // 使Tab容器宽度与内容区域一致
+    alignSelf: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    maxWidth: 500,
+    zIndex: 2,
     elevation: 2,
-    shadowColor: theme.COLORS.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    marginHorizontal: theme.SPACING.md,
+    position: 'relative',
+    overflow: 'hidden',
   },
   tabViewContainer: {
-    transition: 'all 0.3s ease',
     flex: 1,
+    backgroundColor: 'transparent',
+    width: '100%', // 确保宽度铺满
+    marginTop: 0, // 移除负边距
+    zIndex: 1, // 确保层级正确
+    paddingHorizontal: theme.SPACING.sm, // 添加水平内边距
   },
   innerTabContainer: {
     backgroundColor: 'transparent',
@@ -272,76 +371,90 @@ const styles = StyleSheet.create({
   tabViewItem: {
     width: '100%',
     flex: 1,
+    alignItems: 'center', // 居中对齐内容
+    justifyContent: 'flex-start', // 顶部对齐内容
+    paddingTop: 0, // 移除顶部内边距
   },
   tabContentContainer: {
     flex: 1,
-    backgroundColor: 'transparent',
-    borderRadius: theme.BORDER_RADIUS.lg,
-    overflow: 'hidden',
-    marginHorizontal: theme.SPACING.xs,
-  },
-  amountContainer: {
-    marginVertical: theme.SPACING.md,
-    borderRadius: theme.BORDER_RADIUS.lg,
-    overflow: 'hidden',
-    ...theme.SHADOWS.md,
-  },
-  amountGradient: {
-    padding: theme.SPACING.lg,
-    borderRadius: theme.BORDER_RADIUS.lg,
-    alignItems: 'center',
-  },
-  amountLabel: {
-    color: theme.COLORS.white,
-    fontSize: theme.FONT_SIZES.md,
-    fontWeight: theme.FONT_WEIGHTS.medium,
-    marginBottom: theme.SPACING.xs,
-  },
-  amountValue: {
-    color: theme.COLORS.white,
-    fontSize: theme.FONT_SIZES.xxxl,
-    fontWeight: theme.FONT_WEIGHTS.bold,
-    marginBottom: theme.SPACING.sm,
-  },
-  amountCompare: {
-    color: theme.COLORS.white,
-    fontSize: theme.FONT_SIZES.sm,
-    fontWeight: theme.FONT_WEIGHTS.medium,
-    opacity: 0.9,
-  },
-  filterContainer: {
-    marginVertical: theme.SPACING.md,
     backgroundColor: theme.COLORS.white,
-    borderRadius: theme.BORDER_RADIUS.lg,
-    padding: theme.SPACING.md,
-    ...theme.SHADOWS.sm,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: theme.BORDER_RADIUS.md,
+    borderBottomRightRadius: theme.BORDER_RADIUS.md,
+    overflow: 'hidden',
+    marginHorizontal: 0, // 移除水平外边距
+    width: '100%', // 使内容区域宽度与Tab容器一致
+    maxWidth: 500, // 与Tab容器最大宽度一致
+    borderWidth: 1,
+    borderColor: theme.COLORS.borderLight,
+    borderTopWidth: 0, // 移除顶部边框，与Tab容器连接
+    ...theme.SHADOWS.sm, // 保持阴影效果一致
+    elevation: 1, // 为Android添加海拔效果，但低于Tab
+    paddingTop: theme.SPACING.md, // 增加顶部内边距，提供更好的视觉空间
   },
-  filterTitle: {
-    fontSize: theme.FONT_SIZES.md,
-    fontWeight: theme.FONT_WEIGHTS.semibold,
-    color: theme.COLORS.text,
-    marginBottom: theme.SPACING.sm,
-  },
-  timeFilterContainer: {
-    paddingVertical: theme.SPACING.xs,
-  },
-  timeFilterItem: {
-    paddingHorizontal: theme.SPACING.md,
-    paddingVertical: theme.SPACING.xs,
-    borderRadius: theme.BORDER_RADIUS.full,
+  // 登录相关样式
+  loginContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: theme.SPACING.xl,
     backgroundColor: theme.COLORS.backgroundLight,
-    marginRight: theme.SPACING.sm,
   },
-  timeFilterItemActive: {
-    backgroundColor: theme.COLORS.primary,
+  sectionTitle: {
+    fontSize: theme.FONT_SIZES.xl,
+    fontWeight: theme.FONT_WEIGHTS.bold,
+    color: theme.COLORS.text,
+    marginBottom: theme.SPACING.md,
+    textAlign: 'center',
   },
-  timeFilterText: {
-    fontSize: theme.FONT_SIZES.sm,
+  divider: {
+    width: '80%',
+    marginVertical: theme.SPACING.md,
+  },
+  notLoginText: {
+    fontSize: theme.FONT_SIZES.md,
     color: theme.COLORS.textLight,
+    marginBottom: theme.SPACING.xl,
+    textAlign: 'center',
   },
-  timeFilterTextActive: {
-    color: theme.COLORS.white,
+  loginButton: {
+    backgroundColor: theme.COLORS.primary,
+    paddingVertical: theme.SPACING.sm,
+    paddingHorizontal: theme.SPACING.lg,
+    borderRadius: theme.BORDER_RADIUS.md,
+  },
+  loginButtonText: {
+    fontSize: theme.FONT_SIZES.md,
     fontWeight: theme.FONT_WEIGHTS.medium,
+  },
+  loginButtonContainer: {
+    width: '60%',
+    maxWidth: 250,
+    marginTop: theme.SPACING.md,
+  },
+  
+  // 加载状态样式
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.COLORS.backgroundLight,
+  },
+  loadingIndicator: {
+    backgroundColor: theme.COLORS.white,
+    padding: theme.SPACING.lg,
+    borderRadius: theme.BORDER_RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...theme.SHADOWS.md,
+    width: '80%',
+    maxWidth: 350,
+  },
+  loadingText: {
+    fontSize: theme.FONT_SIZES.md,
+    color: theme.COLORS.textLight,
+    textAlign: 'center',
   },
   chartContainer: {
     marginVertical: theme.SPACING.md,

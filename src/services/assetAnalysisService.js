@@ -94,24 +94,84 @@ const generateMockAssetDetailData = (period, type) => {
   // 模拟时间筛选器
   const timeFilters = period === 'month' 
     ? [
-        { label: '本月', active: true },
-        { label: '上月', active: false },
-        { label: '近3月', active: false },
-        { label: '近6月', active: false }
+        { label: '本月', value: 'current', active: true },
+        { label: '上月', value: 'last', active: false },
+        { label: '近3月', value: 'last3', active: false },
+        { label: '近6月', value: 'last6', active: false }
       ]
     : [
-        { label: '本年', active: true },
-        { label: '去年', active: false },
-        { label: '近3年', active: false },
-        { label: '近5年', active: false }
+        { label: '本年', value: 'current', active: true },
+        { label: '去年', value: 'last', active: false },
+        { label: '近3年', value: 'last3', active: false },
+        { label: '近5年', value: 'last5', active: false }
       ];
+  
+  // 添加时间筛选变化时的回调函数
+  const onTimeFilterChange = (index, value) => {
+    console.log(`时间筛选变化: 索引=${index}, 值=${value}`);
+    
+    // 在实际应用中，这里应该根据选择的时间筛选器重新获取数据
+    // 这里我们只是模拟数据变化
+    
+    // 模拟不同时间段的数据变化
+    let multiplier = 1.0;
+    switch(value) {
+      case 'last':
+        multiplier = 0.8; // 上月/去年数据略少
+        break;
+      case 'last3':
+        multiplier = 1.2; // 近3月/近3年数据略多
+        break;
+      case 'last6':
+      case 'last5':
+        multiplier = 1.5; // 近6月/近5年数据更多
+        break;
+      default:
+        multiplier = 1.0; // 默认本月/本年
+    }
+    
+    // 更新时间筛选器状态
+    for (let i = 0; i < timeFilters.length; i++) {
+      timeFilters[i].active = (i === index);
+    }
+    
+    // 更新类别数据
+    for (let i = 0; i < categoryData.length; i++) {
+      // 在原始值基础上应用乘数，并添加一些随机波动
+      const randomFactor = 0.8 + Math.random() * 0.4; // 0.8 到 1.2 之间的随机数
+      categoryData[i].amount = Math.floor(categoryData[i].amount * multiplier * randomFactor);
+    }
+    
+    // 更新趋势数据
+    for (let i = 0; i < trendData.length; i++) {
+      // 在原始值基础上应用乘数，并添加一些随机波动
+      const randomFactor = 0.9 + Math.random() * 0.2; // 0.9 到 1.1 之间的随机数
+      trendData[i].amount = Math.floor(trendData[i].amount * multiplier * randomFactor);
+    }
+    
+    // 更新总金额
+    const newTotalAmount = Math.floor(totalAmount * multiplier * (0.95 + Math.random() * 0.1));
+    
+    // 更新同比增长率
+    const newComparePercentage = comparePercentage * (0.8 + Math.random() * 0.4);
+    
+    // 返回更新后的数据
+    return {
+      totalAmount: newTotalAmount,
+      comparePercentage: newComparePercentage,
+      categoryData,
+      trendData,
+      timeFilters
+    };
+  };
   
   return {
     totalAmount,
     comparePercentage,
     categoryData,
     trendData,
-    timeFilters
+    timeFilters,
+    onTimeFilterChange
   };
 };
 
