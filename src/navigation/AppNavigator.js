@@ -90,7 +90,7 @@ const ProfileStackNavigator = () => (
     <ProfileStack.Screen 
       name="TransactionRecords" 
       component={TransactionRecordsScreen} 
-      options={{ title: '交易记录' }}
+      options={{ title: 'Transaction history' }}
     />
     <ProfileStack.Screen 
       name="TransactionDetail" 
@@ -100,7 +100,7 @@ const ProfileStackNavigator = () => (
     <ProfileStack.Screen 
       name="Assets" 
       component={AssetsScreen} 
-      options={{ title: '我的资产' }}
+      options={{ title: 'My asset' }}
     />
     <ProfileStack.Screen 
       name="AssetDetail" 
@@ -193,7 +193,7 @@ const MainTabNavigator = () => (
       name="Home" 
       component={HomeStackNavigator} 
       options={{ 
-        title: '首页', 
+        title: 'Home', 
         headerShown: false
       }}
       listeners={({ navigation }) => ({
@@ -211,7 +211,7 @@ const MainTabNavigator = () => (
       name="Forum" 
       component={ForumStackNavigator} 
       options={{ 
-        title: '论坛', 
+        title: 'Forum', 
         headerShown: false
       }}
       listeners={({ navigation }) => ({
@@ -229,7 +229,7 @@ const MainTabNavigator = () => (
       name="Profile" 
       component={ProfileStackNavigator} 
       options={{ 
-        title: '我的', 
+        title: 'porfile', 
         headerShown: false
       }}
       listeners={({ navigation }) => ({

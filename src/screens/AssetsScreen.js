@@ -141,17 +141,18 @@ const AssetsScreen = ({ navigation }) => {
           <Text style={styles.holdingName}>{item.productName}</Text>
           <View style={styles.holdingInfoRow}>
             <View style={styles.holdingInfoItem}>
-              <Text style={styles.infoLabel}>当前价值</Text>
+              <Text style={styles.infoLabel}>current value</Text>
               <Text style={styles.infoValue}>¥{item.currentValue.toFixed(2)}</Text>
             </View>
             <View style={styles.holdingInfoItem}>
-              <Text style={styles.infoLabel}>收益</Text>
+              <Text style={styles.infoLabel}>
+              income</Text>
               <Text style={[styles.infoValue, item.profit >= 0 ? styles.profitPositive : styles.profitNegative]}>
                 {item.profit >= 0 ? '+' : ''}{item.profit.toFixed(2)}
               </Text>
             </View>
             <View style={styles.holdingInfoItem}>
-              <Text style={styles.infoLabel}>收益率</Text>
+              <Text style={styles.infoLabel}>yield</Text>
               <Text style={[styles.infoValue, parseFloat(item.profitRate) >= 0 ? styles.profitPositive : styles.profitNegative]}>
                 {parseFloat(item.profitRate) >= 0 ? '+' : ''}{item.profitRate}
               </Text>
@@ -179,12 +180,12 @@ const AssetsScreen = ({ navigation }) => {
             {/* 资产总览 */}
             <Animated.View style={styles.overviewSection}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>资产总览</Text>
+                <Text style={styles.sectionTitle}>Asset overview</Text>
                 <TouchableOpacity 
                   onPress={() => navigation.navigate('AssetAnalysis')}
                   style={styles.analysisButton}
                 >
-                  <Text style={styles.analysisButtonText}>分析</Text>
+                  <Text style={styles.analysisButtonText}>analyze</Text>
                   <Icon name="analytics" type="material" size={16} color={theme.COLORS.primary} />
                 </TouchableOpacity>
               </View>
@@ -194,14 +195,14 @@ const AssetsScreen = ({ navigation }) => {
                 style={styles.overviewContainer}
               >
                 <View style={styles.overviewItem}>
-                  <Text style={styles.overviewLabel}>总资产</Text>
-                  <Text style={styles.overviewValue}>{totalAssetValue.toFixed(2)}元</Text>
+                  <Text style={styles.overviewLabel}>total assets</Text>
+                  <Text style={styles.overviewValue}>{totalAssetValue.toFixed(1)}元</Text>
                 </View>
                 
                 <View style={styles.overviewDivider} />
                 
                 <View style={styles.overviewItem}>
-                  <Text style={styles.overviewLabel}>总收益</Text>
+                  <Text style={styles.overviewLabel}>total revenue</Text>
                   <Text style={[styles.overviewValue, totalProfit >= 0 ? styles.profitPositive : styles.profitNegative]}>
                     {totalProfit >= 0 ? '+' : ''}{totalProfit.toFixed(2)}元
                   </Text>
@@ -210,7 +211,7 @@ const AssetsScreen = ({ navigation }) => {
                 <View style={styles.overviewDivider} />
                 
                 <View style={styles.overviewItem}>
-                  <Text style={styles.overviewLabel}>收益率</Text>
+                  <Text style={styles.overviewLabel}>yield</Text>
                   <Text style={[styles.overviewValue, parseFloat(totalProfitRate) >= 0 ? styles.profitPositive : styles.profitNegative]}>
                     {parseFloat(totalProfitRate) >= 0 ? '+' : ''}{totalProfitRate}
                   </Text>
@@ -221,12 +222,12 @@ const AssetsScreen = ({ navigation }) => {
             {/* 资产分布 */}
             <Animated.View style={styles.distributionSection}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>资产分布</Text>
+                <Text style={styles.sectionTitle}>Asset distribution</Text>
               </View>
               <View style={styles.chartContainer}>
                 <PieChart 
                   data={pieChartData} 
-                  title="资产分布" 
+                  title="Asset distribution" 
                   showLegend={true} 
                   height={220}
                   width={useWindowDimensions().width * 0.9}
@@ -237,7 +238,7 @@ const AssetsScreen = ({ navigation }) => {
             {/* 持仓列表 */}
             <Animated.View style={styles.holdingsSection}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>我的持仓</Text>
+                <Text style={styles.sectionTitle}>My positions</Text>
               </View>
               {holdings && holdings.length > 0 ? (
                 <FlatList
@@ -250,7 +251,7 @@ const AssetsScreen = ({ navigation }) => {
               ) : (
                 <View style={styles.emptyContainer}>
                   <Icon name="account-balance-wallet" size={50} color={theme.COLORS.textLight} />
-                  <Text style={styles.emptyText}>暂无持仓</Text>
+                  <Text style={styles.emptyText}>No positions</Text>
                 </View>
               )}
             </Animated.View>

@@ -16,7 +16,7 @@ import { useTheme } from '@rneui/themed';
 const LineChart = ({ 
   data = {labels: [], datasets: [{data: []}]}, 
   title = '折线图', 
-  height = 220,
+  height = 160,
   width,
   bezier = true,
   yAxisSuffix = '',
@@ -51,10 +51,11 @@ const LineChart = ({
           backgroundColor: theme.colors.background,
           backgroundGradientFrom: theme.colors.background,
           backgroundGradientTo: theme.colors.background,
-          decimalPlaces: 2,
+          decimalPlaces: 0,
           color: (opacity = 1) => `rgba(37, 99, 235, ${opacity})`,
           labelColor: (opacity = 1) => theme.colors.grey1,
           style: {
+            marginVertical: 8,
             borderRadius: 16
           },
           propsForDots: {

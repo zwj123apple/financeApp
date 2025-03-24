@@ -132,21 +132,21 @@ const ProfileScreen = ({ navigation }) => {
                 <Icon name="settings" type="material" color={theme.COLORS.primary} size={22} />
               </View>
               <ListItem.Content>
-                <ListItem.Title style={styles.listItemTitle}>账户设置</ListItem.Title>
-                <ListItem.Subtitle style={styles.listItemSubtitle}>管理您的个人信息和账户安全</ListItem.Subtitle>
+                <ListItem.Title style={styles.listItemTitle}>Account settings</ListItem.Title>
+                <ListItem.Subtitle style={styles.listItemSubtitle}>Manage your personal information and account security</ListItem.Subtitle>
               </ListItem.Content>
               <View>
                 <Icon name="chevron-right" type="material" color={theme.COLORS.primary} size={22} />
               </View>
-            </ListItem>
+            </ListItem> 
             
             <ListItem onPress={navigateToTransactionRecords} containerStyle={styles.listItem}>
               <View style={[styles.iconBackground, { backgroundColor: `${theme.COLORS.secondary}20` }]}>
                 <Icon name="receipt" type="material" color={theme.COLORS.secondary} size={22} />
               </View>
               <ListItem.Content>
-                <ListItem.Title style={styles.listItemTitle}>交易记录</ListItem.Title>
-                <ListItem.Subtitle style={styles.listItemSubtitle}>查看您的所有交易历史</ListItem.Subtitle>
+                <ListItem.Title style={styles.listItemTitle}>transaction history</ListItem.Title>
+                <ListItem.Subtitle style={styles.listItemSubtitle}>View all your transaction history</ListItem.Subtitle>
               </ListItem.Content>
               <View>
                 <Icon name="chevron-right" type="material" color={theme.COLORS.primary} size={22} />
@@ -158,8 +158,8 @@ const ProfileScreen = ({ navigation }) => {
                 <Icon name="account-balance-wallet" type="material" color={theme.COLORS.accent} size={22} />
               </View>
               <ListItem.Content>
-                <ListItem.Title style={styles.listItemTitle}>我的资产</ListItem.Title>
-                <ListItem.Subtitle style={styles.listItemSubtitle}>管理您的资产组合</ListItem.Subtitle>
+                <ListItem.Title style={styles.listItemTitle}>my assets</ListItem.Title>
+                <ListItem.Subtitle style={styles.listItemSubtitle}>Manage your portfolio</ListItem.Subtitle>
               </ListItem.Content>
               <View>
                 <Icon name="chevron-right" type="material" color={theme.COLORS.primary} size={22} />
@@ -169,7 +169,7 @@ const ProfileScreen = ({ navigation }) => {
           
           {/* 退出登录按钮 - 现代化设计 */}
           <Button
-            title="退出登录"
+            title="exit login"
             onPress={handleLogout}
             buttonStyle={styles.logoutButton}
             containerStyle={styles.logoutButtonContainer}

@@ -107,14 +107,20 @@ const TransactionRecordsScreen = ({ navigation }) => {
     });
     
     // 转换为图表数据格式
-    const months = Object.keys(monthlyTransactions).sort();
-    const counts = months.map(month => monthlyTransactions[month]);
+    let months = Object.keys(monthlyTransactions).sort();
+    let counts = months.map(month => monthlyTransactions[month]);
+    console.log('aa:', months, months.length);
+    console.log('bb:', counts);
     
     // 如果数据少于2个点，添加一些默认数据以便显示图表
-    if (months.length < 2) {
-      months.push(...['2023-01', '2023-02', '2023-03', '2023-04', '2023-05', '2023-06'].slice(0, Math.max(2 - months.length, 0)));
-      counts.push(...[0, 0].slice(0, Math.max(2 - counts.length, 0)));
+    if (months.length <= 2) {
+      months=[];
+      counts=[];
+      months.push(...['2023-01', '2023-02', '2023-03', '2023-04', '2023-05', '2023-06']);
+      counts.push(...[0, 1, 2, 3, 4, 5]);
     }
+    console.log('monthlyTransactions:', months);
+    console.log('counts:', counts);
     
     return {
       labels: months.map(month => month.substring(5)), // 只显示MM部分
@@ -130,8 +136,8 @@ const TransactionRecordsScreen = ({ navigation }) => {
   
   // 获取交易类型统计
   const getTransactionTypeStats = () => {
-    const buyCount = transactions.filter(t => t.type === '买入').length;
-    const sellCount = transactions.filter(t => t.type === '卖出').length;
+    const buyCount = transactions.filter(t => t.type === 'buy').length;
+    const sellCount = transactions.filter(t => t.type === 'sell').length;
     const total = transactions.length;
     
     return {
@@ -164,49 +170,46 @@ const TransactionRecordsScreen = ({ navigation }) => {
         >
           {/* 交易统计部分 */}
           <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>交易统计</Text>
+            <Text style={styles.sectionTitle}>Transaction statistics</Text>
             <Divider style={styles.divider} />
             
             <View style={styles.statsContainer}>
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>{transactions.length}</Text>
-                <Text style={styles.statLabel}>总交易次数</Text>
+                <Text style={styles.statLabel}>total number of transactions</Text>
               </View>
               
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>{transactionStats.buy.count}</Text>
-                <Text style={styles.statLabel}>买入 ({transactionStats.buy.percentage}%)</Text>
+                <Text style={styles.statLabel}>buy ({transactionStats.buy.percentage}%)</Text>
               </View>
               
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>{transactionStats.sell.count}</Text>
-                <Text style={styles.statLabel}>卖出 ({transactionStats.sell.percentage}%)</Text>
+                <Text style={styles.statLabel}>sell ({transactionStats.sell.percentage}%)</Text>
               </View>
             </View>
           </View>
           
           {/* 交易活跃度图表 */}
           <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>交易活跃度</Text>
+            <Text style={styles.sectionTitle}>trading activity</Text>
             <Divider style={styles.divider} />
             
             <LineChart
               data={chartData}
-              title="交易活跃度"
-              height={220}
+              title="trading activity"
+              height={160}
               width={width * 0.9}
               bezier
-              yAxisSuffix="次"
+              yAxisSuffix=" time"
             />
           </View>
           
           {/* 筛选器和交易记录 */}
           <View style={styles.sectionContainer}>
             <View style={styles.filterHeader}>
-              <Text style={styles.sectionTitle}>交易记录</Text>
-              <TouchableOpacity onPress={() => setShowFilters(!showFilters)}>
-                <Icon name="filter-list" type="material" color={theme.COLORS.primary} />
-              </TouchableOpacity>
+              <Text style={styles.sectionTitle}>transaction history</Text>
             </View>
             <Divider style={styles.divider} />
         
@@ -265,9 +268,9 @@ const TransactionRecordsScreen = ({ navigation }) => {
                     <View style={styles.transactionHeader}>
                       <View style={styles.transactionIconContainer}>
                         <Icon
-                          name={transaction.type === '买入' ? 'arrow-downward' : 'arrow-upward'}
+                          name={transaction.type === 'buy' ? 'arrow-downward' : 'arrow-upward'}
                           type="material"
-                          color={transaction.type === '买入' ? theme.COLORS.success : theme.COLORS.error}
+                          color={transaction.type === 'buy' ? theme.COLORS.success : theme.COLORS.error}
                           size={20}
                         />
                       </View>
@@ -280,9 +283,9 @@ const TransactionRecordsScreen = ({ navigation }) => {
                         </Text>
                       </View>
                       <Text
-                        style={[styles.transactionAmount, transaction.type === '买入' ? styles.buyAmount : styles.sellAmount]}
+                        style={[styles.transactionAmount, transaction.type === 'buy' ? styles.buyAmount : styles.sellAmount]}
                       >
-                        {transaction.type === '买入' ? '-' : '+'}{transaction.amount}元
+                        {transaction.type === 'buy' ? '-' : '+'}{transaction.amount}元
                       </Text>
                     </View>
                     <View style={styles.chevronContainer}>
