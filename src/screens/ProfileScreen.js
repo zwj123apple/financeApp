@@ -113,12 +113,15 @@ const ProfileScreen = ({ navigation }) => {
                 <Text style={styles.username}>{user.username}</Text>
                 <Text style={styles.userEmail}>{user.email}</Text>
               </View>
-              <TouchableOpacity 
-                onPress={navigateToAccountSettings}
-                style={styles.editButton}
-              >
-                <Icon name="edit" type="material" size={22} color={theme.COLORS.white} />
-              </TouchableOpacity>
+              <View style={styles.editButton}>
+                <Icon 
+                  name="edit" 
+                  type="material" 
+                  size={22} 
+                  color={theme.COLORS.white} 
+                  onPress={navigateToAccountSettings}
+                />
+              </View>
             </View>
           </View>
         

@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
     height: theme.getResponsiveSize(45, 50, 55),
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     // 添加输入框焦点状态样式，移除黑色边框
-    ...(Platform.OS === 'web' ? { outline: 'none' } : {})
+    ...(Platform.OS === 'web' ? { outlineWidth: 0, outlineStyle: 'none' } : {})
   },
   buttonContainer: {
     marginTop: theme.SPACING.md,

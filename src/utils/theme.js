@@ -127,45 +127,27 @@ export const BORDER_RADIUS = {
 // 阴影样式
 export const SHADOWS = {
   none: {
-    shadowColor: 'transparent',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0,
-    shadowRadius: 0,
+    boxShadow: 'none',
     elevation: 0
   },
   xs: {
-    shadowColor: COLORS.cardShadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05)',
     elevation: 1
   },
   sm: {
-    shadowColor: COLORS.cardShadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    boxShadow: '0px 2px 3px rgba(0, 0, 0, 0.1)',
     elevation: 2
   },
   md: {
-    shadowColor: COLORS.cardShadow,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
+    boxShadow: '0px 3px 5px rgba(0, 0, 0, 0.15)',
     elevation: 4
   },
   lg: {
-    shadowColor: COLORS.cardShadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
     elevation: 6
   },
   xl: {
-    shadowColor: COLORS.cardShadow,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
+    boxShadow: '0px 6px 12px rgba(0, 0, 0, 0.25)',
     elevation: 9
   }
 };

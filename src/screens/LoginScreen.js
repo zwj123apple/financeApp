@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     marginVertical: 2,
     ...theme.SHADOWS.sm,
     // 添加输入框焦点状态样式
-    ...(Platform.OS === 'web' ? { outline: 'none' } : {})
+    ...(Platform.OS === 'web' ? { outlineWidth: 0, outlineStyle: 'none' } : {})
   },
   buttonContainer: {
     marginTop: theme.SPACING.sm,

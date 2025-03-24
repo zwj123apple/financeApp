@@ -87,6 +87,10 @@ const LineChart = ({
         withOuterLines={true}
         withDots={true}
         withShadow={false}
+        fromZero={true}
+        // 禁用触摸事件以解决未知事件处理器属性警告
+        onDataPointClick={null}
+        disableTouchEvents={true}
       />
     </View>
   );
