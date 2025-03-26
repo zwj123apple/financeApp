@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, View, ScrollView, TouchableOpacity, Animated, Dimensions, StatusBar, SafeAreaView, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, ScrollView, TouchableOpacity, Animated, Dimensions, StatusBar, SafeAreaView, useWindowDimensions, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 // 导入统一主题
@@ -8,7 +8,7 @@ import { Text, Button, Icon, Divider } from '@rneui/themed';
 import { useAuthStore } from '../store/authStore';
 import { useAssetStore } from '../store/assetStore';
 import { LineChart, PieChart, BarChart } from '../components/charts';
-import { getMonthlyProfitData } from '../services/assetAnalysisService';
+import { ErrorBoundary } from '../components';
 
 // 使用useWindowDimensions钩子替代静态Dimensions
 
@@ -27,36 +27,19 @@ const AssetAnalysisScreen = ({ navigation }) => {
   // 使用useWindowDimensions钩子获取屏幕尺寸，这样在屏幕旋转或尺寸变化时会自动更新
   const { width, height } = useWindowDimensions();
   
-  // 动画值
-  const [fadeAnim] = useState(new Animated.Value(0));
-  const [slideAnim] = useState(new Animated.Value(50));
-  const [scaleAnim] = useState(new Animated.Value(0.95));
   
   // 加载资产数据
   useEffect(() => {
     if (user) {
+      if (isIOS) {
+        console.log('AssetAnalysisScreen: 开始加载数据，用户ID:', user.id);
+      }
       loadData();
     }
-    
-    // 启动进入动画
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: theme.ANIMATION.normal,
-        useNativeDriver: true
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: theme.ANIMATION.normal,
-        useNativeDriver: true
-      }),
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: theme.ANIMATION.normal,
-        useNativeDriver: true
-      })
-    ]).start();
+
   }, [user]);
+  
+  // 移除数据监控效果
   
   const loadData = async () => {
     if (user) {
@@ -65,23 +48,22 @@ const AssetAnalysisScreen = ({ navigation }) => {
       
       try {
         // 使用Promise.all并行加载所有数据，减少总体加载时间
-        const [overviewResult, holdingsResult, analysisResult, monthlyProfitResult] = await Promise.all([
+        const [overviewResult, holdingsResult, analysisResult] = await Promise.all([
           fetchAssetOverview(user.id),
           fetchHoldings(user.id),
-          fetchAssetAnalysis(user.id),
-          getMonthlyProfitData(user.id)
+          fetchAssetAnalysis(user.id)
         ]);
         
-        // 如果月度收益数据获取成功，立即更新到状态中
-        if (monthlyProfitResult.success) {
-          // 使用函数式更新确保获取最新状态
-          useAssetStore.setState(state => ({
-            assetAnalysis: {
-              ...state.assetAnalysis,
-              monthlyProfit: monthlyProfitResult.monthlyProfit
-            },
-            isLoading: false
-          }));
+        // 获取最新的assetAnalysis状态
+        const currentAssetAnalysis = useAssetStore.getState().assetAnalysis;
+        
+        // 数据加载完成后更新加载状态
+        useAssetStore.setState({ isLoading: false });
+        
+        // 如果数据加载成功但月度收益数据为空，尝试重新加载资产分析数据
+        if (analysisResult?.success && (!currentAssetAnalysis?.monthlyProfit || currentAssetAnalysis.monthlyProfit.length === 0)) {
+          // 单独重新加载资产分析数据
+          await fetchAssetAnalysis(user.id);
         }
       } catch (error) {
         console.error('加载资产分析数据失败:', error);
@@ -150,13 +132,16 @@ const AssetAnalysisScreen = ({ navigation }) => {
     // 转换为饼图数据格式
     const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
     
-    return Object.entries(holdingsByProduct).map(([name, value], index) => ({
+    const result = Object.entries(holdingsByProduct).map(([name, value], index) => ({
       name,
       value,
       color: colors[index % colors.length]
     }));
+    
+    return result;
   };
-    // 准备风险等级分布饼图数据
+  
+  // 准备风险等级分布饼图数据
   const prepareRiskDistributionData = () => {
     if (!assetAnalysis || !assetAnalysis.assetSummary || !assetAnalysis.assetSummary.riskLevelDistribution) {
       return [];
@@ -170,22 +155,27 @@ const AssetAnalysisScreen = ({ navigation }) => {
     };
     
     // 转换为饼图数据格式
-    return assetAnalysis.assetSummary.riskLevelDistribution.map(item => ({
+    const result = assetAnalysis.assetSummary.riskLevelDistribution.map(item => ({
       name: item.riskLevel,
       value: parseFloat(item.percentage.replace('%', '')),
       color: riskColors[item.riskLevel] || '#9C27B0' // 默认紫色
     }));
+    
+    return result;
   };
   
   // 准备月度收益柱状图数据
   const prepareMonthlyProfitData = () => {
-    if (!assetAnalysis || !assetAnalysis.monthlyProfit) {
+    // 检查assetAnalysis和monthlyProfit是否存在且为数组
+    if (!assetAnalysis || !assetAnalysis.monthlyProfit || !Array.isArray(assetAnalysis.monthlyProfit) || assetAnalysis.monthlyProfit.length === 0) {
+      // 返回空数据结构
       return {
         labels: [],
         datasets: [{ data: [] }]
       };
     }
     
+    // 确保数据格式正确
     const labels = assetAnalysis.monthlyProfit.map(item => item.month);
     const data = assetAnalysis.monthlyProfit.map(item => item.profit);
     
@@ -198,6 +188,8 @@ const AssetAnalysisScreen = ({ navigation }) => {
     };
   };
 
+  
+  // 移除渲染调试日志
   
   // 添加加载状态指示器
   if (isLoading) {
@@ -215,6 +207,8 @@ const AssetAnalysisScreen = ({ navigation }) => {
     );
   }
   
+  // 移除调试视图和渲染前日志
+  
   return (
     <LinearGradient
       colors={theme.GRADIENTS.background}
@@ -222,75 +216,91 @@ const AssetAnalysisScreen = ({ navigation }) => {
     >
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       <SafeAreaView style={styles.safeArea}>
+
+        
         <ScrollView 
-          style={styles.container}
-          contentContainerStyle={[styles.contentContainer, { paddingHorizontal: Math.max(theme.SPACING.md, width * 0.05) }]}
+          style={[styles.container, { flex: 1 }]}
+          contentContainerStyle={[styles.contentContainer, { 
+            paddingHorizontal: Math.max(theme.SPACING.md, width * 0.05),
+            paddingBottom: theme.SPACING.xl // 增加底部padding
+          }]}
           showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16} // 优化滚动性能
+          removeClippedSubviews={true} // 优化内存使用
         >
           {/* 收益走势图 */}
-          <Animated.View style={[styles.sectionContainer, {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
+          <View style={[styles.sectionContainer, {
               width: width * 0.9, // 使用屏幕宽度的90%
               maxWidth: 500 // 设置最大宽度
             }]}>
             <Text style={styles.sectionTitle}>收益走势分析</Text>
             <Divider style={styles.divider} />
             <View style={styles.chartWrapper}>
-              <LineChart 
-                data={prepareProfitTrendData()} 
-                title="资产收益走势" 
-                height={Math.min(180, height * 0.25)} // 减小图表高度
-                width={width * 0.85} // 设置图表宽度为屏幕宽度的85%
-                yAxisSuffix="元"
-                bezier
-              />
+              <ErrorBoundary 
+                fallbackMessage="收益走势图表加载失败，请稍后再试" 
+                onReset={() => loadData()}
+              >
+                <LineChart 
+                  data={prepareProfitTrendData()} 
+                  title="资产收益走势" 
+                  height={Math.min(180, height * 0.25)} // 减小图表高度
+                  width={width * 0.85} // 设置图表宽度为屏幕宽度的85%
+                  yAxisSuffix="元"
+                  bezier
+                />
+              </ErrorBoundary>
             </View>
             <Text style={styles.chartDescription}>
               展示您的资产总值随时间的变化趋势，帮助您了解资产增长情况。
             </Text>
-          </Animated.View>
+          </View>
           
           {/* 风险分布饼图 */}
-          <Animated.View style={[styles.sectionContainer, {
-              opacity: fadeAnim,
-              transform: [{ translateY: fadeAnim.interpolate({inputRange: [0, 1], outputRange: [100, 0]}) }, { scale: scaleAnim }],
+          <View style={[styles.sectionContainer, {
               width: width * 0.9, // 使用屏幕宽度的90%
               maxWidth: 500 // 设置最大宽度
             }]}>
             <Text style={styles.sectionTitle}>风险分布分析</Text>
             <Divider style={styles.divider} />
             <View style={styles.chartWrapper}>
-              <PieChart 
-                data={prepareRiskDistributionData()} 
-                title="风险等级分布" 
-                height={Math.min(200, height * 0.28)} // 调整饼图高度
-                width={Math.min(width * 0.9, 400)} // 调整饼图宽度，确保完整显示
-              />
+              <ErrorBoundary 
+                fallbackMessage="风险分布图表加载失败，请稍后再试" 
+                onReset={() => loadData()}
+              >
+                <PieChart 
+                  data={prepareRiskDistributionData()} 
+                  title="风险等级分布" 
+                  height={Math.min(200, height * 0.28)} // 调整饼图高度
+                  width={Math.min(width * 0.9, 400)} // 调整饼图宽度，确保完整显示
+                />
+              </ErrorBoundary>
             </View>
             <Text style={styles.chartDescription}>
               展示您的资产在不同风险等级间的分布情况，帮助您了解投资组合的风险水平。
             </Text>
-          </Animated.View>
+          </View>
           
           {/* 月度收益柱状图 */}
-          <Animated.View style={[styles.sectionContainer, {
-              opacity: fadeAnim,
-              transform: [{translateY: fadeAnim.interpolate({inputRange: [0, 1], outputRange: [150, 0]})}, {scale: scaleAnim}],
+          <View style={[styles.sectionContainer, {
               width: width * 0.9, // 使用屏幕宽度的90%
               maxWidth: 500 // 设置最大宽度
             }]}>
             <Text style={styles.sectionTitle}>月度收益分析</Text>
             <Divider style={styles.divider} />
             <View style={styles.chartWrapper}>
-              <BarChart 
-                data={prepareMonthlyProfitData()} 
-                title="月度收益情况" 
-                height={Math.min(180, height * 0.25)} // 减小图表高度
-                width={width * 0.85} // 设置图表宽度为屏幕宽度的85%
-                yAxisSuffix="元"
-                showValuesOnTopOfBars
-              />
+              <ErrorBoundary 
+                fallbackMessage="月度收益图表加载失败，请稍后再试" 
+                onReset={() => loadData()}
+              >
+                <BarChart 
+                  data={prepareMonthlyProfitData()} 
+                  title="月度收益情况" 
+                  height={Math.min(180, height * 0.25)} // 减小图表高度
+                  width={width * 0.85} // 设置图表宽度为屏幕宽度的85%
+                  yAxisSuffix="元"
+                  showValuesOnTopOfBars
+                />
+              </ErrorBoundary>
             </View>
             <Text style={styles.chartDescription}>
               展示您每月的收益情况，帮助您了解资产收益的周期性变化。
@@ -310,7 +320,7 @@ const AssetAnalysisScreen = ({ navigation }) => {
               iconRight
               onPress={() => navigation.navigate('AssetAnalysisDetail')}
             />
-          </Animated.View>
+          </View>
           
           {/* 底部填充，确保内容可以滚动到底部导航栏上方 */}
           <View style={styles.bottomPadding} />
@@ -345,9 +355,10 @@ const styles = StyleSheet.create({
     marginTop: theme.SPACING.md,
   },
   contentContainer: {
-    paddingTop: theme.SPACING.sm, // 减小顶部间距
+    paddingTop: theme.SPACING.sm,
     width: '100%',
-    alignItems: 'center'
+    alignItems: 'center',
+    flexGrow: 1 // 确保内容可以正常滚动
   },
   sectionContainer: {
     marginBottom: theme.SPACING.md, // 减小底部间距
@@ -357,14 +368,34 @@ const styles = StyleSheet.create({
     ...theme.SHADOWS.sm,
     alignItems: 'center',
     alignSelf: 'center', // 确保容器居中
-    overflow: 'hidden' // 防止内容溢出
+    overflow: 'visible', // 修改为visible以确保图表完整显示
+    ...Platform.select({
+      ios: {
+        zIndex: 0, // 设置基础层级
+        paddingBottom: theme.SPACING.md, // 增加底部内边距
+        marginVertical: theme.SPACING.sm // 调整垂直外边距
+      }
+    })
   },
+
   chartWrapper: {
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: theme.SPACING.sm, // 减小垂直间距
-    overflow: 'visible' // 允许图表内容溢出，解决饼图被覆盖问题
+    marginVertical: theme.SPACING.sm,
+    overflow: 'visible',
+    ...Platform.select({
+      ios: {
+        zIndex: 1,
+        minHeight: 250,
+        position: 'relative',
+        paddingVertical: 15,
+        marginBottom: 20,
+        backgroundColor: 'transparent',
+        shadowColor: 'transparent', // 移除阴影
+        elevation: 0 // 移除Android阴影
+      }
+    })
   },
   loginContainer: {
     margin: theme.SPACING.lg,

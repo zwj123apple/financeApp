@@ -102,6 +102,9 @@ export const getUserAssetAnalysis = async (userId) => {
   // 获取用户交易记录
   const transactions = await getUserTransactions(userId);
   
+  // 导入月度收益数据服务
+  const { getMonthlyProfitData } = await import('./assetAnalysisService');
+  
   // 计算月度交易频率
   const transactionsByMonth = {};
   transactions.forEach(t => {
@@ -151,10 +154,26 @@ export const getUserAssetAnalysis = async (userId) => {
   
   const allocationSuggestion = await getAssetAllocationSuggestion(riskPreference);
   
+  // 获取月度收益数据
+  let monthlyProfit = [];
+  try {
+    const monthlyProfitResult = await getMonthlyProfitData(userId);
+    if (monthlyProfitResult && monthlyProfitResult.success) {
+      monthlyProfit = monthlyProfitResult.monthlyProfit || [];
+      console.log(`获取到${monthlyProfit.length}个月度收益数据点`);
+    } else {
+      console.warn('月度收益数据获取结果无效或不成功');
+    }
+  } catch (error) {
+    console.error('获取月度收益数据失败:', error);
+  }
+  
+  // 无论是否成功获取月度收益数据，都返回完整的资产分析对象
   return {
     assetSummary,
     transactionFrequency,
     transactionRatio,
-    allocationSuggestion
+    allocationSuggestion,
+    monthlyProfit
   };
 };
