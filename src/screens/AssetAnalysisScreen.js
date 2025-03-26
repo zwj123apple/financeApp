@@ -31,9 +31,6 @@ const AssetAnalysisScreen = ({ navigation }) => {
   // 加载资产数据
   useEffect(() => {
     if (user) {
-      if (isIOS) {
-        console.log('AssetAnalysisScreen: 开始加载数据，用户ID:', user.id);
-      }
       loadData();
     }
 
