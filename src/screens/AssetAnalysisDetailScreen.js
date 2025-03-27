@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Animated, StatusBar, SafeAreaView, useWindowDimensions, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Animated, StatusBar, SafeAreaView, useWindowDimensions, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 // 导入统一主题
@@ -9,6 +9,7 @@ import { useAuthStore } from '../store/authStore';
 import { useAssetStore } from '../store/assetStore';
 import { getAssetDetailData } from '../services/assetAnalysisService';
 import AnalysisView from '../components/AnalysisView';
+import { ErrorBoundary } from '../components';
 
 const AssetAnalysisDetailScreen = ({ navigation }) => {
   const { user } = useAuthStore();
@@ -139,94 +140,82 @@ const AssetAnalysisDetailScreen = ({ navigation }) => {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       <SafeAreaView style={styles.safeArea}>
-        {/* 顶部时间维度切换 */}
-        <Tab
-          value={periodIndex}
-          onChange={setPeriodIndex}
-          indicatorStyle={{
-            backgroundColor: `${theme.COLORS.primary}40`, // 增加透明度，使颜色更明显
-            height: '100%',
-            width: '50%',
-            borderRadius: theme.BORDER_RADIUS.md,
-            transform: [{ translateX: periodIndex === 0 ? 0 : '100%' }],
-            transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            zIndex: 0, // 保持在文字和图标下方
-            borderBottomWidth: 3,
-            borderBottomColor: theme.COLORS.primary,
-          }}
-          containerStyle={styles.tabContainer}
-          variant="default"
-        >
-          <Tab.Item
-            title="月度分析"
-            titleStyle={(active) => ({
-              color: active ? theme.COLORS.primary : theme.COLORS.textLight,
-              fontSize: theme.FONT_SIZES.sm,
-              fontWeight: active ? theme.FONT_WEIGHTS.bold : theme.FONT_WEIGHTS.medium,
-              marginLeft: theme.SPACING.xs, // 增加左侧边距
-              transition: 'all 0.3s ease',
-              zIndex: 2, // 增加zIndex确保文字在最上层
-              flexShrink: 1, // 允许文本在空间不足时缩小
-            })}
-            icon={{
-              name: 'calendar-month',
-              type: 'material-community',
-              color: periodIndex === 0 ? theme.COLORS.primary : theme.COLORS.textLight,
-              size: 16,
-              style: { zIndex: 2 } // 增加zIndex确保图标在最上层
+        {/* 顶部时间维度切换 - 现代分段控制器设计 */}
+        <View style={styles.tabOuterContainer}>
+          <Tab
+            value={periodIndex}
+            onChange={setPeriodIndex}
+            indicatorStyle={{
+              backgroundColor: theme.COLORS.primary,
+              height: 3,
+              borderRadius: 1.5,
+              width: '49%',
+              transform: [{ translateX: periodIndex === 0 ? 0 : '100%' }],
+              transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
             }}
-            buttonStyle={(active) => ({
-              backgroundColor: 'transparent',
-              paddingVertical: theme.SPACING.sm,
-              paddingHorizontal: theme.SPACING.md, // 增加水平内边距
-              marginHorizontal: 0,
-              borderRadius: theme.BORDER_RADIUS.md,
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              transition: 'all 0.3s ease',
-              zIndex: 1,
-            })}
-          />
-          <Tab.Item
-            title="年度分析"
-            titleStyle={(active) => ({
-              color: active ? theme.COLORS.primary : theme.COLORS.textLight,
-              fontSize: theme.FONT_SIZES.sm,
-              fontWeight: active ? theme.FONT_WEIGHTS.bold : theme.FONT_WEIGHTS.medium,
-              marginLeft: theme.SPACING.xs, // 增加左侧边距
-              transition: 'all 0.3s ease',
-              zIndex: 2, // 增加zIndex确保文字在最上层
-              flexShrink: 1, // 允许文本在空间不足时缩小
-            })}
-            icon={{
-              name: 'calendar',
-              type: 'material-community',
-              color: periodIndex === 1 ? theme.COLORS.primary : theme.COLORS.textLight,
-              size: 16,
-              style: { zIndex: 2 } // 增加zIndex确保图标在最上层
-            }}
-            buttonStyle={(active) => ({
-              backgroundColor: 'transparent',
-              paddingVertical: theme.SPACING.sm,
-              paddingHorizontal: theme.SPACING.md, // 增加水平内边距
-              marginHorizontal: 0,
-              borderRadius: theme.BORDER_RADIUS.md,
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              transition: 'all 0.3s ease',
-              zIndex: 1,
-            })}
-          />
-        </Tab>
+            containerStyle={styles.tabContainer}
+            variant="default"
+          >
+            <Tab.Item
+              title="月度分析"
+              titleStyle={(active) => ({
+                color: active ? theme.COLORS.primary : theme.COLORS.textLight,
+                fontSize: theme.FONT_SIZES.md, // 增大字体大小
+                fontWeight: active ? theme.FONT_WEIGHTS.bold : theme.FONT_WEIGHTS.medium,
+                textAlign: 'center',
+                transition: 'all 0.3s ease',
+              })}
+              icon={{
+                name: 'calendar-month',
+                type: 'material-community',
+                color: active => active ? theme.COLORS.primary : theme.COLORS.textLight,
+                size: 24, // 增大图标尺寸
+              }}
+              buttonStyle={(active) => ({
+                backgroundColor: active ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: 48,
+                width: '100%', // 修改为100%以便完全铺满分配的空间
+                paddingHorizontal: 0,
+                paddingVertical: 0
+             })}
+            />
+            <Tab.Item
+              title="年度分析"
+              titleStyle={(active) => ({
+                color: active ? theme.COLORS.primary : theme.COLORS.textLight,
+                fontSize: theme.FONT_SIZES.md, // 增大字体大小
+                fontWeight: active ? theme.FONT_WEIGHTS.bold : theme.FONT_WEIGHTS.medium,
+                textAlign: 'center',
+                transition: 'all 0.3s ease',
+              })}
+              icon={{
+                name: 'calendar',
+                type: 'material-community',
+                color: active => active ? theme.COLORS.primary : theme.COLORS.textLight,
+                size: 24, // 增大图标尺寸
+              }}
+              buttonStyle={(active) => ({
+                backgroundColor: active ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: 48,
+                width: '100%', // 修改为100%以便完全铺满分配的空间
+                paddingHorizontal: 0,
+                paddingVertical: 0
+              })}
+            />
+          </Tab>
+        </View>
         
         <TabView
           value={periodIndex}
           onChange={setPeriodIndex}
-          animationType="spring" // 修改为有效的动画类型
-          disableTransition={true} // 添加禁用过渡效果属性
-          containerStyle={styles.tabViewContainer}
+          containerStyle={[styles.tabViewContainer, Platform.OS === 'ios' && styles.tabViewContainerIOS]}
+          animationType="spring"
         >
           {/* 月度分析视图 */}
           <TabView.Item style={styles.tabViewItem}>
@@ -247,15 +236,7 @@ const AssetAnalysisDetailScreen = ({ navigation }) => {
                 pieChartData={assetDetailData ? assetDetailData.categoryData?.map((item, index) => ({
                   name: item.category,
                   value: item.amount,
-                  color: [
-                    '#2563eb', // 蓝色
-                    '#10b981', // 绿色
-                    '#f59e0b', // 橙色
-                    '#8b5cf6', // 紫色
-                    '#ec4899', // 粉色
-                    '#14b8a6', // 青色
-                    '#f43f5e'  // 红色
-                  ][index % 7]
+                  color: theme.COLORS.chart[index % theme.COLORS.chart.length] || theme.COLORS.primary
                 })) || [] : []}
                 trendChartData={assetDetailData ? {
                   labels: assetDetailData.trendData?.map(item => item.date) || [],
@@ -288,15 +269,7 @@ const AssetAnalysisDetailScreen = ({ navigation }) => {
                 pieChartData={assetDetailData ? assetDetailData.categoryData?.map((item, index) => ({
                   name: item.category,
                   value: item.amount,
-                  color: [
-                    '#2563eb', // 蓝色
-                    '#10b981', // 绿色
-                    '#f59e0b', // 橙色
-                    '#8b5cf6', // 紫色
-                    '#ec4899', // 粉色
-                    '#14b8a6', // 青色
-                    '#f43f5e'  // 红色
-                  ][index % 7]
+                  color: theme.COLORS.chart[index % theme.COLORS.chart.length] || theme.COLORS.primary
                 })) || [] : []}
                 trendChartData={assetDetailData ? {
                   labels: assetDetailData.trendData?.map(item => item.date) || [],
@@ -322,7 +295,9 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    paddingTop: 0, // 移除顶部内边距
+    paddingTop: 0,
+    paddingHorizontal: 0,
+    width: '100%',
   },
   scrollView: {
     flex: 1,
@@ -331,67 +306,58 @@ const styles = StyleSheet.create({
     paddingBottom: theme.SPACING.xxl,
     alignItems: 'center',
   },
+  tabOuterContainer: {
+    width: '100%',
+    height: 'auto',
+    alignItems: 'stretch',
+    paddingHorizontal: 0,
+  },
   tabContainer: {
     backgroundColor: theme.COLORS.white,
-    marginTop: 0, // 移除顶部间距
-    marginBottom: 0, // 移除底部间距，使Tab与内容区域紧密连接
-    paddingHorizontal: theme.SPACING.md, // 增加水平内边距，确保文本显示完整
-    paddingVertical: theme.SPACING.sm, // 增加垂直内边距，提供更好的视觉空间
-    marginHorizontal: 0, // 移除水平外边距
-    borderTopLeftRadius: theme.BORDER_RADIUS.md,
-    borderTopRightRadius: theme.BORDER_RADIUS.md,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
     borderWidth: 1,
     borderColor: theme.COLORS.borderLight,
-    borderBottomWidth: 0, // 移除底部边框
-    ...theme.SHADOWS.xs,
-    width: '100%', // 使Tab容器宽度与内容区域一致
-    alignSelf: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    maxWidth: 500,
-    zIndex: 2,
-    elevation: 2,
-    position: 'relative',
-    overflow: 'hidden',
+    ...theme.SHADOWS.sm,
+    height: 52,
+    width: '100%',
+    marginHorizontal: 0,
+    paddingHorizontal: 0,
   },
   tabViewContainer: {
     flex: 1,
     backgroundColor: 'transparent',
-    width: '100%', // 确保宽度铺满
-    marginTop: 0, // 移除负边距
-    zIndex: 1, // 确保层级正确
-    paddingHorizontal: theme.SPACING.sm, // 添加水平内边距
+    width: '100%',
+    marginTop: 0,
+    zIndex: 1,
+    paddingHorizontal: 0,
   },
-  innerTabContainer: {
-    backgroundColor: 'transparent',
-    marginVertical: theme.SPACING.md,
+  tabViewContainerIOS: {
+    height: '100%',
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
   },
   tabViewItem: {
     width: '100%',
     flex: 1,
-    alignItems: 'center', // 居中对齐内容
-    justifyContent: 'flex-start', // 顶部对齐内容
-    paddingTop: 0, // 移除顶部内边距
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 0,
+    height: '100%',
   },
   tabContentContainer: {
     flex: 1,
     backgroundColor: theme.COLORS.white,
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 0,
-    borderBottomLeftRadius: theme.BORDER_RADIUS.md,
-    borderBottomRightRadius: theme.BORDER_RADIUS.md,
     overflow: 'hidden',
-    marginHorizontal: 0, // 移除水平外边距
-    width: '100%', // 使内容区域宽度与Tab容器一致
-    maxWidth: 500, // 与Tab容器最大宽度一致
+    marginHorizontal: 0,
+    width: '100%',
+    maxWidth: '100%',
     borderWidth: 1,
     borderColor: theme.COLORS.borderLight,
-    borderTopWidth: 0, // 移除顶部边框，与Tab容器连接
-    ...theme.SHADOWS.sm, // 保持阴影效果一致
-    elevation: 1, // 为Android添加海拔效果，但低于Tab
-    paddingTop: theme.SPACING.md, // 增加顶部内边距，提供更好的视觉空间
+    ...theme.SHADOWS.md,
+    elevation: 2,
+    paddingTop: theme.SPACING.md,
+    height: '100%',
+    position: 'relative',
   },
   // 登录相关样式
   loginContainer: {

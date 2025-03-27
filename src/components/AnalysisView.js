@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import theme from '../utils/theme';
 import { Text, Divider, Tab } from '@rneui/themed';
 import { LineChart, PieChart, BarChart } from './charts';
+import { ErrorBoundary } from './';
 
 /**
  * 通用的财务分析视图组件
@@ -49,74 +50,67 @@ const AnalysisView = (props) => {
       style={styles.scrollView}
       contentContainerStyle={[styles.contentContainer, { paddingHorizontal: Math.max(theme.SPACING.md, width * 0.05) }]}
       showsVerticalScrollIndicator={false}
+      bounces={false}
+      alwaysBounceVertical={false}
     >
-      {/* 收入/支出切换 */}
-      <Tab
-        value={typeIndex}
-        onChange={setTypeIndex}
-        indicatorStyle={{
-          backgroundColor: theme.COLORS.primary,
-          height: 3,
-          borderRadius: 0, // 使用方形设计
-          width: '45%',
-          marginLeft: '2.5%',
-          transform: [{ translateX: typeIndex === 0 ? 0 : '100%' }],
-          transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-        }}
-        containerStyle={styles.innerTabContainer}
-        variant="default"
-      >
-        <Tab.Item
-          title="收入"
-          titleStyle={(active) => ({
-            color: active ? theme.COLORS.primary : theme.COLORS.textLight,
-            fontSize: theme.FONT_SIZES.sm,
-            fontWeight: active ? theme.FONT_WEIGHTS.semibold : theme.FONT_WEIGHTS.regular,
-            transition: 'all 0.3s ease',
-          })}
-          icon={{
-            name: 'trending-up',
-            type: 'material',
-            color: typeIndex === 0 ? theme.COLORS.primary : theme.COLORS.textLight,
-            size: 18,
-          }}
-          buttonStyle={(active) => ({
-            backgroundColor: active ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
-            borderRadius: 0, // 使用方形设计
-            paddingVertical: theme.SPACING.sm,
-            paddingHorizontal: theme.SPACING.xs,
-            marginHorizontal: 0,
-            borderBottom: active ? `2px solid ${theme.COLORS.primary}` : 'none',
-            transition: 'all 0.3s ease',
-            flex: 1, // 让Tab项平均分配空间
-          })}
+      {/* 收入/支出切换 - 现代分段控制器设计 */}
+      <View style={[styles.segmentedControlContainer, { width: width * 0.9, maxWidth: 500 }]}>
+        <TouchableOpacity
+          style={[
+            styles.segmentButton,
+            typeIndex === 0 && styles.segmentButtonActive,
+            { borderTopLeftRadius: theme.BORDER_RADIUS.md, borderBottomLeftRadius: theme.BORDER_RADIUS.md }
+          ]}
+          onPress={() => setTypeIndex(0)}
+          activeOpacity={0.7}
+        >
+          <View style={styles.segmentContent}>
+            <View style={styles.segmentIconContainer}>
+              <LinearGradient
+                colors={typeIndex === 0 ? theme.GRADIENTS.primary : ['rgba(0,0,0,0)', 'rgba(0,0,0,0)']}
+                style={styles.iconBackground}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={[styles.segmentIcon, typeIndex === 0 && styles.segmentIconActive]}>↗</Text>
+              </LinearGradient>
+            </View>
+            <Text style={[styles.segmentText, typeIndex === 0 && styles.segmentTextActive]}>收入</Text>
+          </View>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[
+            styles.segmentButton,
+            typeIndex === 1 && styles.segmentButtonActive,
+            { borderTopRightRadius: theme.BORDER_RADIUS.md, borderBottomRightRadius: theme.BORDER_RADIUS.md }
+          ]}
+          onPress={() => setTypeIndex(1)}
+          activeOpacity={0.7}
+        >
+          <View style={styles.segmentContent}>
+            <View style={styles.segmentIconContainer}>
+              <LinearGradient
+                colors={typeIndex === 1 ? theme.GRADIENTS.error : ['rgba(0,0,0,0)', 'rgba(0,0,0,0)']}
+                style={styles.iconBackground}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={[styles.segmentIcon, typeIndex === 1 && styles.segmentIconActive]}>↘</Text>
+              </LinearGradient>
+            </View>
+            <Text style={[styles.segmentText, typeIndex === 1 && styles.segmentTextActive]}>支出</Text>
+          </View>
+        </TouchableOpacity>
+        
+        {/* 动画指示器 */}
+        <Animated.View 
+          style={[
+            styles.segmentIndicator,
+            { transform: [{ translateX: typeIndex === 0 ? 0 : '100%' }] }
+          ]}
         />
-        <Tab.Item
-          title="支出"
-          titleStyle={(active) => ({
-            color: active ? theme.COLORS.primary : theme.COLORS.textLight,
-            fontSize: theme.FONT_SIZES.sm,
-            fontWeight: active ? theme.FONT_WEIGHTS.semibold : theme.FONT_WEIGHTS.regular,
-            transition: 'all 0.3s ease',
-          })}
-          icon={{
-            name: 'trending-down',
-            type: 'material',
-            color: typeIndex === 1 ? theme.COLORS.primary : theme.COLORS.textLight,
-            size: 18,
-          }}
-          buttonStyle={(active) => ({
-            backgroundColor: active ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
-            borderRadius: 0, // 使用方形设计
-            paddingVertical: theme.SPACING.sm,
-            paddingHorizontal: theme.SPACING.xs,
-            marginHorizontal: 0,
-            borderBottom: active ? `2px solid ${theme.COLORS.primary}` : 'none',
-            transition: 'all 0.3s ease',
-            flex: 1, // 让Tab项平均分配空间
-          })}
-        />
-      </Tab>
+      </View>
       
       {/* 金额显示区域和时间筛选区域的整合设计 */}
       <View style={[styles.combinedContainer, {
@@ -213,14 +207,19 @@ const AnalysisView = (props) => {
         <Text style={styles.chartTitle}>{typeIndex === 0 ? '收入' : '支出'}类别分布</Text>
         <Divider style={styles.divider} />
         <View style={styles.chartWrapper}>
-          <BarChart
-            data={barChartData}
-            title={`${typeIndex === 0 ? (periodIndex === 0 ? '月度收入' : '年度收入') : (periodIndex === 0 ? '月度支出' : '年度支出')}类别统计`}
-            height={Math.min(180, height * 0.25)}
-            width={width * 0.85}
-            yAxisSuffix="元"
-            showValuesOnTopOfBars
-          />
+          <ErrorBoundary 
+            fallbackMessage="类别分布图表加载失败，请稍后再试" 
+            onReset={() => console.log('重置类别分布图表')}
+          >
+            <BarChart
+              data={barChartData}
+              title={`${typeIndex === 0 ? (periodIndex === 0 ? '月度收入' : '年度收入') : (periodIndex === 0 ? '月度支出' : '年度支出')}类别统计`}
+              height={Math.min(180, height * 0.25)}
+              width={width * 0.85}
+              yAxisSuffix="元"
+              showValuesOnTopOfBars
+            />
+          </ErrorBoundary>
         </View>
         <Text style={styles.chartDescription}>
           展示您的{typeIndex === 0 ? '收入' : '支出'}在不同类别间的分布情况。
@@ -235,13 +234,18 @@ const AnalysisView = (props) => {
         <Text style={styles.chartTitle}>{typeIndex === 0 ? '收入' : '支出'}占比分析</Text>
         <Divider style={styles.divider} />
         <View style={styles.chartWrapper}>
-          <PieChart
-            data={pieChartData}
-            title={`${typeIndex === 0 ? (periodIndex === 0 ? '月度收入' : '年度收入') : (periodIndex === 0 ? '月度支出' : '年度支出')}占比`}
-            height={Math.min(220, height * 0.3)}
-            width={width * 0.85}
-            showLegend={true}
-          />
+          <ErrorBoundary 
+            fallbackMessage="占比分析图表加载失败，请稍后再试" 
+            onReset={() => console.log('重置占比分析图表')}
+          >
+            <PieChart
+              data={pieChartData}
+              title={`${typeIndex === 0 ? (periodIndex === 0 ? '月度收入' : '年度收入') : (periodIndex === 0 ? '月度支出' : '年度支出')}占比`}
+              height={Math.min(220, height * 0.3)}
+              width={width * 0.85}
+              showLegend={true}
+            />
+          </ErrorBoundary>
         </View>
         <Text style={styles.chartDescription}>
           展示您的{typeIndex === 0 ? (periodIndex === 0 ? '月度收入' : '年度收入') : (periodIndex === 0 ? '月度支出' : '年度支出')}在不同类别间的占比情况。
@@ -256,14 +260,19 @@ const AnalysisView = (props) => {
         <Text style={styles.chartTitle}>{typeIndex === 0 ? '收入' : '支出'}趋势分析</Text>
         <Divider style={styles.divider} />
         <View style={styles.chartWrapper}>
-          <LineChart
-            data={trendChartData}
-            title={`${typeIndex === 0 ? (periodIndex === 0 ? '月度收入' : '年度收入') : (periodIndex === 0 ? '月度支出' : '年度支出')}趋势`}
-            height={Math.min(180, height * 0.25)}
-            width={width * 0.85}
-            yAxisSuffix="元"
-            bezier={true}
-          />
+          <ErrorBoundary 
+            fallbackMessage="趋势分析图表加载失败，请稍后再试" 
+            onReset={() => console.log('重置趋势分析图表')}
+          >
+            <LineChart
+              data={trendChartData}
+              title={`${typeIndex === 0 ? (periodIndex === 0 ? '月度收入' : '年度收入') : (periodIndex === 0 ? '月度支出' : '年度支出')}趋势`}
+              height={Math.min(180, height * 0.25)}
+              width={width * 0.85}
+              yAxisSuffix="元"
+              bezier={true}
+            />
+          </ErrorBoundary>
         </View>
         <Text style={styles.chartDescription}>
           展示您的{typeIndex === 0 ? (periodIndex === 0 ? '月度收入' : '年度收入') : (periodIndex === 0 ? '月度支出' : '年度支出')}随时间变化的趋势。
@@ -278,21 +287,90 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingBottom: theme.SPACING.xl,
+    paddingBottom: theme.SPACING.xs,
     alignItems: 'center',
   },
-  innerTabContainer: {
-    backgroundColor: theme.COLORS.white,
-    marginVertical: theme.SPACING.md,
-    borderRadius: theme.BORDER_RADIUS.sm,
-    paddingHorizontal: 0,
-    paddingVertical: 0,
+  // 分段控制器样式
+  segmentedControlContainer: {
+    flexDirection: 'row',
+    backgroundColor: theme.COLORS.backgroundLight,
+    borderRadius: theme.BORDER_RADIUS.md,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: theme.COLORS.borderLight,
     ...theme.SHADOWS.xs,
-    display: 'flex', // 使用flex布局
-    flexDirection: 'row', // 水平排列
+    position: 'relative',
+    height: 48,
+  },
+  segmentButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  segmentButtonActive: {
+    backgroundColor: 'transparent',
+  },
+  segmentContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  segmentIconContainer: {
+    marginRight: theme.SPACING.xxs,
+  },
+  iconBackground: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  segmentIcon: {
+    fontSize: 16,
+    color: theme.COLORS.textLight,
+  },
+  segmentIconActive: {
+    color: theme.COLORS.white,
+  },
+  segmentText: {
+    fontSize: theme.FONT_SIZES.md,
+    fontWeight: theme.FONT_WEIGHTS.medium,
+    color: theme.COLORS.textLight,
+  },
+  segmentTextActive: {
+    color: theme.COLORS.primary,
+    fontWeight: theme.FONT_WEIGHTS.semibold,
+  },
+  segmentIndicator: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    bottom: 4,
+    width: '48%',
+    backgroundColor: theme.COLORS.white,
+    borderRadius: theme.BORDER_RADIUS.sm,
+    ...theme.SHADOWS.xs,
+    zIndex: 0,
+    transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+  },
+  // 旧的Tab容器样式保留作为参考
+  innerTabContainer: {
+    backgroundColor: theme.COLORS.white,
+    marginVertical: theme.SPACING.sm, // 减小垂直外边距
+    borderRadius: theme.BORDER_RADIUS.md,
+    paddingHorizontal: theme.SPACING.xs,
+    paddingVertical: theme.SPACING.xxs,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: theme.COLORS.borderLight,
+    ...theme.SHADOWS.xs,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: 50, // 减小高度
+    width: '100%', // 使Tab容器宽度铺满
   },
   combinedContainer: {
     marginVertical: theme.SPACING.sm,
