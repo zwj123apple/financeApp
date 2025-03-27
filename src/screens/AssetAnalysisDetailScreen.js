@@ -141,74 +141,62 @@ const AssetAnalysisDetailScreen = ({ navigation }) => {
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       <SafeAreaView style={styles.safeArea}>
         {/* 顶部时间维度切换 - 现代分段控制器设计 */}
-        <View style={styles.tabOuterContainer}>
-          <Tab
-            value={periodIndex}
-            onChange={setPeriodIndex}
-            indicatorStyle={{
-              backgroundColor: theme.COLORS.primary,
-              height: 3,
-              borderRadius: 1.5,
-              width: '49%',
-              transform: [{ translateX: periodIndex === 0 ? 0 : '100%' }],
-              transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            }}
-            containerStyle={styles.tabContainer}
-            variant="default"
+        <View style={[styles.segmentedControlContainer, { width: width, maxWidth: 500 }]}>
+          <TouchableOpacity
+            style={[
+              styles.segmentButton,
+              periodIndex === 0 && styles.segmentButtonActive,
+              { borderTopLeftRadius: theme.BORDER_RADIUS.md, borderBottomLeftRadius: theme.BORDER_RADIUS.md }
+            ]}
+            onPress={() => setPeriodIndex(0)}
+            activeOpacity={0.7}
           >
-            <Tab.Item
-              title="月度分析"
-              titleStyle={(active) => ({
-                color: active ? theme.COLORS.primary : theme.COLORS.textLight,
-                fontSize: theme.FONT_SIZES.md, // 增大字体大小
-                fontWeight: active ? theme.FONT_WEIGHTS.bold : theme.FONT_WEIGHTS.medium,
-                textAlign: 'center',
-                transition: 'all 0.3s ease',
-              })}
-              icon={{
-                name: 'calendar-month',
-                type: 'material-community',
-                color: active => active ? theme.COLORS.primary : theme.COLORS.textLight,
-                size: 24, // 增大图标尺寸
-              }}
-              buttonStyle={(active) => ({
-                backgroundColor: active ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: 48,
-                width: '100%', // 修改为100%以便完全铺满分配的空间
-                paddingHorizontal: 0,
-                paddingVertical: 0
-             })}
-            />
-            <Tab.Item
-              title="年度分析"
-              titleStyle={(active) => ({
-                color: active ? theme.COLORS.primary : theme.COLORS.textLight,
-                fontSize: theme.FONT_SIZES.md, // 增大字体大小
-                fontWeight: active ? theme.FONT_WEIGHTS.bold : theme.FONT_WEIGHTS.medium,
-                textAlign: 'center',
-                transition: 'all 0.3s ease',
-              })}
-              icon={{
-                name: 'calendar',
-                type: 'material-community',
-                color: active => active ? theme.COLORS.primary : theme.COLORS.textLight,
-                size: 24, // 增大图标尺寸
-              }}
-              buttonStyle={(active) => ({
-                backgroundColor: active ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: 48,
-                width: '100%', // 修改为100%以便完全铺满分配的空间
-                paddingHorizontal: 0,
-                paddingVertical: 0
-              })}
-            />
-          </Tab>
+            <View style={styles.segmentContent}>
+              <View style={styles.segmentIconContainer}>
+                <LinearGradient
+                  colors={periodIndex === 0 ? theme.GRADIENTS.primary : ['rgba(0,0,0,0)', 'rgba(0,0,0,0)']}
+                  style={styles.iconBackground}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Text style={[styles.segmentIcon, periodIndex === 0 && styles.segmentIconActive]}>📅</Text>
+                </LinearGradient>
+              </View>
+              <Text style={[styles.segmentText, periodIndex === 0 && styles.segmentTextActive]}>月度分析</Text>
+            </View>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={[
+              styles.segmentButton,
+              periodIndex === 1 && styles.segmentButtonActive,
+              { borderTopRightRadius: theme.BORDER_RADIUS.md, borderBottomRightRadius: theme.BORDER_RADIUS.md }
+            ]}
+            onPress={() => setPeriodIndex(1)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.segmentContent}>
+              <View style={styles.segmentIconContainer}>
+                <LinearGradient
+                  colors={periodIndex === 1 ? theme.GRADIENTS.primary : ['rgba(0,0,0,0)', 'rgba(0,0,0,0)']}
+                  style={styles.iconBackground}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Text style={[styles.segmentIcon, periodIndex === 1 && styles.segmentIconActive]}>📆</Text>
+                </LinearGradient>
+              </View>
+              <Text style={[styles.segmentText, periodIndex === 1 && styles.segmentTextActive]}>年度分析</Text>
+            </View>
+          </TouchableOpacity>
+          
+          {/* 动画指示器 */}
+          <Animated.View 
+            style={[
+              styles.segmentIndicator,
+              { transform: [{ translateX: periodIndex === 0 ? 0 : '100%' }] }
+            ]}
+          />
         </View>
         
         <TabView
@@ -306,6 +294,71 @@ const styles = StyleSheet.create({
     paddingBottom: theme.SPACING.xxl,
     alignItems: 'center',
   },
+  // 分段控制器样式
+  segmentedControlContainer: {
+    flexDirection: 'row',
+    backgroundColor: theme.COLORS.backgroundLight,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: theme.COLORS.borderLight,
+    ...theme.SHADOWS.sm,
+    position: 'relative',
+    height: 52,
+    marginHorizontal: 0,
+    paddingHorizontal: 0,
+  },
+  segmentButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  segmentButtonActive: {
+    backgroundColor: 'transparent',
+  },
+  segmentContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  segmentIconContainer: {
+    marginRight: theme.SPACING.xxs,
+  },
+  iconBackground: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  segmentIcon: {
+    fontSize: 16,
+    color: theme.COLORS.textLight,
+  },
+  segmentIconActive: {
+    color: theme.COLORS.white,
+  },
+  segmentText: {
+    fontSize: theme.FONT_SIZES.md,
+    fontWeight: theme.FONT_WEIGHTS.medium,
+    color: theme.COLORS.textLight,
+  },
+  segmentTextActive: {
+    color: theme.COLORS.primary,
+    fontWeight: theme.FONT_WEIGHTS.semibold,
+  },
+  segmentIndicator: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    width: '50%',
+    backgroundColor: theme.COLORS.white,
+    ...theme.SHADOWS.xs,
+    zIndex: 0,
+    transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+  },
+  // 保留旧的Tab样式以便兼容
   tabOuterContainer: {
     width: '100%',
     height: 'auto',
