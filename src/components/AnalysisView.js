@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingBottom: theme.SPACING.xs,
+    paddingBottom: theme.SPACING.xxs,
     alignItems: 'center',
   },
   // 分段控制器样式
@@ -344,10 +344,10 @@ const styles = StyleSheet.create({
   },
   segmentIndicator: {
     position: 'absolute',
-    top: 4,
-    left: 4,
-    bottom: 4,
-    width: '48%',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    width: '50%',
     backgroundColor: theme.COLORS.white,
     borderRadius: theme.BORDER_RADIUS.sm,
     ...theme.SHADOWS.xs,

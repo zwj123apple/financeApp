@@ -225,7 +225,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
                   color={theme.COLORS.primary} 
                   containerStyle={styles.iconContainer}
                 />
-                <Text h3 style={[styles.title, { fontSize: theme.getResponsiveSize(22, 26, 30) }]}>重置密码</Text>
+                <Text h3 style={[styles.title, { fontSize: theme.getResponsiveSize(16, 20, 24) }]}>重置密码</Text>
                 <Text style={[styles.subtitle, { fontSize: theme.getResponsiveSize(14, 16, 18) }]}>
                   {step === 1 ? '请输入您的邮箱地址' : 
                    step === 2 ? '请输入您收到的验证码' : 
@@ -255,14 +255,6 @@ const ForgotPasswordScreen = ({ navigation }) => {
   );
 };
 
-// 根据屏幕尺寸计算响应式尺寸的辅助函数
-const getResponsiveSize = (smallSize, mediumSize, largeSize) => {
-  const { width } = Dimensions.get('window');
-  if (width < 380) return smallSize;
-  if (width < 768) return mediumSize;
-  return largeSize;
-};
-
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
@@ -285,77 +277,95 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     padding: theme.SPACING.md,
-    paddingVertical: theme.SPACING.lg,
     minHeight: '100%'
   },
   contentContainer: {
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: theme.SPACING.xl
+    paddingBottom: theme.SPACING.lg,
+    paddingTop: theme.SPACING.sm
   },
   formCard: {
     width: '100%',
-    borderRadius: theme.BORDER_RADIUS.lg,
+    borderRadius: theme.BORDER_RADIUS.md,
     padding: theme.SPACING.md,
-    marginTop: theme.SPACING.md,
-    marginBottom: theme.SPACING.lg,
+    marginBottom: theme.SPACING.sm,
     ...theme.SHADOWS.md,
     backgroundColor: theme.COLORS.cardBackground,
     elevation: 4,
     maxWidth: 500, // 限制在大屏幕上的最大宽度
-    alignSelf: 'center'
+    alignSelf: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(229, 231, 235, 0.5)'
   },
   headerContainer: {
     alignItems: 'center',
-    marginBottom: theme.SPACING.md,
+    marginBottom: theme.SPACING.xs,
     width: '100%',
-    maxWidth: 500 // 限制在大屏幕上的最大宽度
+    maxWidth: 500, // 限制在大屏幕上的最大宽度
+    paddingVertical: theme.SPACING.xs
   },
   iconContainer: {
     backgroundColor: 'rgba(21, 101, 192, 0.1)',
     padding: theme.getResponsiveSize(12, 15, 18),
-    borderRadius: 50,
+    borderRadius: 60,
     marginBottom: theme.SPACING.sm,
-    ...theme.SHADOWS.sm
+    ...theme.SHADOWS.md
   },
   title: {
-    marginTop: theme.SPACING.xs,
+    marginTop: theme.SPACING.sm,
     color: theme.COLORS.primary,
     fontWeight: theme.FONT_WEIGHTS.bold,
     textAlign: 'center',
-    letterSpacing: 0.5
+    letterSpacing: 0.8,
+    marginBottom: theme.SPACING.xs
   },
   subtitle: {
     color: theme.COLORS.secondary,
     marginTop: theme.SPACING.xs,
     marginBottom: theme.SPACING.sm,
     textAlign: 'center',
-    letterSpacing: 0.3
+    letterSpacing: 0.5,
+    maxWidth: '90%',
+    lineHeight: 20
   },
   errorText: {
     color: theme.COLORS.error,
     textAlign: 'center',
-    marginBottom: theme.SPACING.sm,
-    fontSize: theme.FONT_SIZES.sm
+    marginBottom: theme.SPACING.md,
+    fontSize: theme.FONT_SIZES.sm,
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    paddingVertical: theme.SPACING.sm,
+    paddingHorizontal: theme.SPACING.md,
+    borderRadius: theme.BORDER_RADIUS.sm,
+    borderLeftWidth: 3,
+    borderLeftColor: theme.COLORS.error,
+    fontWeight: theme.FONT_WEIGHTS.medium
   },
   inputOuterContainer: {
     marginBottom: theme.SPACING.sm,
-    paddingHorizontal: theme.SPACING.xs,
+    paddingHorizontal: theme.SPACING.sm,
     width: '100%'
   },
   inputContainer: {
-    borderWidth: 0.5,
-    borderColor: theme.COLORS.primaryLight,
+    borderWidth: 1,
+    borderColor: theme.COLORS.borderLight,
     borderRadius: theme.BORDER_RADIUS.md,
-    paddingHorizontal: theme.SPACING.sm,
-    height: theme.getResponsiveSize(45, 50, 55),
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    paddingHorizontal: theme.SPACING.md,
+    height: theme.getResponsiveSize(50, 55, 60),
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     // 添加输入框焦点状态样式，移除黑色边框
-    ...(Platform.OS === 'web' ? { outlineWidth: 0, outlineStyle: 'none' } : {})
+    ...(Platform.OS === 'web' ? { outlineWidth: 0, outlineStyle: 'none' } : {}),
+    shadowColor: theme.COLORS.cardShadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1
   },
   buttonContainer: {
-    marginTop: theme.SPACING.md,
+    marginTop: theme.SPACING.xs,
+    marginBottom: theme.SPACING.xs,
     borderRadius: theme.BORDER_RADIUS.md,
     overflow: 'hidden',
     width: '100%',
@@ -363,22 +373,25 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     backgroundColor: theme.COLORS.primary,
-    height: theme.getResponsiveSize(45, 50, 55),
+    height: theme.getResponsiveSize(50, 55, 60),
     borderRadius: theme.BORDER_RADIUS.md,
+    paddingHorizontal: theme.SPACING.md
   },
   buttonTitle: {
     fontSize: theme.FONT_SIZES.md,
     fontWeight: theme.FONT_WEIGHTS.bold,
-    letterSpacing: 0.5
+    letterSpacing: 1,
+    textTransform: 'uppercase'
   },
   loginButtonContainer: {
-    marginTop: theme.SPACING.md,
-    alignSelf: 'center'
+    alignSelf: 'center',
+    paddingVertical: theme.SPACING.xs
   },
   loginButtonTitle: {
     color: theme.COLORS.secondary,
     fontSize: theme.FONT_SIZES.md,
-    fontWeight: theme.FONT_WEIGHTS.medium
+    fontWeight: theme.FONT_WEIGHTS.medium,
+    textDecorationLine: 'underline'
   }
 });
 
